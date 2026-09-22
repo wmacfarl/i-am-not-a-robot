@@ -1,0 +1,11 @@
+import { sessionStore, sessionView } from './session/app.js';
+import mazePrototypeStore from './maze/store.js';
+import { mazePrototypeView } from './views/maze-prototype-view.js';
+const app = Choo();
+app.use(sessionStore);
+app.use(mazePrototypeStore);
+app.route('/trace', mazePrototypeView);
+app.route('/trace/', mazePrototypeView);
+app.route('/', sessionView);
+app.route('/*', sessionView);
+app.mount('body');
