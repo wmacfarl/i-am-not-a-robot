@@ -4,7 +4,7 @@ let active = null;
 const skins = {
   paper: { field: "rgba(245,247,249,0.9)", corridor: "#cfd7e1", path: "#667587", traced: "#2563eb", core: "#ffffff", guide: "#2563eb", guideFill: "#ffffff", marker: "37,99,235", start: "#1d4ed8", end: "#0f766e", endpointFill: "#ffffff" },
   slate: { field: "rgba(232,237,244,0.94)", corridor: "#b9c3d0", path: "#475569", traced: "#0f766e", core: "#ffffff", guide: "#0f766e", guideFill: "#ffffff", marker: "15,118,110", start: "#0f766e", end: "#1d4ed8", endpointFill: "#ffffff" },
-  chamber: { field: "rgba(255,255,255,0.03)", corridor: "#5e3a50", path: "#c98fb0", traced: "#f0a6c8", core: "#ffffff", guide: "#f0a6c8", guideFill: "#2a1530", marker: "240,166,200", start: "#e07aa8", end: "#c4b5fd", endpointFill: "#2a1530" },
+  chamber: { field: "rgba(0,0,0,0)", corridor: "#5e3a50", path: "#c98fb0", traced: "#f0a6c8", core: "#ffffff", guide: "#f0a6c8", guideFill: "#2a1530", marker: "240,166,200", start: "#e07aa8", end: "#c4b5fd", endpointFill: "#2a1530" },
 };
 
 export function mountTrace(canvas, task, onComplete) {

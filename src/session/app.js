@@ -1,9 +1,10 @@
 import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt } from './content.js';
 import { planStimuli, runStimuli } from './stimuli.js';
-import { startAudio, muteAudio, sound, setChamber } from './audio.js';
+import { startAudio, muteAudio, sound, setChamber, setBurst } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
 import { mountHold, unmountHold } from './hold.js';
 import { mountSpiral, unmountSpiral, setSpiral } from './spiral.js';
+import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
@@ -35,10 +36,11 @@ export function sessionStore(state, emitter) {
   function arm() {
     armed = true;
     stimuliRun = runStimuli(planStimuli(step()), {
-      show: entry => { s().stimuli = [...s().stimuli, entry]; emitter.emit('render'); },
+      show: entry => { s().stimuli = [...s().stimuli, entry]; if (entry.mode === 'flash') tear(); emitter.emit('render'); },
       hide: key => { s().stimuli = s().stimuli.filter(item => item.key !== key); emitter.emit('render'); },
     });
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
+    if (step().type === 'burst' && !s().done) lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms);
   }
   function disarm() {
     armed = false;
@@ -116,12 +118,6 @@ export function sessionStore(state, emitter) {
     if (acceptsSelection(step(), s().selected)) finish(acceptanceFor(step()));
     else { s().feedback = step().symbolic ? 'Check the example and try again. Select every matching symbol.' : 'Check the category and try again. Select every matching word.'; sound('retry'); render(); }
   });
-  emitter.on('session:answer', () => {
-    if (!active() || step().type !== 'report') return;
-    sound('select');
-    if (s().line < step().items.length - 1) { s().line++; s().feedback = 'Response recorded.'; render(); }
-    else finish(acceptanceFor(step()));
-  });
   emitter.on('session:traceComplete', () => { if (active() && step().type === 'trace') finish(acceptanceFor(step())); });
   emitter.on('session:holdComplete', () => { if (active() && step().type === 'hold') finish(acceptanceFor(step())); });
   emitter.on('session:next', () => { if (s().screen === 'play' && !blocked() && s().done) advance(); });
@@ -152,9 +148,12 @@ export function sessionStore(state, emitter) {
     dialogOpen = Boolean(dialog);
     muteAudio(session.muted || suspended || !playing);
     setChamber(playing && session.carrier);
+    setBurst(playing && !suspended && current.type === 'burst');
     const spiral = document.getElementById('session-spiral');
-    if (spiral) mountSpiral(spiral, { paused: suspended, intensity: meterAt(session.index), ring: current.phase.ring, fade: current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.3 : 1 });
+    if (spiral) mountSpiral(spiral, { paused: suspended, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' ? 1 : 0, fade: current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.55 : 1 });
     else unmountSpiral();
+    const stage = playing && !suspended && current.phase.glitch ? document.getElementById(`stage-${current.id}`) : null;
+    if (stage) mountGlitch(stage, { intensity: current.phase.glitch }); else unmountGlitch();
     const running = playing && !suspended && !session.done;
     const traceCanvas = running && current.type === 'trace' ? document.getElementById('session-trace') : null;
     if (traceCanvas) {
@@ -183,7 +182,6 @@ export function sessionStore(state, emitter) {
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
       }
       if (event.key === 'Escape' && s().screen === 'play') { s().paused = true; render(); }
-      if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && active() && step().type === 'report') { event.preventDefault(); emitter.emit('session:answer', event.key === 'ArrowRight'); }
     });
   });
 }

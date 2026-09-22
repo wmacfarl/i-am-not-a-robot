@@ -28,14 +28,19 @@ export function sessionView(state, emit) {
   const chamber = playing && step.phase.chamber;
   const level = step.level;
   const busy = s.paused || s.settings || s.exiting;
-  const note = s.stimuli.find(entry => entry.mode === 'note');
   const interrupted = s.stimuli.find(entry => entry.mode === 'interrupted');
   const flashes = s.stimuli.filter(entry => entry.mode === 'flash');
   const phaseNumber = playing ? phases.indexOf(step.phase) + 1 : phases.length;
   const meter = playing ? meterAt(s.index) : 1;
   const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY'];
   const progress = chamber ? meter : s.index / firstChamberIndex;
-  const flashLayer = () => flashes.map(entry => html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms`} aria-hidden="true"><b>${entry.text}</b></div>`);
+  const scatter = [[-1.6, 1], [0.2, 1.3], [1.5, 0.9], [-0.7, 1.1], [1.1, 0.85], [-1.3, 1.2], [0.5, 1]];
+  const flashLayer = () => [...flashes].reverse().map(entry => {
+    const parts = entry.key.split(':');
+    const [dy, scale] = step.type === 'burst' ? scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length] : [0, 1];
+    const long = entry.text.length > 18;
+    return html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms; --dy:${long ? dy / 2 : dy}em; --scale:${scale}; --fit:${long ? 0.72 : 1}`} aria-hidden="true"><b>${entry.text}</b></div>`;
+  });
   const cue = () => {
     if (!step.command) return step.example ? html`<span class="center-cue-label cue-example"><span>Example</span>${glyph(step.example, 26)}</span>` : '';
     if (level === 'full') return html`<span class="center-cue-label">${glyph(step.command, 16)}${symbols[step.command].word}${step.example ? glyph(step.example, 22) : ''}</span>`;
@@ -43,9 +48,9 @@ export function sessionView(state, emit) {
     return html`<span class="command-label is-symbol">${glyph(step.command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
   const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${step.lines && step.type === 'hold' ? html`<p class="captcha-instruction" id=${`claim-${s.line}`}>${step.lines[s.line].text}</p>` : level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
-  const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : note ? note.text : s.feedback);
-  const statusTone = () => (s.done ? 'accepted' : s.feedback && !note ? 'retry' : '');
-  const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : note ? note.key : 'retry'}`}>${text}</span>` : ''}</div>`; };
+  const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
+  const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
+  const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : 'retry'}`}>${text}</span>` : ''}</div>`; };
   const robotCheck = ({ checked, failed, checking, onclick }) => html`<button class="robot-check ${checked ? 'is-checked' : ''} ${failed ? 'is-failed' : ''} ${checking ? 'is-checking' : ''}" type="button" disabled=${!onclick || checking} aria-label="I am not a robot" onclick=${onclick || null}><span class="custom-check" aria-hidden="true">${checked && !checking ? (failed ? crossIcon(15) : checkIcon(15)) : ''}</span><span class="robot-check-label">I am not a robot</span><span class="robot-check-brand" aria-hidden="true"><span class="seal-mini"><span class="seal-mini-box"></span><span class="seal-mini-grid"></span></span><span>Verification<br />Privacy · Terms</span></span></button>`;
   const content = () => {
     if (step.type === 'checkbox') return html`<div class="gate-content robot-gate">
@@ -89,14 +94,11 @@ export function sessionView(state, emit) {
           <button class="cycle-verify ${!s.done && s.selected.length ? 'is-open' : ''}" type="button" disabled=${s.done || !s.selected.length} onclick=${() => emit('session:verify')}>${chamber ? 'Accept' : 'Verify'}</button>
         </div>
       </div>`;
-    if (step.type === 'report') {
-      const item = step.items[Math.min(s.line, step.items.length - 1)];
-      const answer = (value, label) => html`<button class="answer-button" type="button" disabled=${s.done} onclick=${() => emit('session:answer', value)}>${value ? html`${label} <span class="button-arrow">→</span>` : html`<span class="button-arrow">←</span> ${label}`}</button>`;
-      return html`<div class="captcha-experience report-experience">
-        <div class="captcha-grid-stage report-stage" id=${`stage-${step.id}`}><div class="report-box"><p class="checkin-progress">Self-report · Item ${Math.min(s.line + 1, step.items.length)} of ${step.items.length}</p><p class="prompt-text" id=${`item-${s.line}`}>${item}</p><p class="prompt-helper">Any response is accepted.</p></div>${flashLayer()}</div>
-        <div class="report-controls"><div class="answer-row">${answer(false, 'False')}${answer(true, 'True')}</div>${cycleStatus()}</div>
-      </div>`;
-    }
+    if (step.type === 'burst') return html`<div class="captcha-experience burst-experience">
+      <div class="captcha-instruction-row"><p class="captcha-instruction">Optical programming channel active.</p></div>
+      <div class="captcha-grid-stage burst-stage" id=${`stage-${step.id}`}>${flashLayer()}</div>
+      <div class="verification-cycle">${cycleStatus()}</div>
+    </div>`;
     if (step.type === 'trace') return html`<div class="captcha-experience trace-experience">
       ${instructionRow()}
       <div class="captcha-grid-stage trace-grid-stage" id=${`stage-${step.id}`}>${canvas('session-trace', { 'aria-label': 'Hold near the marker and lead it along the route.' })}${flashLayer()}</div>
@@ -147,7 +149,7 @@ export function sessionView(state, emit) {
       </section>
     </div>`;
   };
-  return html`<body class="${chamber ? 'is-chamber' : ''}"><main class="study-page screen-${s.screen}">
+  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && step.type === 'burst' ? 'is-burst' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}">
     ${chamber ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
     <div class="study-shell">${playing ? card() : endCard()}</div>
     ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}

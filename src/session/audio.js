@@ -35,7 +35,7 @@ function buildCarrier() {
   const transport = T.getTransport ? T.getTransport() : T.Transport;
   transport.bpm.value = BPM;
   transport.scheduleRepeat(time => pulse.triggerAttackRelease('C1', '8n', time), '4n');
-  return { gain, transport };
+  return { gain, transport, right };
 }
 export function setChamber(on) {
   if (on === chamber) return;
@@ -51,6 +51,15 @@ export function setChamber(on) {
       carrier.gain.gain.rampTo(0, 3);
       setTimeout(() => { if (!chamber) carrier.transport.stop(); }, 3200);
     }
+  } catch { /* Audio is optional. */ }
+}
+let bursting = false;
+export function setBurst(on) {
+  if (on === bursting || !carrier) return;
+  bursting = on;
+  try {
+    carrier.gain.gain.rampTo(muted || !chamber ? 0 : on ? 1.9 : 1, on ? 0.15 : 0.9);
+    carrier.right.frequency.rampTo(on ? 214 : 206, on ? 0.3 : 1.2);
   } catch { /* Audio is optional. */ }
 }
 export const beatPhase = now => (((now - epoch) / 1000) * BPM / 60) % 1;

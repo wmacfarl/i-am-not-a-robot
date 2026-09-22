@@ -1917,16 +1917,6 @@ h3 {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 1ms !important;
-  }
-}
 
 /* Persistent adaptive CAPTCHA prototype */
 
@@ -3769,11 +3759,6 @@ h3 {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .trace-demo-signal {
-    animation: none;
-  }
-}
 
 /* Minimal maze interaction test */
 

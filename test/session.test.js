@@ -30,7 +30,7 @@ async function complete(state, emit, t) {
   if (step.type === 'cloud') { for (const word of step.targets || []) emit('session:select', word); emit('session:verify'); }
   else if (step.type === 'trace') emit('session:traceComplete');
   else if (step.type === 'hold') emit('session:holdComplete');
-  else if (step.type === 'report') { for (const item of step.items) emit('session:answer', true); }
+  else if (step.type === 'burst') advance(t, step.ms);
   else if (step.type === 'text') { if (step.trigger) { await emit('session:start'); t.mock.timers.tick(900); } advance(t, total(step)); }
 }
 test('authored script: unique ids, usable tasks, symbols taught before they stand alone, reveals earned by fragments', () => {
@@ -52,13 +52,13 @@ test('authored script: unique ids, usable tasks, symbols taught before they stan
     }
     if (step.type === 'trace') { assert.ok(step.path.startsWith('maze-') && Number(step.path.slice(5)) < 12, step.id); assert.ok(['guided', 'fading', 'cue'].includes(step.mode)); }
     if (step.type === 'hold') { assert.ok(step.cycles >= 1); assert.ok(step.holdMs >= 0); }
-    if (step.type === 'report') { assert.ok(step.items.length >= 2); for (const item of step.items) assert.match(item, /^[A-Z].*\.$/); }
     if (step.type === 'text') { assert.ok(step.lines.length); for (const line of step.lines) { assert.ok(line.ms > 0); assert.ok(line.kind); } }
-    if (step.type !== 'checkbox' && step.type !== 'text' && step.phase.id !== 'close') assert.ok(step.between, `${step.id} has no transition flash`);
+    if (step.type === 'burst') { assert.ok(step.ms >= 2000 && step.phase.chamber, step.id); assert.ok(step.sub.length >= 7, `${step.id} needs a dense flash stream`); }
+    if (!['checkbox', 'text', 'burst'].includes(step.type) && step.phase.id !== 'close') assert.ok(step.between, `${step.id} has no transition flash`);
     if (step.between) assert.match(step.between, /^[A-Z ]+$/);
     if (step.level === 'symbol') assert.ok(steps.slice(0, index).some(prior => prior.command === step.command && prior.level !== 'symbol'), `${step.id} uses ${step.command} bare before it was taught`);
     if (step.echoes) {
-      const earlier = steps.slice(0, index).flatMap(prior => [...(prior.between ? [prior.between.toLowerCase()] : []), ...(prior.sub || []).flatMap(entry => Array(entry.mode === 'flash' ? entry.times : 1).fill(entry.text.toLowerCase()))]);
+      const earlier = steps.slice(0, index).flatMap(prior => [...(prior.between ? [prior.between.toLowerCase()] : []), ...(prior.type !== 'text' ? (prior.lines || []).map(line => line.text.toLowerCase()) : []), ...(prior.sub || []).flatMap(entry => Array(entry.mode === 'flash' ? entry.times : 1).fill(entry.text.toLowerCase()))]);
       let exposures = 0;
       for (const echo of step.echoes) { const hits = earlier.filter(text => text.includes(echo.toLowerCase())).length; assert.ok(hits >= 1, `${step.id}: "${echo}" never fragmented earlier`); exposures += hits; }
       assert.ok(exposures >= 5, `${step.id}: only ${exposures} fragment exposures before the reveal`);
@@ -66,21 +66,19 @@ test('authored script: unique ids, usable tasks, symbols taught before they stan
   });
 });
 test('stimulus planner expands flashes and the runner respects done/stop', t => {
-  const step = { id: 's', sub: [{ mode: 'flash', text: 'ROBOT', at: 1000, times: 3 }, { mode: 'note', text: 'open', at: 500, ms: 900 }, { mode: 'interrupted', text: 'GOOD' }] };
+  const step = { id: 's', sub: [{ mode: 'flash', text: 'ROBOT', at: 1000, times: 3 }, { mode: 'interrupted', text: 'GOOD' }] };
   const plan = planStimuli(step);
   assert.deepEqual(plan.filter(e => e.mode === 'flash').map(e => e.delay), [1000, 1650, 2300]);
   const between = planStimuli({ id: 'b', between: 'ROBOT' });
-  assert.deepEqual(between.map(e => [e.mode, e.at, e.delay, e.text]), [['flash', 'done', 320, 'ROBOT']]);
+  assert.deepEqual(between.map(e => [e.mode, e.at, e.delay, e.text]), [['flash', 'done', 300, 'ROBOT']]);
   assert.equal(plan.find(e => e.mode === 'interrupted').at, 'done');
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const shown = []; const hidden = [];
   const run = runStimuli(plan, { show: e => shown.push(e.text), hide: key => hidden.push(key) });
-  t.mock.timers.tick(499); assert.deepEqual(shown, []);
-  t.mock.timers.tick(1); assert.deepEqual(shown, ['open']);
-  t.mock.timers.tick(900); assert.equal(hidden.length, 1);
-  advance(t, 2000); assert.deepEqual(shown, ['open', 'ROBOT', 'ROBOT', 'ROBOT']);
+  t.mock.timers.tick(999); assert.deepEqual(shown, []);
+  advance(t, 2500); assert.deepEqual(shown, ['ROBOT', 'ROBOT', 'ROBOT']); assert.equal(hidden.length, 3);
   run.done(); t.mock.timers.tick(0); assert.equal(shown.at(-1), 'GOOD');
-  run.stop(); t.mock.timers.tick(5000); assert.equal(hidden.length, 4);
+  run.stop(); t.mock.timers.tick(5000); assert.equal(hidden.length, 3);
 });
 test('complete authored session runs from the checkbox to the terminated connection without collecting measurements', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -90,7 +88,7 @@ test('complete authored session runs from the checkbox to the terminated connect
   let sawCarrier = false;
   while (state.session.screen === 'play') {
     const step = steps[state.session.index];
-    if (step.id === 'route-a-again') { t.mock.timers.tick(2500); sawStimulus = state.session.stimuli.some(e => e.mode === 'note'); }
+    if (step.id === 'route-a-again') { t.mock.timers.tick(3500); sawStimulus = state.session.stimuli.some(e => e.mode === 'flash'); }
     if (step.phase.id === 'receive') sawCarrier = sawCarrier || state.session.carrier;
     await complete(state, emit, t);
     assert.equal(state.session.done, true, step.id);
@@ -116,9 +114,9 @@ test('wrong selections stay editable; pause and settings block input and clear t
   emit('session:verify'); assert.equal(state.session.done, true);
   t.mock.timers.tick(850); assert.equal(state.session.index, 2);
   while (steps[state.session.index].id !== 'route-a-again') { await complete(state, emit, t); t.mock.timers.tick(850); }
-  t.mock.timers.tick(2500); assert.ok(state.session.stimuli.length);
+  t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
   emit('session:pause'); assert.deepEqual(state.session.stimuli, []);
-  emit('session:pause'); t.mock.timers.tick(2500); assert.ok(state.session.stimuli.length);
+  emit('session:pause'); t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
   emit('session:exit'); assert.equal(state.session.screen, 'end'); assert.deepEqual(state.session.stimuli, []);
 });
 test('text sequences advance line by line, toggle the carrier, and pause holds the current line', async t => {
@@ -153,7 +151,8 @@ test('dev skip and ?start deep links are localhost-only', async t => {
   assert.equal(local.state.session.index, stepIndex('receive-a'));
   assert.equal(local.state.session.carrier, true);
   local.emit('session:settings', true); local.emit('session:skip'); assert.equal(local.state.session.index, stepIndex('receive-a'));
-  local.emit('session:settings', false); local.emit('session:skip'); assert.equal(steps[local.state.session.index].id, 'receive-b');
+  local.emit('session:settings', false); local.emit('session:skip'); assert.equal(steps[local.state.session.index].id, 'burst-2');
+  local.emit('session:skip'); assert.equal(steps[local.state.session.index].id, 'receive-b');
   local.emit('session:holdComplete'); local.emit('session:skip'); t.mock.timers.tick(1000);
   assert.equal(steps[local.state.session.index].id, 'receive-c'); assert.equal(local.state.session.done, false);
 });

@@ -7,7 +7,8 @@ let last = null;
 let angle = 0;
 let ringAngle = 0;
 let fadeNow = 1;
-const state = { contraction: 0, intensity: 0.5, ring: [], paused: false, fade: 1 };
+let burstNow = 0;
+const state = { contraction: 0, intensity: 0.5, ring: [], paused: false, fade: 1, burst: 0 };
 export function mountSpiral(element, next = {}) {
   if (element !== canvas) {
     unmountSpiral();
@@ -46,23 +47,24 @@ function draw(now) {
   const dt = last === null ? 0 : Math.min(50, now - last) / 1000;
   last = now;
   fadeNow += (state.fade - fadeNow) * Math.min(1, dt * 1.6);
-  angle += dt * (0.42 + state.contraction * 0.9) * fadeNow;
+  burstNow += (state.burst - burstNow) * Math.min(1, dt * (state.burst > burstNow ? 6 : 1.8));
   ringAngle -= dt * 0.05;
   const phase = beatPhase(now);
   const attack = 0.18;
   const rise = Math.min(1, phase / attack);
   const pulse = phase < attack ? rise * rise * (3 - 2 * rise) : Math.pow(1 - (phase - attack) / (1 - attack), 2);
+  angle += dt * (0.34 + state.contraction * 0.8) * (1 + pulse * 1.1) * (1 + burstNow * 2.4) * fadeNow;
   const cx = width / 2;
   const cy = height / 2;
   const size = Math.min(width, height);
-  const scale = (1 - 0.3 * state.contraction) * (1 + pulse * (0.025 * (1 - state.contraction) - 0.02 * state.contraction));
+  const scale = 1 - 0.3 * state.contraction - 0.08 * burstNow;
   const depth = state.intensity;
   const arm = blend([120, 92, 130], [226, 150, 196], 0.35 + depth * 0.65);
   const glow = blend([70, 40, 70], [162, 58, 106], depth);
   context.fillStyle = '#261b29';
   context.fillRect(0, 0, width, height);
   const wash = context.createRadialGradient(cx, cy, 0, cx, cy, size * 0.62);
-  wash.addColorStop(0, `rgba(${glow},${(0.4 + 0.6 * fadeNow) * (0.16 + pulse * 0.14 + state.contraction * 0.2)})`);
+  wash.addColorStop(0, `rgba(${glow},${(0.4 + 0.6 * fadeNow) * (0.16 + pulse * 0.14 + state.contraction * 0.2 + burstNow * 0.3)})`);
   wash.addColorStop(1, 'rgba(38,27,41,0)');
   context.fillStyle = wash;
   context.fillRect(0, 0, width, height);
@@ -76,7 +78,7 @@ function draw(now) {
     context.fillRect(0, 0, width, height);
   }
   const maxRadius = Math.hypot(width, height) * 0.58;
-  const alpha = fadeNow * (0.16 + depth * 0.26 + state.contraction * 0.12);
+  const alpha = Math.min(0.95, fadeNow * (0.16 + depth * 0.26 + state.contraction * 0.12) + burstNow * 0.35);
   context.lineCap = 'round';
   for (let armIndex = 0; armIndex < 2; armIndex++) {
     context.beginPath();
@@ -89,14 +91,15 @@ function draw(now) {
       if (i === 0) context.moveTo(x, y); else context.lineTo(x, y);
     }
     context.strokeStyle = `rgba(${arm},${alpha})`;
-    context.lineWidth = 3 + size * 0.01 + state.contraction * 2;
+    context.lineWidth = 3 + size * 0.01 + state.contraction * 2 + burstNow * 2.5;
     context.stroke();
   }
+  drawInterference(context, width, height, now);
   if (!state.ring.length) return;
   context.save();
   context.translate(cx, cy);
   context.rotate(ringAngle);
-  context.fillStyle = `rgba(240,200,220,${fadeNow * 0.26})`;
+  context.fillStyle = `rgba(240,200,220,${fadeNow * 0.26 + burstNow * 0.4})`;
   context.font = '700 11px ui-monospace, SFMono-Regular, Consolas, monospace';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
@@ -108,4 +111,25 @@ function draw(now) {
     context.restore();
   });
   context.restore();
+}
+
+function drawInterference(context, width, height, now) {
+  const strength = 0.2 + burstNow * 0.8;
+  for (let i = 0; i < 4; i++) {
+    const bandHeight = (14 + i * 16) * (i === 1 ? 1 + burstNow : 1);
+    const y = ((now / 1000 * (40 + i * 27) + i * 173) % (height + bandHeight)) - bandHeight;
+    const band = context.createLinearGradient(0, y, 0, y + bandHeight);
+    band.addColorStop(0, 'rgba(255,235,245,0)');
+    band.addColorStop(0.5, `rgba(255,235,245,${0.05 * strength + (i === 1 ? 0.34 : 0.09) * burstNow})`);
+    band.addColorStop(1, 'rgba(255,235,245,0)');
+    context.fillStyle = band;
+    context.fillRect(0, y, width, bandHeight);
+  }
+  if (burstNow > 0.2 && Math.random() < 0.14 * burstNow) {
+    const ratio = canvas.width / width;
+    const tearHeight = 8 + Math.random() * 42;
+    const tearY = Math.random() * (height - tearHeight);
+    const shift = (Math.random() - 0.5) * 40 * burstNow;
+    context.drawImage(canvas, 0, tearY * ratio, canvas.width, tearHeight * ratio, shift, tearY, width, tearHeight);
+  }
 }
