@@ -1,5 +1,6 @@
 import { steps, phases, symbols, glyphOf, arrangeWords, firstChamberIndex, meterAt, installedAt } from './content.js';
 import { isLocalDev } from './app.js';
+const verificationId = String(10000 + (Date.now() % 90000));
 const canvases = new Map();
 function canvas(id, attrs) {
   let element = canvases.get(id);
@@ -15,67 +16,141 @@ export function glyph(id, size = 28) {
   const shape = symbols[glyphOf(id)];
   return html`<svg class="glyph" viewBox="0 0 24 24" width=${size} height=${size} aria-hidden="true">${shape.paths.map(p => html`<path d=${p.d} fill=${p.fill ? 'currentColor' : 'none'} stroke=${p.fill ? 'none' : 'currentColor'} stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>`)}</svg>`;
 }
+const checkIcon = (size = 22) => html`<svg viewBox="0 0 24 24" width=${size} height=${size} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg>`;
+const crossIcon = (size = 15) => html`<svg viewBox="0 0 24 24" width=${size} height=${size} fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>`;
+const shieldIcon = () => html`<svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.6l5 2v3.9c0 3-2.2 4.8-5 5.6C5.2 12.3 3 10.5 3 7.5V3.6l5-2z"></path></svg>`;
+const gearIcon = () => html`<svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.7 2.4h2.6l.4 2.1c.5.2 1 .5 1.4.8l2-.7 1.3 2.2-1.6 1.4c.1.5.1 1.1 0 1.6l1.6 1.4-1.3 2.2-2-.7c-.4.3-.9.6-1.4.8l-.4 2.1H8.7l-.4-2.1c-.5-.2-1-.5-1.4-.8l-2 .7-1.3-2.2 1.6-1.4a6 6 0 0 1 0-1.6L3.6 6.8l1.3-2.2 2 .7c.4-.3.9-.6 1.4-.8l.4-2.1Z"></path><circle cx="10" cy="10" r="2.5"></circle></svg>`;
+
 export function sessionView(state, emit) {
   const s = state.session;
   const step = steps[s.index];
   const playing = s.screen === 'play';
-  const chamber = playing ? step.phase.chamber : true;
+  const chamber = playing && step.phase.chamber;
   const level = step.level;
   const busy = s.paused || s.settings || s.exiting;
-  const button = (label, event, disabled = false, cls = 'session-primary') => html`<button type="button" class=${cls} disabled=${disabled} onclick=${() => emit(event)}>${label}</button>`;
-  const command = () => {
-    if (!step.command || step.type === 'accept') return '';
-    return html`<div class="command level-${level}">${glyph(step.command, level === 'symbol' ? 64 : 26)}${level === 'symbol' ? '' : html`<span>${step.label || symbols[step.command].word}</span>`}</div>`;
+  const note = s.stimuli.find(entry => entry.mode === 'note');
+  const interrupted = s.stimuli.find(entry => entry.mode === 'interrupted');
+  const flashes = s.stimuli.filter(entry => entry.mode === 'flash');
+  const phaseNumber = playing ? phases.indexOf(step.phase) + 1 : phases.length;
+  const meter = playing ? meterAt(s.index) : 1;
+  const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY'];
+  const progress = chamber ? meter : s.index / firstChamberIndex;
+  const flashLayer = () => flashes.map(entry => html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms`} aria-hidden="true"><b>${entry.text}</b></div>`);
+  const cue = () => {
+    if (!step.command) return step.example ? html`<span class="center-cue-label cue-example"><span>Example</span>${glyph(step.example, 26)}</span>` : '';
+    if (level === 'full') return html`<span class="center-cue-label">${glyph(step.command, 16)}${symbols[step.command].word}${step.example ? glyph(step.example, 22) : ''}</span>`;
+    if (level === 'word') return html`<span class="command-label">${glyph(step.command, 30)}${step.label || symbols[step.command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
+    return html`<span class="command-label is-symbol">${glyph(step.command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
-  const prompt = () => (level === 'full' ? html`<h1 class="session-prompt">${step.prompt}</h1>` : '');
-  const help = text => (level === 'full' ? html`<p class="session-help">${text}</p>` : '');
-  const inline = s.stimuli.find(entry => entry.anchor === 'below');
-  const feedback = fallback => html`<div class="session-feedback ${s.done ? 'accepted' : ''}" role="status" aria-live="polite"><span>${s.feedback || fallback}</span>${inline ? html`<span class="stim stim-inline" aria-hidden="true">${inline.text}</span>` : ''}</div>`;
-  const accepted = () => (s.done ? html`<div class="completion-cue" aria-hidden="true"><span>✓</span> ${chamber ? 'Executed' : 'Accepted'}</div>` : '');
-  const captcha = (checked, failed, spinning) => html`<span class="captcha-box ${checked ? 'checked' : ''} ${failed ? 'failed' : ''} ${spinning ? 'checking' : ''}"><span class="captcha-check" aria-hidden="true">${checked && !spinning ? '✓' : ''}</span><span class="captcha-label">I AM NOT A ROBOT</span><span class="captcha-brand" aria-hidden="true"><span>verification</span><span>privacy · terms</span></span></span>`;
+  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${step.lines && step.type === 'hold' ? html`<p class="captcha-instruction" id=${`claim-${s.line}`}>${step.lines[s.line].text}</p>` : level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
+  const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : note ? note.text : s.feedback);
+  const statusTone = () => (s.done ? 'accepted' : s.feedback && !note ? 'retry' : '');
+  const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : note ? note.key : 'retry'}`}>${text}</span>` : ''}</div>`; };
+  const robotCheck = ({ checked, failed, checking, onclick }) => html`<button class="robot-check ${checked ? 'is-checked' : ''} ${failed ? 'is-failed' : ''} ${checking ? 'is-checking' : ''}" type="button" disabled=${!onclick || checking} aria-label="I am not a robot" onclick=${onclick || null}><span class="custom-check" aria-hidden="true">${checked && !checking ? (failed ? crossIcon(15) : checkIcon(15)) : ''}</span><span class="robot-check-label">I am not a robot</span><span class="robot-check-brand" aria-hidden="true"><span class="seal-mini"><span class="seal-mini-box"></span><span class="seal-mini-grid"></span></span><span>Verification<br />Privacy · Terms</span></span></button>`;
   const content = () => {
-    if (s.screen === 'end') return html`<div class="end-screen"><p class="session-kicker">Connection terminated</p><h1>Unit in standby.</h1><p class="session-lead">The programming session has closed.</p>${s.returnUrl ? button('Return', 'session:leave') : button('Reconnect', 'session:restart', false, 'session-link')}</div>`;
-    if (step.type === 'checkbox') return html`<div class="captcha-intro"><button type="button" class="captcha-button" disabled=${s.starting} aria-label="I am not a robot" onclick=${() => emit('session:start')}>${captcha(s.starting, false, s.starting)}</button><p class="session-help">${s.starting ? 'Verifying…' : 'Confirm to continue.'}</p></div>`;
+    if (step.type === 'checkbox') return html`<div class="gate-content robot-gate">
+      <div class="captcha-seal" aria-hidden="true"><span class="seal-checkbox">${checkIcon()}</span><span class="seal-grid"></span></div>
+      <p class="screen-label">Automated verification</p>
+      <h2>Verification required.</h2>
+      ${robotCheck({ checked: s.starting, failed: false, checking: s.starting, onclick: () => emit('session:start') })}
+      <p class="muted-text robot-gate-note">${s.starting ? 'Verifying…' : 'Confirm to continue.'}</p>
+    </div>`;
     if (step.type === 'text') {
-      const current = step.lines[s.line];
-      if (current.kind === 'flash') return html`<div class="status-lines"><div class="flash-word">${current.text}</div></div>`;
-      const visible = step.lines.slice(0, s.line + 1);
-      const from = visible.reduce((start, line, index) => (['claim', 'title'].includes(line.kind) ? index : start), 0);
+      const armed = !step.trigger || s.triggered;
+      const visible = armed ? step.lines.slice(0, s.line + 1) : [];
+      const current = armed ? step.lines[s.line] : null;
+      const from = visible.reduce((start, line, index) => (line.kind === 'title' ? index : start), 0);
+      const readout = visible.slice(from).filter(line => ['status', 'title', 'error', 'carrier', 'carrier-off'].includes(line.kind));
       const failed = visible.some(line => line.kind === 'error');
-      return html`<div class="status-lines">${visible.slice(from).filter(line => line.kind !== 'flash').map(line => html`<div class="line line-${line.kind} ${line === current ? 'current' : ''}">${line.kind === 'checkbox' ? captcha(true, failed, false) : line.text}</div>`)}</div>`;
+      const lastFlash = [...visible].reverse().find(line => line.kind === 'flash');
+      const headline = !current ? null : current.kind === 'flash' ? { label: 'Response model', word: current.text, text: 'Previously observed fragment.' }
+        : current.kind === 'claim' ? { label: 'Response model', word: lastFlash?.text || 'ROBOT', text: current.text }
+        : current.kind === 'install' ? { label: 'Program status', word: step.installs || 'UNIT', text: current.text }
+        : current.kind === 'reveal' ? { label: 'Program status', word: step.installs || 'UNIT', text: html`${visible.find(line => line.kind === 'install')?.text}<br />${current.text}` }
+        : null;
+      return html`<div class="classification-content readout">
+        ${flashLayer()}
+        <p class="screen-label">${step.phase.title}</p>
+        ${step.trigger === 'checkbox' ? robotCheck({ checked: s.triggered || s.starting, failed, checking: s.starting, onclick: armed || s.starting ? null : () => emit('session:start') }) : ''}
+        ${step.trigger && !armed ? html`<p class="muted-text robot-gate-note">${s.starting ? 'Verifying…' : 'Confirm to continue.'}</p>` : ''}
+        ${readout.length ? html`<div class="diagnostic-lines" aria-live="polite">${readout.map(line => html`<p class="line-${line.kind} ${line === current ? 'is-current' : ''}">${line.text}</p>`)}</div>` : ''}
+        ${headline ? html`<div class="model-result ${current?.kind === 'flash' ? 'is-flash' : ''}" id=${`headline-${s.line}`}><span>${headline.label}</span><strong>${headline.word}</strong><p>${headline.text}</p></div>` : ''}
+      </div>`;
     }
-    if (step.type === 'cloud') {
-      const objective = step.targets !== null;
-      const verifyLabel = step.phase.id === 'verify' ? 'Verify selection' : html`ACCEPT ${glyph('accept', 18)}`;
-      return html`<p class="session-kicker">${objective ? (step.symbolic ? 'Symbol verification' : 'Word verification') : 'Your description'}</p>${prompt()}${command()}
-        ${step.example ? html`<div class="example">${level === 'full' ? html`<span>Example</span>` : ''}${glyph(step.example, 40)}</div>` : ''}
-        ${help(objective ? (step.symbolic ? 'Select every matching symbol, then accept.' : 'Select every matching word, then verify.') : 'Choose any that fit. Mixed descriptions are welcome.')}
-        <div class="word-cloud" role="group" aria-label=${step.prompt}>${arrangeWords(step.words, s.index).map(word => html`<button type="button" class="word-tile ${step.symbolic ? 'symbol-tile' : ''} ${s.selected.includes(word) ? 'selected' : ''}" aria-pressed=${s.selected.includes(word)} aria-label=${step.symbolic ? `symbol ${glyphOf(word)}` : word} disabled=${s.done} onclick=${() => emit('session:select', word)}>${step.symbolic ? glyph(word, 36) : word}<span aria-hidden="true">${s.selected.includes(word) ? '✓' : '+'}</span></button>`)}</div>
-        ${feedback(`${s.selected.length} selected`)}
-        ${s.done ? accepted() : html`${button(objective ? verifyLabel : 'Accept selection', 'session:verify', !s.selected.length)}${objective ? '' : button('None of these fit', 'session:none', false, 'session-link')}`}`;
+    if (step.type === 'cloud') return html`<div class="captcha-experience">
+        ${instructionRow()}
+        <div class="captcha-grid-stage ${s.done ? 'is-verified' : s.selected.length ? 'is-verify-ready' : ''}" id=${`stage-${step.id}`} style="--scan-ms: 2200ms">
+          <div class="grid-scan" aria-hidden="true"></div>
+          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${arrangeWords(step.words, s.index).map((word, index) => { const active = s.selected.includes(word); return html`<button class="captcha-tile ${active ? 'is-selected' : ''} ${s.done && active ? 'is-accepted' : ''} ${step.symbolic ? 'is-shape' : 'is-text'}" type="button" disabled=${s.done} aria-pressed=${active ? 'true' : 'false'} aria-label=${step.symbolic ? `symbol ${glyphOf(word)}` : word} onclick=${() => emit('session:select', word)}>${step.symbolic ? html`<span class="tile-shape">${glyph(word, 52)}</span>` : html`<span class="tile-text">${word}</span>`}<span class="selection-frame" aria-hidden="true"></span><span class="tile-index" aria-hidden="true">${index + 1}</span></button>`; })}</div>
+          ${flashLayer()}
+        </div>
+        <div class="verification-cycle has-action">
+          ${cycleStatus()}
+          <button class="cycle-verify ${!s.done && s.selected.length ? 'is-open' : ''}" type="button" disabled=${s.done || !s.selected.length} onclick=${() => emit('session:verify')}>${chamber ? 'Accept' : 'Verify'}</button>
+        </div>
+      </div>`;
+    if (step.type === 'report') {
+      const item = step.items[Math.min(s.line, step.items.length - 1)];
+      const answer = (value, label) => html`<button class="answer-button" type="button" disabled=${s.done} onclick=${() => emit('session:answer', value)}>${value ? html`${label} <span class="button-arrow">→</span>` : html`<span class="button-arrow">←</span> ${label}`}</button>`;
+      return html`<div class="captcha-experience report-experience">
+        <div class="captcha-grid-stage report-stage" id=${`stage-${step.id}`}><div class="report-box"><p class="checkin-progress">Self-report · Item ${Math.min(s.line + 1, step.items.length)} of ${step.items.length}</p><p class="prompt-text" id=${`item-${s.line}`}>${item}</p><p class="prompt-helper">Any response is accepted.</p></div>${flashLayer()}</div>
+        <div class="report-controls"><div class="answer-row">${answer(false, 'False')}${answer(true, 'True')}</div>${cycleStatus()}</div>
+      </div>`;
     }
-    if (step.type === 'trace') return html`<p class="session-kicker">Continuous input</p>${prompt()}${command()}${help(step.mode === 'cue' ? 'Run the familiar route. Hold near the marker and lead it along the path.' : 'Hold near the marker, then lead it along the route. Lift and resume nearby.')}${canvas('session-trace', { 'aria-label': 'Hold near the marker and lead it along the route.' })}${feedback('Move at your own pace.')}${accepted()}`;
-    if (step.type === 'hold') return html`<p class="session-kicker">${step.holdMs === 0 ? 'Target input' : 'Sustained input'}</p>${prompt()}${command()}${help(step.holdMs === 0 ? 'Press the target.' : 'Press and hold the target. Release when the ring completes.')}${canvas('session-hold', { 'aria-label': step.holdMs === 0 ? 'Press the center target' : 'Press and hold the center target' })}${step.lines ? html`<div class="claim-line">${step.lines[s.line].text}</div>` : ''}${feedback('')}${accepted()}`;
-    if (step.type === 'accept') return html`<p class="session-kicker">Confirmation</p>${prompt()}${command()}<button type="button" class="accept-button level-${level}" disabled=${s.done} aria-label="Accept" onclick=${() => emit('session:accept')}>${glyph('accept', level === 'symbol' ? 56 : 22)}${level === 'symbol' ? '' : 'ACCEPT'}</button>${feedback('')}${accepted()}`;
+    if (step.type === 'trace') return html`<div class="captcha-experience trace-experience">
+      ${instructionRow()}
+      <div class="captcha-grid-stage trace-grid-stage" id=${`stage-${step.id}`}>${canvas('session-trace', { 'aria-label': 'Hold near the marker and lead it along the route.' })}${flashLayer()}</div>
+      <div class="verification-cycle">${cycleStatus()}</div>
+    </div>`;
+    if (step.type === 'hold') return html`<div class="captcha-experience action-experience">
+      ${instructionRow()}
+      <div class="captcha-grid-stage action-grid-stage" id=${`stage-${step.id}`}>${canvas('session-hold', { 'aria-label': 'Press and hold the center target' })}${flashLayer()}</div>
+      <div class="verification-cycle">${cycleStatus()}</div>
+    </div>`;
     return '';
   };
-  const installed = playing ? installedAt(s.index) : ['RECEIVE', 'OBEY'];
-  const meter = playing ? meterAt(s.index) : 1;
-  const phaseNumber = playing ? phases.indexOf(step.phase) + 1 : phases.length;
-  return html`<body class="session-body ${chamber ? 'chamber' : ''} ${s.reduced ? 'session-reduced' : ''}"><main class="session-page">
-    ${chamber && playing ? canvas('session-spiral', { class: 'spiral', 'aria-hidden': 'true' }) : ''}
-    <div class="stim-layer" aria-hidden="true">${s.stimuli.filter(entry => entry.anchor === 'backdrop').map(entry => html`<span id=${`stim-${entry.key}`} class="stim stim-${entry.mode} anchor-backdrop" style=${`--ms:${entry.ms}ms`}>${entry.text}</span>`)}</div>
-    <section class="session-card screen-${s.screen} task-${playing ? step.type : 'end'} ${s.done ? 'task-complete' : ''}" aria-label="Verification session">
-      <header class="session-header"><span class="session-badge">${phaseNumber}</span><span>${playing ? step.phase.title : 'Standby'}</span><span class="session-header-count">${playing && !chamber ? `${phaseNumber} / ${phases.length}` : chamber ? `${Math.round(meter * 100)}%` : ''}</span>${playing ? html`<button class="header-settings" type="button" aria-label="Session settings" onclick=${() => emit('session:settings', true)}>⚙</button>` : ''}</header>
-      ${playing ? html`<div class="session-progress" role="progressbar" aria-label=${chamber ? 'Programming progress' : 'Verification progress'} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round((chamber ? meter : s.index / firstChamberIndex) * 100)}><span style=${`width:${(chamber ? meter : s.index / firstChamberIndex) * 100}%`}></span></div>` : ''}
-      <div class="session-content">${content()}</div>
-      ${s.stimuli.filter(entry => entry.anchor === 'corner').map(entry => html`<span id=${`stim-${entry.key}`} class="stim stim-${entry.mode} anchor-corner" style=${`--ms:${entry.ms}ms`} aria-hidden="true">${entry.text}</span>`)}
-      <footer class="session-footer">${chamber ? html`<span class="installed">${installed.length ? installed.map(name => html`<span>${name}: ACTIVE</span>`) : html`<span>NO PROGRAMS INSTALLED</span>`}</span><span>PROGRAMMING PROGRESS ${Math.round(meter * 100)}%</span>` : step.phase.footer.map(word => html`<span>${word}</span>`)}</footer>
-    </section>
-    ${playing && isLocalDev() ? html`<button class="dev-skip" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip <span>dev</span></button>` : ''}
-    ${busy ? html`<div class="session-overlay"><section class="session-dialog" role="dialog" aria-modal="true" aria-label=${s.exiting ? 'End session' : s.settings ? 'Settings' : 'Paused'}>
-      <h2>${s.exiting ? 'End the session?' : s.settings ? 'Session settings' : 'Session paused'}</h2><p>Your place and progress are preserved.</p>
-      ${s.exiting ? html`${button('End session', 'session:exit')}<button type="button" onclick=${() => emit('session:exitPrompt', false)}>Return to session</button>` : s.settings ? html`${button(s.muted ? 'Unmute audio' : 'Mute audio', 'session:mute', false, 'session-link')}<button type="button" class="session-primary" onclick=${() => emit('session:settings', false)}>Resume session</button><button type="button" onclick=${() => emit('session:exitPrompt', true)}>End session</button>` : button('Resume session', 'session:pause')}
-    </section></div>` : ''}
+  const card = () => html`<section class="study-card test-card experience-card ${chamber ? 'pulse-card mode-center' : ''} task-${step.type} ${s.done ? 'is-complete' : ''}" aria-label="Verification session">
+    <div class="card-header">
+      <div class="card-header-row">
+        <div class="step-badge">${phaseNumber}</div>
+        <div class="card-label">Section ${phaseNumber} of ${phases.length} · ${step.phase.title}</div>
+        <div class="card-header-tools">
+          <button class="settings-trigger" type="button" title="Session settings" aria-label="Session settings" onclick=${() => emit('session:settings', true)}>${gearIcon()}</button>
+          <span class="header-tool-divider"></span>
+          <div class="card-count">${chamber ? `Programming ${Math.round(meter * 100)}%` : `Task ${Math.max(1, s.index)} of ${firstChamberIndex - 1}`}</div>
+        </div>
+      </div>
+      <div class="card-bar" role="progressbar" aria-label=${chamber ? 'Programming progress' : 'Verification progress'} aria-valuemin="0" aria-valuemax="100" aria-valuenow=${Math.round(progress * 100)}><div class="card-bar-fill" style=${`width:${progress * 100}%`}></div></div>
+    </div>
+    <div class="card-body">${content()}</div>
+    <div class="card-footer">
+      <span class="card-footer-note">${shieldIcon()} ${chamber ? (installed.length ? installed.map(name => `${name}: active`).join(' · ') : 'No programs installed') : 'No responses are stored.'}</span>
+      <span>Verification ID: ${verificationId}</span>
+    </div>
+  </section>`;
+  const endCard = () => html`<section class="study-card study-card-narrow complete-card">
+    <p class="screen-label">Connection terminated</p>
+    <p>The programming session has closed.</p>
+    <p>Unit placed in standby.</p>
+    <p class="completion-meta">Verification ID: ${verificationId}</p>
+    ${s.returnUrl ? html`<button class="secondary-button" type="button" onclick=${() => emit('session:leave')}>Return</button>` : html`<button class="secondary-button" type="button" onclick=${() => emit('session:restart')}>Reconnect</button>`}
+  </section>`;
+  const overlay = () => {
+    if (s.paused && !s.settings && !s.exiting) return html`<div class="modal-backdrop pause-backdrop" role="presentation"><section class="modal-panel pause-panel" role="dialog" aria-modal="true" aria-label="Paused"><p class="screen-label">Protocol paused</p><h2>Session paused</h2><p>Timing and visual motion are suspended.</p><button class="primary-button" type="button" onclick=${() => emit('session:pause')}>Resume session</button></section></div>`;
+    return html`<div class="settings-backdrop" role="presentation" onclick=${event => { if (event.target === event.currentTarget && !s.exiting) emit('session:settings', false); }}>
+      <section class="settings-panel session-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <header class="settings-panel-header"><h2 id="settings-title">Session settings</h2><button class="settings-close" type="button" onclick=${() => { emit('session:exitPrompt', false); emit('session:settings', false); }}>Done</button></header>
+        <section class="settings-group"><h3>Audio</h3><button class="settings-toggle" type="button" onclick=${() => emit('session:mute')}><span>Protocol audio</span><span class="toggle-track ${s.muted ? '' : 'is-on'}"><span></span></span></button></section>
+        <section class="settings-group"><h3>Session</h3>${s.exiting
+          ? html`<div class="finish-confirmation"><p class="finish-confirmation-title">Are you sure?</p><p class="finish-confirmation-text">This will end the current session.</p><div class="finish-confirmation-actions"><button class="gate-button" type="button" onclick=${() => emit('session:exitPrompt', false)}>Stay in session</button><button class="gate-decline" type="button" onclick=${() => emit('session:exit')}>Leave session</button></div></div>`
+          : html`<button class="gate-decline" type="button" onclick=${() => emit('session:exitPrompt', true)}>End the session.</button>`}</section>
+      </section>
+    </div>`;
+  };
+  return html`<body class="${chamber ? 'is-chamber' : ''}"><main class="study-page screen-${s.screen}">
+    ${chamber ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
+    <div class="study-shell">${playing ? card() : endCard()}</div>
+    ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}
+    ${busy ? overlay() : ''}
   </main></body>`;
 }

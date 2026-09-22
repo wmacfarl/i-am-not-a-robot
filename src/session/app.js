@@ -7,8 +7,7 @@ import { mountSpiral, unmountSpiral, setSpiral } from './spiral.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
-  const reduced = query.get('motion') === 'reduced' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', done: false, starting: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', reduced, flash: !reduced && query.get('flash') !== '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null });
+  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null });
   state.session = fresh();
   let frame;
   let dialogOpen = false;
@@ -35,11 +34,11 @@ export function sessionStore(state, emitter) {
   }
   function arm() {
     armed = true;
-    stimuliRun = runStimuli(planStimuli(step(), { flash: s().flash }), {
+    stimuliRun = runStimuli(planStimuli(step()), {
       show: entry => { s().stimuli = [...s().stimuli, entry]; emitter.emit('render'); },
       hide: key => { s().stimuli = s().stimuli.filter(item => item.key !== key); emitter.emit('render'); },
     });
-    if (step().lines && !s().done) runLine();
+    if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
   }
   function disarm() {
     armed = false;
@@ -65,7 +64,7 @@ export function sessionStore(state, emitter) {
     cancelAdvance();
     disarm();
     const current = step();
-    Object.assign(s(), { selected: [], feedback: '', done: false, line: 0, stimuli: [] });
+    Object.assign(s(), { selected: [], feedback: '', done: false, starting: false, triggered: false, line: 0, stimuli: [] });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
     s().holdTask = current.type === 'hold' ? { ...current, progress: 0 } : null;
     if (current.phase.carrier !== undefined) s().carrier = current.phase.carrier;
@@ -88,17 +87,24 @@ export function sessionStore(state, emitter) {
     Object.assign(s(), { screen: 'end', carrier: false, exiting: false, paused: false, settings: false, done: false });
   }
   emitter.on('session:start', async () => {
-    if (s().starting || !active() || step().type !== 'checkbox') return;
+    if (s().starting || s().triggered || !active() || (step().type !== 'checkbox' && step().trigger !== 'checkbox')) return;
     s().starting = true; emitter.emit('render');
     await Promise.race([startAudio(), new Promise(resolve => setTimeout(resolve, 1800))]);
     muteAudio(s().muted);
     setTimeout(() => {
       if (!s().starting) return;
       s().starting = false;
+      if (step().trigger) {
+        s().triggered = true;
+        sound('retry');
+        if (armed && lineTimer === null) runLine();
+        render();
+        return;
+      }
       const jump = isLocalDev() ? stepIndex(query.get('start') || '') : -1;
       s().index = jump > 0 ? jump : s().index + 1;
       prepare(); render();
-    }, 700);
+    }, 900);
   });
   emitter.on('session:select', word => {
     if (!active() || step().type !== 'cloud') return;
@@ -110,13 +116,14 @@ export function sessionStore(state, emitter) {
     if (acceptsSelection(step(), s().selected)) finish(acceptanceFor(step()));
     else { s().feedback = step().symbolic ? 'Check the example and try again. Select every matching symbol.' : 'Check the category and try again. Select every matching word.'; sound('retry'); render(); }
   });
-  emitter.on('session:none', () => {
-    if (!active() || step().type !== 'cloud' || step().targets !== null) return;
-    s().selected = []; finish(acceptanceFor(step()));
+  emitter.on('session:answer', () => {
+    if (!active() || step().type !== 'report') return;
+    sound('select');
+    if (s().line < step().items.length - 1) { s().line++; s().feedback = 'Response recorded.'; render(); }
+    else finish(acceptanceFor(step()));
   });
   emitter.on('session:traceComplete', () => { if (active() && step().type === 'trace') finish(acceptanceFor(step())); });
   emitter.on('session:holdComplete', () => { if (active() && step().type === 'hold') finish(acceptanceFor(step())); });
-  emitter.on('session:accept', () => { if (active() && step().type === 'accept') finish(acceptanceFor(step())); });
   emitter.on('session:next', () => { if (s().screen === 'play' && !blocked() && s().done) advance(); });
   emitter.on('session:skip', () => {
     if (!isLocalDev() || s().screen !== 'play' || blocked()) return;
@@ -128,7 +135,7 @@ export function sessionStore(state, emitter) {
   emitter.on('session:settings', value => { s().settings = value; render(); });
   emitter.on('session:exitPrompt', value => { s().exiting = value; render(); });
   emitter.on('session:exit', () => { end(); render(); });
-  emitter.on('session:restart', () => { const { muted, reduced, flash, returnUrl } = s(); disarm(); state.session = { ...fresh(), muted, reduced, flash, returnUrl }; render(); });
+  emitter.on('session:restart', () => { const { muted, returnUrl } = s(); disarm(); state.session = { ...fresh(), muted, returnUrl }; render(); });
   emitter.on('session:leave', () => { if (s().returnUrl) window.location.assign(s().returnUrl); });
   emitter.on('session:mute', () => { s().muted = !s().muted; muteAudio(s().muted); render(); });
   function sync() {
@@ -146,19 +153,19 @@ export function sessionStore(state, emitter) {
     muteAudio(session.muted || suspended || !playing);
     setChamber(playing && session.carrier);
     const spiral = document.getElementById('session-spiral');
-    if (spiral) mountSpiral(spiral, { paused: suspended, reduced: session.reduced, intensity: meterAt(session.index), ring: current.phase.ring, fade: current.phase.id === 'close' ? 0.45 : 1 });
+    if (spiral) mountSpiral(spiral, { paused: suspended, intensity: meterAt(session.index), ring: current.phase.ring, fade: current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.3 : 1 });
     else unmountSpiral();
     const running = playing && !suspended && !session.done;
     const traceCanvas = running && current.type === 'trace' ? document.getElementById('session-trace') : null;
     if (traceCanvas) {
       const task = session.traceTask;
-      task.reduced = session.reduced; task.chamber = current.phase.chamber;
+      task.chamber = current.phase.chamber;
       mountTrace(traceCanvas, task, () => { if (s().traceTask === task) emitter.emit('session:traceComplete'); });
     } else unmountTrace();
     const holdCanvas = running && current.type === 'hold' ? document.getElementById('session-hold') : null;
     if (holdCanvas) {
       const task = session.holdTask;
-      task.reduced = session.reduced; task.chamber = current.phase.chamber;
+      task.chamber = current.phase.chamber;
       mountHold(holdCanvas, task, { onComplete: () => { if (s().holdTask === task) emitter.emit('session:holdComplete'); }, onFill: fill => setSpiral({ contraction: fill }), onPulse: () => sound('pulse') });
     } else { unmountHold(); setSpiral({ contraction: 0 }); }
   }
@@ -176,6 +183,7 @@ export function sessionStore(state, emitter) {
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
       }
       if (event.key === 'Escape' && s().screen === 'play') { s().paused = true; render(); }
+      if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && active() && step().type === 'report') { event.preventDefault(); emitter.emit('session:answer', event.key === 'ArrowRight'); }
     });
   });
 }

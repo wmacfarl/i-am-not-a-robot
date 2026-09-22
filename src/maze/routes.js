@@ -10,12 +10,12 @@ const RING_COUNTS = [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10];
  * is strictly orthogonal; later mazes add curvature monotonically toward the
  * center while preserving the same ring spacing and traversal grammar.
  */
-export function routeForRound(roundIndex) {
+export function routeForRound(roundIndex, { rings: ringOverride } = {}) {
   const index = clamp(Math.floor(roundIndex), 0, TRACE_ROUND_COUNT - 1);
   const progress = index / (TRACE_ROUND_COUNT - 1);
   const roundness = smoothstep(0.02, 0.78, progress);
   const spiral = smoothstep(0.42, 1, progress);
-  const ringCount = RING_COUNTS[index];
+  const ringCount = ringOverride ?? RING_COUNTS[index];
   const transitionCount = ringCount - 1;
   const outerRadius = 0.445;
   const innerRadius = 0.13;

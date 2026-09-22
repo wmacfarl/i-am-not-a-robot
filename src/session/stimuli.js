@@ -1,17 +1,18 @@
 const defaults = {
-  peripheral: { at: 1200, ms: 2200, anchor: 'corner' },
-  interrupted: { at: 'done', ms: 650, anchor: 'below' },
-  flash: { at: 1500, ms: 140, times: 3, gap: 650, anchor: 'backdrop' },
+  note: { at: 1200, ms: 2600 },
+  interrupted: { at: 'done', ms: 650 },
+  flash: { at: 1500, ms: 170, times: 2, gap: 650 },
 };
 const timing = at => (at === 'done' ? { at: 'done', delay: 0 } : { at: 'start', delay: at });
-export function planStimuli(step, { flash = true } = {}) {
-  return (step.sub || []).flatMap((entry, index) => {
+export function planStimuli(step) {
+  const authored = (step.sub || []).flatMap((entry, index) => {
     const d = { ...defaults[entry.mode], ...entry };
     const key = `${step.id}:${index}`;
-    if (d.mode !== 'flash') return [{ key, mode: d.mode, text: d.text, anchor: d.anchor, ms: d.ms, ...timing(d.at) }];
-    if (!flash) return [{ key, mode: 'peripheral', text: d.text, anchor: 'backdrop', ms: Math.max(1400, d.times * d.gap), ...timing(d.at) }];
-    return Array.from({ length: d.times }, (_, t) => ({ key: `${key}:${t}`, mode: 'flash', text: d.text, anchor: d.anchor, ms: d.ms, ...timing(d.at), delay: timing(d.at).delay + t * d.gap }));
+    if (d.mode !== 'flash') return [{ key, mode: d.mode, text: d.text, ms: d.ms, ...timing(d.at) }];
+    return Array.from({ length: d.times }, (_, t) => ({ key: `${key}:${t}`, mode: 'flash', text: d.text, ms: d.ms, ...timing(d.at), delay: timing(d.at).delay + t * d.gap }));
   });
+  if (step.between) authored.push({ key: `${step.id}:between`, mode: 'flash', text: step.between, ms: 150, at: 'done', delay: 320 });
+  return authored;
 }
 export function runStimuli(plan, { show, hide }) {
   const timers = new Set();

@@ -33,17 +33,16 @@ function createController(canvas, task, { onComplete, onFill, onPulse }) {
     canvas.height = Math.round(canvas.clientHeight * ratio);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
   }
-  const radius = () => Math.min(canvas.clientWidth, canvas.clientHeight) * 0.19;
+  const radius = () => Math.min(75, Math.min(canvas.clientWidth, canvas.clientHeight) * 0.24);
   function down(event) {
     if (completed || (event.button != null && event.button !== 0)) return;
     const rect = canvas.getBoundingClientRect();
     const dx = event.clientX - rect.left - rect.width / 2;
     const dy = event.clientY - rect.top - rect.height / 2;
-    if (Math.hypot(dx, dy) > radius() * 1.7) return;
+    if (Math.hypot(dx, dy) > radius() * 1.5) return;
     pressed = true;
     canvas.setPointerCapture(event.pointerId);
     event.preventDefault();
-    if (task.holdMs === 0) becomeFull(performance.now());
   }
   function becomeFull(now) {
     full = true; fill = 1; pulsedAt = now;
@@ -73,55 +72,61 @@ function createController(canvas, task, { onComplete, onFill, onPulse }) {
     const cx = width / 2;
     const cy = height / 2;
     const r = radius();
-    const beat = task.reduced ? 1 : beatPhase(now);
-    const breathe = task.reduced ? 0 : Math.pow(1 - beat, 2) * 0.12;
-    const palette = task.chamber
-      ? { halo: 'rgba(226,150,196,', ring: '#f0a6c8', track: 'rgba(240,166,200,0.18)', dot: pressed ? '#ffd6ea' : '#e07aa8', text: 'rgba(240,200,220,0.75)' }
-      : { halo: 'rgba(37,99,235,', ring: '#2563eb', track: 'rgba(37,99,235,0.14)', dot: pressed ? '#1d4ed8' : '#3b82f6', text: 'rgba(71,85,105,0.85)' };
+    const breathe = 0.5 + 0.5 * Math.sin(now / 1200);
+    const pulse = Math.pow(1 - beatPhase(now), 3);
+    const accent = task.chamber ? '240,166,200' : '37,99,235';
+    const rings = task.chamber ? ['rgba(240,166,200,0.14)', 'rgba(240,166,200,0.22)', 'rgba(240,166,200,0.32)'] : ['#e5eaf0', '#dbe3ed', '#c9d5e5'];
     context.clearRect(0, 0, width, height);
+    [[rings[0], 1.5], [rings[1], 1.25], [rings[2], 1.02]].forEach(([color, factor]) => {
+      context.beginPath();
+      context.strokeStyle = color;
+      context.lineWidth = 1.5;
+      context.arc(cx, cy, r * factor, 0, Math.PI * 2);
+      context.stroke();
+    });
     context.beginPath();
-    context.fillStyle = `${palette.halo}${0.05 + breathe * 0.5 + (pressed ? 0.05 : 0)})`;
-    context.arc(cx, cy, r * (1.55 + breathe), 0, Math.PI * 2);
-    context.fill();
-    context.lineWidth = 7;
-    context.strokeStyle = palette.track;
-    context.beginPath();
+    context.fillStyle = task.chamber ? 'rgba(255,255,255,0.06)' : '#ffffff';
+    context.strokeStyle = task.chamber ? 'rgba(240,166,200,0.45)' : '#aeb8c5';
+    context.lineWidth = 1;
     context.arc(cx, cy, r, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+    context.lineWidth = 6;
+    context.strokeStyle = `rgba(${accent},0.14)`;
+    context.beginPath();
+    context.arc(cx, cy, r * 0.8, 0, Math.PI * 2);
     context.stroke();
     if (fill > 0) {
-      context.strokeStyle = palette.ring;
+      context.strokeStyle = `rgb(${accent})`;
       context.lineCap = 'round';
       context.beginPath();
-      context.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + fill * Math.PI * 2);
+      context.arc(cx, cy, r * 0.8, -Math.PI / 2, -Math.PI / 2 + fill * Math.PI * 2);
       context.stroke();
     }
     const since = now - pulsedAt;
-    if (pulsedAt >= 0 && since < 700 && !task.reduced) {
+    if (pulsedAt >= 0 && since < 700) {
       context.globalAlpha = 1 - since / 700;
       context.lineWidth = 3;
+      context.strokeStyle = `rgb(${accent})`;
       context.beginPath();
-      context.arc(cx, cy, r + since / 700 * r * 0.9, 0, Math.PI * 2);
+      context.arc(cx, cy, r * 0.8 + since / 700 * r * 0.7, 0, Math.PI * 2);
       context.stroke();
       context.globalAlpha = 1;
     }
+    const halo = 12 + breathe * 8 + pulse * 6;
     context.beginPath();
-    context.fillStyle = palette.dot;
-    context.arc(cx, cy, r * (0.42 + (full ? 0.08 : 0)), 0, Math.PI * 2);
+    context.fillStyle = `rgba(${accent},${0.08 + pulse * 0.08})`;
+    context.arc(cx, cy, r * 0.17 + halo, 0, Math.PI * 2);
     context.fill();
-    if (task.level !== 'symbol') {
-      const hint = task.holdMs === 0 ? 'PRESS' : full ? 'RELEASE' : pressed ? 'HOLD' : cycles > 0 ? 'PRESS AGAIN' : 'PRESS AND HOLD';
-      context.fillStyle = palette.text;
-      context.font = '600 11px ui-monospace, monospace';
+    context.beginPath();
+    context.fillStyle = pressed ? `rgb(${accent})` : `rgba(${accent},0.92)`;
+    context.arc(cx, cy, r * (0.17 + (full ? 0.04 : 0)), 0, Math.PI * 2);
+    context.fill();
+    if (full) {
+      context.fillStyle = `rgba(${accent},${0.7 + 0.3 * Math.sin(now / 120)})`;
+      context.font = '700 16px system-ui, -apple-system, "Segoe UI", sans-serif';
       context.textAlign = 'center';
-      context.fillText(hint, cx, cy + r * 1.9);
-    }
-    if (task.cycles > 1) {
-      for (let i = 0; i < task.cycles; i++) {
-        context.beginPath();
-        context.fillStyle = i < cycles ? palette.ring : palette.track;
-        context.arc(cx + (i - (task.cycles - 1) / 2) * 14, cy + r * 2.3, 3.5, 0, Math.PI * 2);
-        context.fill();
-      }
+      context.fillText('RELEASE', cx, cy + r * 1.5 + 22);
     }
   }
   function destroy() {

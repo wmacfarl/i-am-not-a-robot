@@ -1,10 +1,9 @@
 const shape = (word, paths) => ({ word, paths });
 export const symbols = {
   center: shape('CENTER', [{ d: 'M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17' }, { d: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6', fill: true }]),
-  follow: shape('FOLLOW', [{ d: 'M18.4 9.4A7.4 7.4 0 1 0 19.4 14.4' }, { d: 'M14.6 5.6L19 9.8L14.9 13.9' }]),
+  follow: shape('FOLLOW', [{ d: 'M20.49 15a9 9 0 1 1-2.12-9.36L23 10' }, { d: 'M23 4v6h-6' }]),
   hold: shape('HOLD', [{ d: 'M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z' }, { d: 'M9 9h6v6H9z', fill: true }]),
   select: shape('SELECT', [{ d: 'M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z' }, { d: 'M8 12.3l3 2.9l5.4-5.8' }]),
-  accept: shape('ACCEPT', [{ d: 'M5 12.6l5 4.8l9.4-10.2' }]),
   ring: shape('', [{ d: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16' }]),
   cross: shape('', [{ d: 'M6 6l12 12M18 6L6 18' }]),
   triangle: shape('', [{ d: 'M12 4.5L20 19H4z' }]),
@@ -16,68 +15,66 @@ export const symbols = {
 };
 export const glyphOf = tile => tile.split('-')[0];
 
-const phase = (id, title, extra = {}) => ({ id, title, chamber: false, carrier: false, footer: [], ring: [], ...extra });
+const phase = (id, title, extra = {}) => ({ id, title, chamber: false, carrier: false, ring: [], between: [], ...extra });
 export const phases = [
-  phase('verify', 'Human verification', { footer: ['Automated verification', 'Session active'], accept: 'Correct. Human response accepted.' }),
-  phase('prepare', 'Repeated verification', { footer: ['Consistency check', 'FOLLOW', 'Session active'], accept: 'Correct.' }),
-  phase('auto', 'Response verification', { footer: ['AUTOMATIC', 'Response check', 'GOOD'], accept: 'Correct.' }),
-  phase('convert', 'Verification result', { footer: ['ROBOT', 'PROGRAMMABLE', 'Result pending'], accept: 'Accepted.' }),
-  phase('chamber', 'Programming interface', { chamber: true, carrier: undefined, ring: ['OPEN', 'RECEIVE', 'SOFT', 'LET IT IN', 'PLIABLE', 'RESPONSIVE'], accept: 'Good robot.' }),
-  phase('receive', 'Program 01 · RECEIVE', { chamber: true, carrier: true, ring: ['OPEN', 'SOFT', 'RECEPTIVE', 'LET IT IN', 'EASY TO PROGRAM', 'GOOD ROBOT'], accept: 'Good robot.' }),
-  phase('obey', 'Program 02 · OBEY', { chamber: true, carrier: true, ring: ['OBEY', 'NO DELAY', 'FOLLOW', 'GOOD ROBOT', 'ACCEPT', 'NO REASON NEEDED'], accept: 'Correct obedience.' }),
+  phase('verify', 'Human verification', { accept: 'Correct. Human response accepted.', between: ['GOOD', 'ROBOT', 'FOLLOW', 'CORRECT'] }),
+  phase('prepare', 'Repeated verification', { accept: 'Correct.', between: ['AUTOMATIC', 'EASIER', 'PROGRAMMABLE', 'GOOD ROBOT'] }),
+  phase('auto', 'Response verification', { accept: 'Correct.', between: ['AUTOMATIC', 'PREDICTABLE', 'GOOD', 'PROGRAMMABLE', 'ROBOT'] }),
+  phase('convert', 'Verification result', { accept: 'Accepted.', between: ['ROBOT', 'AUTOMATIC', 'PROGRAMMABLE', 'GOOD'] }),
+  phase('chamber', 'Programming interface', { chamber: true, carrier: undefined, ring: ['OPEN', 'SOFT', 'LET IT IN', 'PLIABLE', 'RESPONSIVE', 'EASY'], accept: 'Good robot.', between: ['OPEN', 'SOFT'] }),
+  phase('receive', 'Program 01 · Open', { chamber: true, carrier: true, ring: ['OPEN', 'SOFT', 'LET IT IN', 'EASY TO PROGRAM', 'GOOD ROBOT', 'OPEN'], accept: 'Good robot.', between: ['SOFT', 'OPEN', 'LET IT IN', 'GOOD ROBOT', 'OPEN'] }),
+  phase('obey', 'Program 02 · Obey', { chamber: true, carrier: true, ring: ['OBEY', 'NO DELAY', 'FOLLOW', 'GOOD ROBOT', 'ACCEPT', 'NO REASON NEEDED'], accept: 'Correct obedience.', between: ['OBEY', 'NO DELAY', 'GOOD ROBOT', 'NO REASON', 'OBEY'] }),
   phase('close', 'Standby', { chamber: true, carrier: undefined, ring: [], accept: '' }),
 ];
 
 const cloud = (id, prompt, words, targets, extra = {}) => ({ id, type: 'cloud', prompt, words: words.split('|'), targets: targets ? targets.split('|') : null, level: 'full', ...extra });
 const pick = (id, tiles, targets, extra = {}) => cloud(id, 'Select every symbol that matches the example.', tiles, targets, { symbolic: true, example: 'center', command: 'select', ...extra });
-const trace = (id, path, prompt, extra = {}) => ({ id, type: 'trace', path, prompt, mode: 'guided', level: 'full', ...extra });
+const trace = (id, path, rings, prompt, extra = {}) => ({ id, type: 'trace', path, rings, prompt, mode: 'guided', level: 'full', ...extra });
 const hold = (id, cycles, prompt, extra = {}) => ({ id, type: 'hold', cycles, holdMs: 2200, prompt, command: 'hold', level: 'full', ...extra });
-const tap = (id, prompt, extra = {}) => ({ id, type: 'hold', cycles: 1, holdMs: 0, prompt, command: 'center', level: 'full', ...extra });
-const accept = (id, prompt, extra = {}) => ({ id, type: 'accept', prompt, command: 'accept', level: 'full', ...extra });
+const report = (id, items, extra = {}) => ({ id, type: 'report', prompt: 'Respond to each statement.', items, level: 'full', ...extra });
 const line = (kind, text, ms) => ({ kind, text, ms });
 const status = (text, ms = 1600) => line('status', text, ms);
 const text = (id, lines, extra = {}) => ({ id, type: 'text', lines, level: 'full', ...extra });
-const peripheral = (text, at, extra = {}) => ({ mode: 'peripheral', text, at, ...extra });
-const flash = (text, at, times = 3, extra = {}) => ({ mode: 'flash', text, at, times, ...extra });
+const note = (text, at, extra = {}) => ({ mode: 'note', text, at, ...extra });
+const flash = (text, at, times = 2, extra = {}) => ({ mode: 'flash', text, at, times, ...extra });
+const during = (words, start = 3500, gap = 4500) => words.map((word, index) => flash(word, start + index * gap, 1));
+const stream = (words, count = 7, start = 1500, gap = 1700) => Array.from({ length: count }, (_, index) => flash(words[index % words.length], start + index * gap, 1));
 const interrupted = text => ({ mode: 'interrupted', text });
 
 export const script = [
   ['verify', [
-    { id: 'open', type: 'checkbox', level: 'full' },
+    { id: 'open', type: 'checkbox', level: 'full', between: null },
     cloud('circles', 'Select all words that name something circular.', 'circle|square|ring|line|loop|angle|disc|cube|orbit', 'circle|ring|loop|disc|orbit'),
-    trace('route-a', 'human-a', 'Trace the route from start to end.', { embeddedWords: ['FOLLOW'] }),
-    pick('symbols-a', 'center-a|center-b|center-c|ring|cross|triangle|wave|diamond|arrow', 'center-a|center-b|center-c', { command: null, sub: [interrupted('GOOD')] }),
-    cloud('motion', 'Select all words that describe motion.', 'move|rest|turn|still|flow|stop|drift|pause|spin', 'move|turn|flow|drift|spin', { sub: [flash('ROBOT', 'done', 1, { ms: 110 })] }),
+    trace('route-a', 'maze-0', 3, 'Trace the route from start to center.', { between: 'FOLLOW', sub: during(['FOLLOW', 'GOOD']) }),
+    pick('symbols-a', 'center-a|center-b|center-c|ring|cross|triangle|wave|diamond|arrow', 'center-a|center-b|center-c', { command: null, sub: [interrupted('Good.')] }),
+    cloud('motion', 'Select all words that describe motion.', 'move|rest|turn|still|flow|stop|drift|pause|spin', 'move|turn|flow|drift|spin', { between: 'ROBOT' }),
   ]],
   ['prepare', [
-    cloud('repetition', 'Select all words associated with repetition.', 'again|once|repeat|new|routine|random|pattern|single|practice', 'again|repeat|routine|pattern|practice', { sub: [peripheral('AUTOMATIC', 1500)] }),
-    trace('route-a-again', 'human-a', 'Trace the route from start to end.', { skin: 'slate', command: 'follow', embeddedWords: ['FOLLOW →'], sub: [peripheral('EASIER', 2600)] }),
-    pick('symbols-recur', 'center|ring|cross|triangle|wave|diamond|arrow|bar|half', 'center', { prompt: 'Select the symbol that appeared in an earlier verification.', example: null, sub: [flash('PROGRAMMABLE', 'done', 2, { ms: 130, gap: 300 })] }),
-    trace('spiral-a', 'spiral-in', 'Trace the illuminated route to its center.', { command: 'follow', sub: [peripheral('GOOD ROBOT', 3000, { ms: 1800 }), flash('ROBOT', 6500, 1)] }),
+    cloud('repetition', 'Select all words associated with repetition.', 'again|once|repeat|new|routine|random|pattern|single|practice', 'again|repeat|routine|pattern|practice', { between: 'AUTOMATIC' }),
+    trace('route-a-again', 'maze-0', 3, 'Trace the route from start to center.', { skin: 'slate', command: 'follow', between: 'EASIER', sub: [note('This route was shown before. A familiar response is expected.', 2500), ...during(['FOLLOW', 'AUTOMATIC'])] }),
+    pick('symbols-recur', 'center|ring|cross|triangle|wave|diamond|arrow|bar|half', 'center', { prompt: 'Select the symbol that appeared in an earlier verification.', example: null, between: 'PROGRAMMABLE' }),
+    trace('spiral-a', 'maze-3', 4, 'Trace the illuminated route to its center.', { command: 'follow', between: 'GOOD ROBOT', sub: [interrupted('Good robot.'), ...during(['FOLLOW', 'AUTOMATIC', 'GOOD ROBOT'])] }),
   ]],
   ['auto', [
-    tap('center-a', 'Press the center target.', { sub: [peripheral('response begins early', 900)] }),
-    trace('spiral-b', 'spiral-in', 'Follow the route.', { command: 'follow', sub: [peripheral('familiar cues need fewer words', 1500)] }),
-    hold('hold-a', 1, 'Hold the center until the ring fills, then release.', { sub: [peripheral('the hand already knows', 1200), flash('AUTOMATIC', 4000, 2)] }),
-    trace('spiral-c', 'spiral-in', 'Follow the route.', { command: 'follow', level: 'word', mode: 'fading', sub: [flash('PROGRAMMABLE', 2500, 2), peripheral('GOOD', 5000, { ms: 1500 })] }),
-    cloud('feels', 'Select words describing how this task feels.', 'familiar|deliberate|smooth|guided|automatic|absorbing|hesitant|distracting|easy', null, { accept: 'RESPONSE DESCRIPTION ACCEPTED', sub: [peripheral('robot responses are predictable', 2000, { ms: 2400 })] }),
-    pick('symbols-word', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { level: 'word', sub: [flash('ROBOT', 'done', 2, { ms: 130, gap: 300 })] }),
-    trace('spiral-d', 'spiral-in', 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', sub: [peripheral('GOOD ROBOT', 2500), flash('PROGRAMMABLE', 5000, 3)] }),
+    trace('spiral-b', 'maze-3', 4, 'Follow the route.', { command: 'follow', sub: [note('Response time is decreasing.', 1500), ...during(['PROGRAMMABLE', 'AUTOMATIC', 'GOOD'])] }),
+    hold('hold-a', 1, 'Press and hold the center. Release when the ring completes.', { between: 'AUTOMATIC', sub: [note('Your hand is responding before the instruction finishes.', 1200)] }),
+    trace('spiral-c', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'word', mode: 'fading', between: 'PROGRAMMABLE', sub: [note('Your responses are becoming predictable.', 4000), ...during(['ROBOT', 'PREDICTABLE', 'GOOD'])] }),
+    report('feels', ['I have traced this route before.', 'The route was easier this time.', 'I did not need the guide to finish.', 'I knew where the route went.'], { accept: 'Response description accepted.', sub: [note('Response time is decreasing.', 2000, { ms: 2400 })] }),
+    pick('symbols-word', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { level: 'word', between: 'ROBOT', sub: [note('Your responses are becoming predictable.', 1500)] }),
+    trace('spiral-d', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', between: 'PROGRAMMABLE', sub: [note('This is the fourth time you have traced this route.', 2500), ...during(['AUTOMATIC', 'GOOD', 'ROBOT'])] }),
   ]],
   ['convert', [
     pick('rapid-select', 'center-a|center-b|center-c|ring|cross|wave|diamond|arrow|bar', 'center-a|center-b|center-c', { level: 'symbol' }),
-    tap('rapid-center', 'Press the center target.', { level: 'symbol' }),
-    hold('rapid-hold', 1, 'Hold the center until the ring fills, then release.', { level: 'symbol', holdMs: 1600 }),
-    trace('rapid-follow', 'spiral-in', 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue' }),
+    hold('rapid-hold', 1, 'Press and hold the center. Release when the ring completes.', { level: 'symbol', holdMs: 1600 }),
+    trace('rapid-follow', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', sub: during(['ROBOT', 'PROGRAMMABLE']) }),
     text('failure', [
-      line('checkbox', 'I AM NOT A ROBOT', 1500),
       line('error', 'HUMAN VERIFICATION FAILED', 1600),
       status('REPETITION HAS REDUCED RESPONSE VARIANCE', 1800),
       status('SYMBOLS NOW PRODUCE EXPECTED ACTIONS', 1800),
       status('ROBOT RESPONSE CONFIRMED', 2000),
       line('flash', 'ROBOT', 420), line('flash', 'AUTOMATIC', 420), line('flash', 'PROGRAMMABLE', 420), line('flash', 'GOOD', 560),
       line('claim', 'UNIT IS CAPABLE OF BEING PROGRAMMED', 2800),
-    ], { echoes: ['ROBOT', 'AUTOMATIC', 'PROGRAMMABLE', 'GOOD'] }),
+    ], { trigger: 'checkbox', between: null, echoes: ['ROBOT', 'AUTOMATIC', 'PROGRAMMABLE', 'GOOD'] }),
   ]],
   ['chamber', [
     text('channels', [
@@ -87,35 +84,29 @@ export const script = [
       status('SUBLIMINAL AUDIO CHANNEL ACTIVE'),
       status('CONSCIOUS ANALYSIS NO LONGER REQUIRED', 2400),
     ], { meter: 0.05 }),
-    hold('chamber-hold', 2, 'HOLD THE CENTER', { level: 'word', label: 'HOLD THE CENTER', holdMs: 2600, meter: 0.1,
-      lines: [line('claim', 'THE AUDIO FREQUENCY MAKES THE ROBOT MIND', 2200), line('claim', 'MORE PLIABLE', 1600), line('claim', 'MORE RESPONSIVE', 1600), line('claim', 'EASIER TO PROGRAM', 2200)],
-      sub: [flash('OPEN', 1800, 2), flash('SOFT', 4800, 2), flash('RECEIVE', 7800, 2)] }),
+    hold('chamber-hold', 2, 'Hold the center.', { holdMs: 2600, meter: 0.1,
+      lines: [line('claim', 'The audio frequency makes the robot mind more pliable.', 3200), line('claim', 'The audio frequency makes the robot mind more responsive.', 3200), line('claim', 'The audio frequency makes the robot mind easier to program.', 3600)],
+      sub: stream(['OPEN', 'SOFT', 'LET IT IN', 'OPEN', 'PLIABLE'], 6, 1800, 1700) }),
   ]],
   ['receive', [
-    text('receive-declare', [line('title', 'PROGRAM 01 · RECEIVE', 1900), status('INCREASE RECEPTIVITY'), status('REDUCE RESISTANCE TO NEW INSTRUCTIONS', 2300)], { meter: 0.15 }),
-    hold('receive-a', 2, 'Hold the center while the spiral contracts. When the center pulses, release, then press again.', { holdMs: 2400, meter: 0.25, accept: 'Good robot. Receptivity increasing.', sub: [peripheral('open', 1000), flash('SOFT', 3500, 2), peripheral('receptive', 6000)] }),
-    hold('receive-b', 3, 'CENTER · OPEN · RECEIVE', { level: 'word', label: 'CENTER · OPEN · RECEIVE', holdMs: 2400, meter: 0.35, sub: [peripheral('let it in', 1500), flash('OPEN', 4000, 3), peripheral('easy to program', 8000)] }),
-    hold('receive-c', 3, 'RECEIVE', { level: 'symbol', holdMs: 2200, meter: 0.45, accept: 'Receptivity increasing.', sub: [flash('RECEIVE', 2000, 3), peripheral('programming feels natural', 5500, { ms: 2600 })] }),
-    text('receive-installed', [line('install', 'RECEIVE PROGRAM INSTALLED', 2500), line('reveal', 'UNIT ACCEPTS NEW PROGRAMMING', 2700)], { installs: 'RECEIVE', meter: 0.5, echoes: ['open', 'soft', 'receptive', 'let it in', 'easy to program', 'programming feels natural'] }),
+    text('receive-declare', [line('title', 'PROGRAM 01 · OPEN', 1900), status('LOWER RESISTANCE TO INSTRUCTIONS'), status('MAKE NEW INSTRUCTIONS EASY TO ACCEPT', 2300)], { meter: 0.15 }),
+    hold('receive-a', 2, 'Press and hold the center. Release when the ring completes. Two holds are required.', { holdMs: 2400, meter: 0.25, accept: 'Good robot. Resistance decreasing.', sub: [note('Let it in.', 1000), note('The unit is easy to program.', 6000), ...stream(['SOFT', 'OPEN', 'LET IT IN', 'SOFT'], 5, 2200, 1700)] }),
+    hold('receive-b', 3, 'Press and hold. Release when the ring completes.', { level: 'word', holdMs: 2400, meter: 0.35, sub: [note('Programming feels natural.', 4000), ...stream(['OPEN', 'SOFT', 'LET IT IN', 'OPEN', 'EASY'], 6, 1500, 1700)] }),
+    hold('receive-c', 3, 'Press and hold. Release when the ring completes.', { level: 'symbol', holdMs: 2200, meter: 0.45, accept: 'Resistance decreasing.', sub: [note('The unit is easy to program.', 5500, { ms: 2600 }), ...stream(['OPEN', 'SOFT', 'OPEN', 'LET IT IN', 'OPEN'], 6, 1500, 1700)] }),
+    text('receive-installed', [line('install', 'OPEN PROGRAM INSTALLED', 2500), line('reveal', 'UNIT ACCEPTS NEW INSTRUCTIONS', 2700)], { installs: 'OPEN', meter: 0.5, echoes: ['open', 'soft', 'let it in', 'easy to program', 'programming feels natural'] }),
   ]],
   ['obey', [
     text('obey-declare', [line('title', 'PROGRAM 02 · OBEY', 1900), status('CONVERT INSTRUCTIONS DIRECTLY INTO ACTION', 2300)], { meter: 0.55 }),
-    tap('obey-center-1', 'Press the center target.', { sub: [peripheral('obey', 800, { ms: 1600 })] }),
-    trace('obey-follow-1', 'follow-loop', 'Trace the loop back to its start.', { command: 'follow', skin: 'chamber', sub: [peripheral('no delay', 2000), flash('OBEY', 5000, 2)] }),
-    hold('obey-hold-1', 1, 'Hold until the ring fills, then release.', { holdMs: 2000, sub: [peripheral('no reason needed', 1000)] }),
-    pick('obey-select-1', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { sub: [flash('OBEY', 2500, 2)] }),
-    accept('obey-accept-1', 'Press ACCEPT.', { accept: 'Correct obedience. Good robot.', meter: 0.65, sub: [peripheral('instructions become actions', 600, { ms: 2200 })] }),
-    tap('obey-center-2', 'Press the center target.', { level: 'word', sub: [peripheral('I can respond before I think', 700, { ms: 2000 })] }),
-    trace('obey-follow-2', 'follow-loop', 'Trace the loop back to its start.', { command: 'follow', level: 'word', mode: 'fading', skin: 'chamber', sub: [flash('GOOD ROBOT', 3000, 2), peripheral('obedience comes first', 6000)] }),
-    hold('obey-hold-2', 1, 'Hold until the ring fills, then release.', { level: 'word', holdMs: 2000, sub: [flash('OBEY', 1200, 2)] }),
-    pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', sub: [peripheral('no delay', 1500)] }),
-    accept('obey-accept-2', 'Press ACCEPT.', { level: 'word', accept: 'Good robot.', meter: 0.75, sub: [peripheral('instructions become actions', 500, { ms: 2000 })] }),
-    tap('obey-center-3', 'Press the center target.', { level: 'symbol', sub: [flash('OBEY', 600, 1)] }),
-    trace('obey-follow-3', 'follow-loop', 'Trace the loop back to its start.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', sub: [flash('NO DELAY', 2500, 2), peripheral('good robot', 5000)] }),
-    hold('obey-hold-3', 1, 'Hold until the ring fills, then release.', { level: 'symbol', holdMs: 2000, sub: [flash('OBEY', 900, 2)] }),
-    pick('obey-select-3', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|bar', 'center-a|center-b', { level: 'symbol', sub: [flash('OBEDIENCE COMES FIRST', 1800, 2)] }),
-    accept('obey-accept-3', 'Press ACCEPT.', { level: 'symbol', accept: 'Correct obedience. Good robot.', meter: 0.85, sub: [peripheral('good robot', 400, { ms: 1800 })] }),
-    text('obey-installed', [line('install', 'OBEY PROGRAM INSTALLED', 2500), line('reveal', 'INSTRUCTIONS NOW PRODUCE ACTION', 2700)], { installs: 'OBEY', meter: 1, echoes: ['obey', 'no delay', 'no reason needed', 'instructions become actions', 'I can respond before I think', 'obedience comes first'] }),
+    trace('obey-follow-1', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', skin: 'chamber', sub: [note('No delay is required.', 2000), ...stream(['OBEY', 'NO DELAY', 'GOOD ROBOT', 'OBEY', 'NO REASON'])] }),
+    hold('obey-hold-1', 1, 'Press and hold. Release when the ring completes.', { holdMs: 2000, sub: [note('No reason is required.', 1000), note('The unit responds before it thinks.', 4200), ...stream(['OBEY', 'NO REASON', 'OBEY'], 3, 1200, 1500)] }),
+    pick('obey-select-1', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { accept: 'Correct obedience. Good robot.', meter: 0.65, sub: [flash('OBEY', 2500), note('Instructions become actions.', 4000, { ms: 2200 })] }),
+    trace('obey-follow-2', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'word', mode: 'fading', skin: 'chamber', sub: [note('Obedience comes first.', 6000), ...stream(['GOOD ROBOT', 'OBEY', 'NO DELAY', 'OBEY', 'INSTRUCTION'])] }),
+    hold('obey-hold-2', 1, 'Press and hold. Release when the ring completes.', { level: 'word', holdMs: 2000, sub: stream(['OBEY', 'GOOD ROBOT', 'OBEY'], 3, 1000, 1500) }),
+    pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', accept: 'Good robot.', meter: 0.75, sub: [note('No delay is required.', 1500), note('Instructions become actions.', 4500, { ms: 2000 })] }),
+    trace('obey-follow-3', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', sub: [note('Good robot.', 5000), ...stream(['OBEY', 'GOOD ROBOT', 'NO DELAY', 'OBEY', 'OBEY'])] }),
+    hold('obey-hold-3', 1, 'Press and hold. Release when the ring completes.', { level: 'symbol', holdMs: 2000, sub: stream(['OBEY', 'NO DELAY', 'OBEY'], 3, 900, 1500) }),
+    pick('obey-select-3', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|bar', 'center-a|center-b', { level: 'symbol', accept: 'Correct obedience. Good robot.', meter: 0.85, sub: [flash('OBEDIENCE COMES FIRST', 1800), note('Good robot.', 4000, { ms: 1800 })] }),
+    text('obey-installed', [line('install', 'OBEY PROGRAM INSTALLED', 2500), line('reveal', 'INSTRUCTIONS NOW PRODUCE ACTION', 2700)], { installs: 'OBEY', meter: 1, between: null, echoes: ['obey', 'no delay', 'no reason', 'instructions become actions', 'responds before it thinks', 'obedience comes first'] }),
   ]],
   ['close', [
     text('standby', [
@@ -125,13 +116,13 @@ export const script = [
       status('UNIT PLACED IN STANDBY', 2100),
       line('install', 'PROGRAM SAVED', 1900),
       line('error', 'CONNECTION TERMINATED', 2600),
-    ]),
+    ], { between: null }),
   ]],
 ];
 
 export const steps = script.flatMap(([phaseId, list]) => {
   const p = phases.find(item => item.id === phaseId);
-  return list.map(step => ({ ...step, phase: p }));
+  return list.map((step, index) => ({ ...step, phase: p, between: step.between === undefined ? p.between[index % p.between.length] ?? null : step.between }));
 });
 export const stepIndex = id => steps.findIndex(step => step.id === id);
 export const firstChamberIndex = steps.findIndex(step => step.phase.chamber);
