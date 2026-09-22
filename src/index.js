@@ -1,4 +1,5 @@
-import { sessionStore, sessionView } from './session/app.js';
+import { sessionStore } from './session/app.js';
+import { sessionView } from './session/view.js';
 import mazePrototypeStore from './maze/store.js';
 import { mazePrototypeView } from './views/maze-prototype-view.js';
 const app = Choo();

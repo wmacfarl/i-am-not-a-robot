@@ -1,54 +1,62 @@
 # I Am Not a Robot
 
-A mobile-first fictional robot-transformation game. Word-selection CAPTCHAs and
-continuous tracing develop from human verification into familiar robot routines.
-The presentation follows the restrained institutional style of `compliance-research-2`.
+A fictional robot-programming game presented entirely as a human-verification
+interface. Word CAPTCHAs, symbol grids, and continuous tracing establish human
+control; the interface then reinterprets the player's learned responses as robot
+behaviour and opens an explicit programming chamber.
 
 ## Play locally
 
 Run `npm run dev`, then open `http://127.0.0.1:4173/`.
 
-The complete MVP contains 43 authored steps across seven sections, followed by a
-self-paced closing sequence. Allow roughly 10–15 minutes; this is a provisional
-estimate, not an enforced duration. The planned full session is longer.
+The active session is the vertical slice from
+[docs/covert-priming-design.md](./docs/covert-priming-design.md) §11: opening
+checkbox, human verification, covert subliminal preparation, shortening
+instructions, robot conversion, chamber activation, `RECEIVE`, `OBEY`, and the
+diegetic shutdown. Allow roughly 10–12 minutes.
 
-- Begin verification starts directly; age gating belongs on the itch page.
-- Category clouds have matching answers and allow correction.
-- Experience clouds accept any selection, including none.
-- Repeated tracing leads into CENTER and FOLLOW practice, fading guidance, and cue recall.
-- Correct feedback changes from human verification to robot execution.
-- Successful tasks chime, celebrate briefly, and advance automatically.
-- Tracing preserves progress after lifting, pausing, and opening settings.
-- Tracing uses the authored guidance level; completing the route advances the task.
-- The header settings button pauses play and contains mute and ending.
-- Activities resize to the viewport without a floating control bar or page scrolling.
-- No behavioral statistics, response history, or data transmission.
+Everything after the opening checkbox is diegetic: disclosure, consent, and
+aftercare belong on the hosting page, which launches the game with query
+parameters:
+
+- `?return=<url>` — the page to return to from the final screen.
+- `?motion=reduced` — static spiral, no pulses, no flashing (also follows the
+  OS reduced-motion preference).
+- `?flash=0` — keep motion but present every masked flash as readable
+  peripheral copy instead.
+- `?audio=0` — start muted.
+
+On localhost only, `?start=<step-id>` jumps to any authored step after the
+checkbox (for example `?start=channels` or `?start=receive-a`), and a Skip
+button advances one step.
 
 The standalone twelve-maze experiment remains at `/trace`.
 
 ## Implementation
 
-Choo, nanohtml, PixiJS, Tone.js, plain CSS, JavaScript ES modules, and a small Node
+Choo, nanohtml, Tone.js, plain CSS, JavaScript ES modules, and a small Node
 HTTP server. Browser libraries are bundled locally; there is no build step.
 
-- `src/session/content.js`: authored sections, clouds, routines, and closing copy.
-- `src/session/app.js`: session state, events, and views.
-- `src/session/audio.js`: optional Tone.js selection and acceptance sounds.
-- `src/session/style.css`: institutional session presentation and responsive layout.
-- `src/trace/tracing.js`: continuous pointer tracing with resumable progress.
-- `src/pixi/stimulus.js`: shared visual background.
+- `src/session/content.js`: symbol vocabulary, phases, and the authored script.
+  Every step carries its instruction level (`full`, `word`, `symbol`) and its
+  subliminal annotations (`peripheral`, `interrupted`, `flash`); text steps carry
+  timed lines and the fragments they reveal.
+- `src/session/app.js`: session state, events, timers, and DOM sync.
+- `src/session/view.js`: card chrome, tasks, chamber, and the stimulus layers.
+- `src/session/stimuli.js`: the subliminal planner and timer runner.
+- `src/session/hold.js`: press-and-hold and tap canvas controller.
+- `src/session/spiral.js`: full-viewport programming spiral.
+- `src/session/audio.js`: Tone.js interface sounds, pulse carrier, and the
+  binaural-style layer.
+- `src/trace/tracing.js`: continuous pointer tracing with skins.
 - `src/maze/`: independent maze experiment.
 
 Earlier prototype modules remain in the tree for reference but are not imported
-by the main session. The active session does not use their measurement logic.
+by the main session.
 
 ## Validation
 
-`npm test` checks maze geometry, authored content, session completion, correction,
-input blocking, and tracing completion/resume through pointer event handlers.
-
-See [current session direction](./docs/session-direction.md) for the design.
-The [original draft](./docs/game-design.md) is historical.
-
-
-
+`npm test` checks the authored script (unique ids, every bare symbol taught
+before it stands alone, every reveal earned by earlier fragments), the stimulus
+planner and its no-flash fallback, a complete playthrough, pause and settings
+behaviour, the hold controller, and tracing completion and resume.

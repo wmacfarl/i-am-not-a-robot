@@ -1,3 +1,5 @@
+> Superseded by [covert-priming-design.md](./covert-priming-design.md) (2026-09-22) wherever the two conflict: in-game disclosure, restrained presentation, and the ban on flashing copy no longer apply. Kept for the interaction vocabulary.
+
 # Current session direction
 
 This direction supersedes conflicting proposals in the original game-design draft.

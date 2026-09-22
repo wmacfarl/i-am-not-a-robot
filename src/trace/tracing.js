@@ -1,4 +1,9 @@
 let active = null;
+const skins = {
+  paper: { field: "rgba(248,250,252,0.88)", grid: "rgba(100,116,139,0.11)", halo: "#aeb8c5", path: "#607086", traced: "#2563eb", core: "#ffffff", guide: "#2563eb", guideFill: "#ffffff", marker: "37,99,235", start: "#1d4ed8", end: "#0f766e", endpointFill: "#ffffff", words: "71,85,105" },
+  slate: { field: "rgba(226,232,240,0.92)", grid: "rgba(51,65,85,0.18)", halo: "#94a3b8", path: "#334155", traced: "#0f766e", core: "#ffffff", guide: "#0f766e", guideFill: "#ffffff", marker: "15,118,110", start: "#0f766e", end: "#1d4ed8", endpointFill: "#ffffff", words: "30,41,59" },
+  chamber: { field: "rgba(14,10,22,0.35)", grid: "rgba(226,150,196,0.10)", halo: "#7a3d63", path: "#c27ea6", traced: "#f0a6c8", core: "#ffffff", guide: "#f0a6c8", guideFill: "#2a1530", marker: "240,166,200", start: "#e07aa8", end: "#c4b5fd", endpointFill: "#2a1530", words: "240,200,220" },
+};
 
 export function mountTrace(canvas, task, onComplete) {
   if (!canvas || !task) return;
@@ -20,6 +25,7 @@ export function unmountTrace() {
 
 function createController(canvas, task, onComplete) {
   const context = canvas.getContext("2d");
+  const skin = skins[task.skin || (task.chamber ? "chamber" : "paper")];
   let points = [];
   let drawing = false;
   let completed = false;
@@ -123,7 +129,7 @@ function createController(canvas, task, onComplete) {
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     context.clearRect(0, 0, width, height);
-    drawField(context, width, height);
+    drawField(context, width, height, skin);
 
     const delta = Math.min(40, now - lastGuideAt);
     lastGuideAt = now;
@@ -138,13 +144,13 @@ function createController(canvas, task, onComplete) {
         : task.mode === "cue"
           ? 0
           : 0.66;
-    drawPath(context, points, "#aeb8c5", 30, fade * 0.28);
-    drawPath(context, points, "#607086", 2, fade);
+    drawPath(context, points, skin.halo, 30, fade * 0.28);
+    drawPath(context, points, skin.path, 2, fade);
 
     if (progress > 0) {
       const traced = [...points.slice(0, Math.floor(progress * (points.length - 1)) + 1), pointAt(points, progress)];
-      drawPath(context, traced, "#2563eb", 8, 0.82);
-      drawPath(context, traced, "#ffffff", 2, 0.72);
+      drawPath(context, traced, skin.traced, 8, 0.82);
+      drawPath(context, traced, skin.core, 2, 0.72);
     }
 
     if (task.mode !== "cue" || progress > 0.02) {
@@ -152,17 +158,17 @@ function createController(canvas, task, onComplete) {
       const guide = points[guideIndex];
       const guideAlpha =
         task.mode === "fading" ? Math.max(0, 1 - progress * 2.2) : task.mode === "cue" ? 0 : 0.9;
-      drawGuide(context, guide, task.reduced ? 0 : now, guideAlpha);
+      drawGuide(context, guide, task.reduced ? 0 : now, guideAlpha, skin);
     }
 
-    drawWords(context, points, task.embeddedWords || [], progress);
+    drawWords(context, points, task.embeddedWords || [], progress, skin);
     const marker = pointAt(points, progress);
     context.beginPath();
-    context.fillStyle = drawing ? "rgba(37,99,235,0.07)" : "rgba(37,99,235,0.035)";
+    context.fillStyle = `rgba(${skin.marker},${drawing ? 0.07 : 0.035})`;
     context.arc(marker.x, marker.y, 38, 0, Math.PI * 2);
     context.fill();
-    drawEndpoint(context, marker, "START", true, "#1d4ed8");
-    drawEndpoint(context, points[points.length - 1], "END", progress >= 0.92, "#0f766e");
+    drawEndpoint(context, marker, "START", true, skin.start, skin);
+    drawEndpoint(context, points[points.length - 1], "END", progress >= 0.92, skin.end, skin);
 
     animationFrame = requestAnimationFrame(draw);
   }
@@ -250,10 +256,10 @@ function pointAt(points, progress) {
   return { x: a.x + (b.x - a.x) * fraction, y: a.y + (b.y - a.y) * fraction };
 }
 
-function drawField(context, width, height) {
-  context.fillStyle = "rgba(248,250,252,0.88)";
+function drawField(context, width, height, skin) {
+  context.fillStyle = skin.field;
   context.fillRect(0, 0, width, height);
-  context.strokeStyle = "rgba(100,116,139,0.11)";
+  context.strokeStyle = skin.grid;
   context.lineWidth = 1.25;
   context.strokeRect(0.5, 0.5, width - 1, height - 1);
   for (let column = 1; column < 3; column += 1) {
@@ -289,13 +295,13 @@ function drawPath(context, points, color, width, alpha) {
   context.restore();
 }
 
-function drawGuide(context, point, now, alpha) {
+function drawGuide(context, point, now, alpha, skin) {
   if (!point || alpha <= 0) return;
   const pulse = 1 + Math.sin(now / 170) * 0.14;
   context.save();
   context.globalAlpha = alpha;
-  context.fillStyle = "#ffffff";
-  context.strokeStyle = "#2563eb";
+  context.fillStyle = skin.guideFill;
+  context.strokeStyle = skin.guide;
   context.lineWidth = 3;
   context.beginPath();
   context.arc(point.x, point.y, 10 * pulse, 0, Math.PI * 2);
@@ -304,9 +310,9 @@ function drawGuide(context, point, now, alpha) {
   context.restore();
 }
 
-function drawEndpoint(context, point, label, activeEndpoint, color) {
+function drawEndpoint(context, point, label, activeEndpoint, color, skin) {
   context.save();
-  context.fillStyle = activeEndpoint ? color : "#ffffff";
+  context.fillStyle = activeEndpoint ? color : skin.endpointFill;
   context.strokeStyle = color;
   context.lineWidth = 2;
   context.beginPath();
@@ -321,10 +327,10 @@ function drawEndpoint(context, point, label, activeEndpoint, color) {
   context.restore();
 }
 
-function drawWords(context, points, words, progress) {
+function drawWords(context, points, words, progress, skin) {
   if (!words.length) return;
   context.save();
-  context.fillStyle = `rgba(71,85,105,${0.18 + progress * 0.18})`;
+  context.fillStyle = `rgba(${skin.words},${0.18 + progress * 0.18})`;
   context.font = "600 10px ui-monospace, monospace";
   context.textAlign = "center";
   words.forEach((word, index) => {
@@ -338,4 +344,3 @@ function drawWords(context, points, words, progress) {
 function distance(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
-

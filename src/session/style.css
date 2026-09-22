@@ -127,3 +127,98 @@
 .dev-skip span { margin-left:6px; font-size:9px; text-transform:uppercase; color:#939eac; }
 .dev-skip:disabled { opacity:.4; cursor:default; }
 @media(max-width:760px) { .session-page:has(.dev-skip) { padding-bottom:48px; } .session-page:has(.dev-skip) .session-card { height:calc(100dvh - 56px); } }
+
+.session-body { transition:background 1.4s ease; }
+.session-card { position:relative; transition:width 1.2s ease, height 1.2s ease, background 1.2s ease, border-color 1.2s ease; }
+.captcha-intro { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+.captcha-button { border:0; background:none; padding:0; width:min(100%,340px); cursor:pointer; text-align:left; }
+.captcha-button:disabled { cursor:default; }
+.captcha-box { display:flex; align-items:center; gap:14px; width:100%; padding:16px 18px; border:1px solid #d3d9e2; border-radius:4px; background:#f9f9f9; box-shadow:0 1px 3px #0001; color:#222; }
+.captcha-check { width:26px; height:26px; border:2px solid #c1c1c1; border-radius:3px; background:#fff; flex-shrink:0; display:grid; place-items:center; color:#0f9d58; font-size:19px; font-weight:700; }
+.captcha-box.checking .captcha-check { border-color:#4a90e2; border-top-color:transparent; border-radius:50%; animation:spin .9s linear infinite; }
+.captcha-box.failed { border-color:#c0392b; background:#fff5f5; }
+.captcha-box.failed .captcha-check { color:#c0392b; border-color:#c0392b; }
+.captcha-label { flex:1; font-size:14px; font-weight:500; letter-spacing:.4px; }
+.captcha-brand { display:flex; flex-direction:column; align-items:flex-end; font-size:9px; color:#9aa3ad; line-height:1.4; text-transform:uppercase; letter-spacing:.6px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.command { display:flex; align-items:center; gap:10px; margin:0 0 10px; color:#2c5fbb; font-weight:700; letter-spacing:2.2px; font-size:15px; flex-shrink:0; }
+.command.level-word { font-size:20px; }
+.command.level-symbol { justify-content:center; margin:8px 0 12px; }
+.glyph { display:block; flex-shrink:0; }
+.word-tile.symbol-tile { display:grid; place-items:center; color:#3a4657; }
+.word-tile.symbol-tile .glyph { width:40%; height:auto; max-height:72%; }
+.example { display:flex; align-items:center; gap:10px; font-size:12px; color:#7a8491; margin-bottom:4px; flex-shrink:0; }
+.example .glyph { color:#3a4657; }
+#session-hold { flex:1; min-height:0; height:0; width:100%; display:block; touch-action:none; margin-top:6px; }
+.claim-line { text-align:center; font:600 13px/1.5 ui-monospace, monospace; letter-spacing:1.6px; color:#5b4b6b; min-height:40px; flex-shrink:0; animation:line-in .5s ease-out; }
+.accept-button { flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:10px; margin:auto 0; min-height:72px; border:1px solid #2c5fbb; border-radius:8px; background:#3267c5; color:#fff; font-weight:700; letter-spacing:2.2px; font-size:15px; cursor:pointer; }
+.accept-button.level-symbol { min-height:130px; }
+.accept-button:disabled { opacity:.5; cursor:default; }
+.status-lines { flex:1; display:flex; flex-direction:column; justify-content:center; gap:12px; font-family:ui-monospace, monospace; }
+.line { font-size:13px; letter-spacing:1.8px; color:#4b5563; opacity:.75; animation:line-in .5s ease-out; }
+.line.current { color:#111827; opacity:1; }
+.line-error { color:#b42318; font-weight:700; }
+.line-title { font-size:17px; font-weight:700; color:#1f2937; }
+.line-claim { font-size:16px; font-weight:700; color:#1f2937; line-height:1.5; }
+.line-install { font-size:17px; font-weight:700; color:#217367; }
+.line-reveal { font-size:15px; font-weight:600; color:#7c2d5c; }
+.line-checkbox { display:flex; justify-content:center; }
+.line-checkbox .captcha-box { width:min(100%,340px); }
+.flash-word { text-align:center; font-size:34px; font-weight:800; letter-spacing:6px; color:#1f2937; animation:line-in .15s ease-out; }
+@keyframes line-in { from { opacity:0; transform:translateY(4px); } }
+.end-screen { flex:1; display:flex; flex-direction:column; justify-content:center; }
+.stim-layer { position:fixed; inset:0; pointer-events:none; z-index:4; }
+.stim { pointer-events:none; font:600 11px/1.3 ui-monospace, monospace; letter-spacing:1.6px; text-transform:uppercase; color:#7b8494; animation:stim-in var(--ms) ease-in-out forwards; }
+.stim.anchor-corner { position:absolute; top:58px; right:18px; z-index:2; }
+.stim-inline { display:block; margin-left:12px; color:#8a9aa8; font-size:10px; }
+.stim.anchor-backdrop { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:30px; font-weight:800; letter-spacing:9px; color:#aab2bd; white-space:nowrap; }
+.stim-flash.anchor-backdrop { animation:stim-flash var(--ms) linear forwards; }
+@keyframes stim-in { 0% { opacity:0; } 14% { opacity:.9; } 86% { opacity:.9; } 100% { opacity:0; } }
+@keyframes stim-flash { 0% { opacity:.55; } 100% { opacity:.55; } }
+.session-footer span { white-space:nowrap; }
+.chamber { background:#07060d; color:#e8dbe6; }
+.spiral { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
+.chamber .session-page { padding:0; }
+.chamber .session-card { width:min(100%, 760px); height:min(880px, 100dvh); border-radius:0; background:rgba(12,9,20,.72); border-color:rgba(226,150,196,.22); box-shadow:0 0 70px rgba(160,60,120,.25); color:#efe4ec; }
+@media(min-width:780px) and (min-height:900px) { .chamber .session-card { border-radius:12px; } }
+.chamber .session-header, .chamber .session-footer { border-color:rgba(226,150,196,.16); color:#c9a9bd; font-family:ui-monospace, monospace; }
+.chamber .session-badge { background:rgba(226,150,196,.15); color:#f0a6c8; }
+.chamber .session-header-count { color:#f0a6c8; }
+.chamber .session-kicker { color:#b58aa5; }
+.chamber .session-content h1 { color:#f7ecf3; font-family:ui-monospace, monospace; letter-spacing:1.5px; font-size:18px; line-height:1.5; text-transform:uppercase; }
+.chamber .session-content h1.session-prompt { font-size:16px; }
+.chamber .session-help, .chamber .session-feedback, .chamber .session-lead { color:#b9a3b1; }
+.chamber .session-feedback.accepted { color:#f0a6c8; }
+.chamber .command { color:#f0a6c8; }
+.chamber .word-tile { background:rgba(255,255,255,.04); border-color:rgba(226,150,196,.25); color:#e8d6e2; }
+.chamber .word-tile:hover:not(:disabled) { background:rgba(226,150,196,.1); border-color:rgba(226,150,196,.5); }
+.chamber .word-tile.selected { background:rgba(226,150,196,.2); border-color:#f0a6c8; color:#fff; }
+.chamber .word-tile span { color:#b58aa5; }
+.chamber .example { color:#b58aa5; }
+.chamber .example .glyph { color:#f0a6c8; }
+.chamber .session-primary, .chamber .accept-button { background:#b04a8a; border-color:#c86aa2; }
+.chamber .session-primary:hover:not(:disabled) { background:#9c3d7a; }
+.chamber .session-link { color:#c9a9bd; }
+.chamber .completion-cue { background:rgba(226,150,196,.12); border-color:rgba(226,150,196,.35); color:#f0a6c8; }
+.chamber .completion-cue span { background:#b04a8a; }
+.chamber .task-complete .word-tile.selected { border-color:#f0a6c8; background:rgba(226,150,196,.2); color:#fff; }
+.chamber .line { color:#c9a9bd; }
+.chamber .line.current { color:#fbe9f3; }
+.chamber .line-title, .chamber .line-claim { color:#fbe9f3; }
+.chamber .line-install { color:#f0a6c8; }
+.chamber .line-reveal { color:#e2b7d0; }
+.chamber .line-error { color:#ff9a9a; }
+.chamber .flash-word { color:#fbe9f3; }
+.chamber .claim-line { color:#e2b7d0; }
+.chamber .stim { color:#d8a9c4; }
+.chamber .stim.anchor-backdrop { color:#f3c9de; }
+.chamber .session-progress { background:rgba(255,255,255,.06); }
+.chamber .session-progress span { background:#e07aa8; }
+.chamber .header-settings { background:rgba(255,255,255,.05); border-color:rgba(226,150,196,.25); color:#d8a9c4; }
+.chamber .session-overlay { background:rgba(7,6,13,.9); }
+.chamber .session-dialog { background:#15101d; border-color:rgba(226,150,196,.25); color:#efe4ec; }
+.chamber .session-dialog p, .chamber .session-dialog button:not(.session-primary):not(.session-link) { color:#c9a9bd; }
+.chamber .dev-skip { background:#15101d; border-color:#5b4b6b; color:#c9a9bd; }
+.chamber .installed { display:flex; gap:12px; flex-wrap:wrap; }
+@keyframes accept-card-chamber { 35% { box-shadow:0 0 0 6px rgba(240,166,200,.25), 0 0 70px rgba(160,60,120,.25); } }
+.chamber .task-complete { animation:accept-card-chamber .8s ease-out; }
