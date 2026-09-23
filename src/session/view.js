@@ -43,7 +43,7 @@ export function sessionView(state, emit) {
       const [x, y, scale] = spikeSpots[(Number(parts[parts.length - 1]) || 0) % spikeSpots.length];
       return html`<div id=${`stim-${entry.key}`} class="stim-flash is-spike" style=${`--ms:${entry.ms}ms; --x:${x}%; --y:${y}%; --scale:${scale}`} aria-hidden="true"><b>${entry.text}</b></div>`;
     }
-    const [dy, scale] = step.type === 'burst' ? scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length] : [0, 1];
+    const [dy, scale] = step.type !== 'burst' ? [0, 1] : entry.ms >= 800 ? [0, 1.35] : scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length];
     const long = entry.text.length > 18;
     return html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms; --dy:${long ? dy / 2 : dy}em; --scale:${scale}; --fit:${long ? 0.72 : 1}`} aria-hidden="true"><b>${entry.text}</b></div>`;
   });
@@ -168,7 +168,7 @@ export function sessionView(state, emit) {
       </section>
     </div>`;
   };
-  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking) ? 'is-burst' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}">
+  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking) ? 'is-burst' : ''} ${playing && step.type === 'burst' && !s.prelude && !s.done ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div>
     ${chamber ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
     <div class="study-shell">${playing ? card() : endCard()}</div>
     ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}

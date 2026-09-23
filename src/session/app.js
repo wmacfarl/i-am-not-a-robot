@@ -1,6 +1,6 @@
 import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt } from './content.js';
 import { planStimuli, runStimuli, spikeOf } from './stimuli.js';
-import { startAudio, muteAudio, sound, setChamber, setBurst } from './audio.js';
+import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
 import { mountHold, unmountHold } from './hold.js';
 import { mountSpiral, unmountSpiral, setSpiral } from './spiral.js';
@@ -8,7 +8,7 @@ import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
-  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false });
+  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false, prelude: false });
   state.session = fresh();
   let frame;
   let dialogOpen = false;
@@ -21,6 +21,7 @@ export function sessionStore(state, emitter) {
   let timeline = [];
   let carry = null;
   let spikeTimer = null;
+  let preludeTimer = null;
   let rejectTimer = null;
   let armed = false;
   const s = () => state.session;
@@ -47,13 +48,18 @@ export function sessionStore(state, emitter) {
     });
     if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 1300); }
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
-    if (step().type === 'burst' && !s().done) lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms);
+    if (step().type === 'burst' && !s().done) {
+      lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms);
+      s().prelude = true;
+      preludeTimer = setTimeout(() => { preludeTimer = null; s().prelude = false; emitter.emit('render'); }, 300);
+    }
   }
   function disarm() {
     armed = false;
     stimuliRun?.stop(); stimuliRun = null;
     clearTimeout(lineTimer); lineTimer = null;
     clearTimeout(spikeTimer); spikeTimer = null;
+    clearTimeout(preludeTimer); preludeTimer = null; s().prelude = false;
     s().stimuli = [];
   }
   function runLine() {
@@ -74,7 +80,7 @@ export function sessionStore(state, emitter) {
     cancelAdvance();
     disarm();
     const current = step();
-    Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [] });
+    Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [], prelude: false });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
     s().holdTask = current.type === 'hold' ? { ...current, progress: 0 } : null;
     if (current.phase.carrier !== undefined) s().carrier = current.phase.carrier;
@@ -184,9 +190,11 @@ export function sessionStore(state, emitter) {
     muteAudio(session.muted || suspended || !playing);
     setChamber(playing && session.carrier);
     const spiking = playing && !suspended && session.spiking;
-    setBurst(playing && !suspended && (current.type === 'burst' || spiking));
+    setIntensity(meterAt(session.index));
+    setSurge(spiking && current.type !== 'burst');
+    setBurst(playing && !suspended && current.type === 'burst' && !session.done, current.ms);
     const spiral = document.getElementById('session-spiral');
-    if (spiral) mountSpiral(spiral, { paused: suspended, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' ? 1 : spiking ? 0.7 : 0, fade: current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.55 : 1 });
+    if (spiral) mountSpiral(spiral, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : 0, fade: current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.55 : 1 });
     else unmountSpiral();
     const stage = playing && !suspended && current.phase.glitch ? document.getElementById(`stage-${current.id}`) : null;
     if (stage) mountGlitch(stage, { intensity: current.phase.glitch }); else unmountGlitch();

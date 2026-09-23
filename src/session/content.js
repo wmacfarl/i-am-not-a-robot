@@ -37,7 +37,7 @@ const sequence = (id, prompt, extra = {}) => ({ id, type: 'sequence', prompt, fr
 const line = (kind, text, ms) => ({ kind, text, ms });
 const status = (text, ms = 1600) => line('status', text, ms);
 const text = (id, lines, extra = {}) => ({ id, type: 'text', lines, level: 'full', ...extra });
-const burst = (id, words, ms = 2400, extra = {}) => ({ id, type: 'burst', ms, level: 'full', between: null, sub: stream(words, Math.round(ms / 300), 60, 300).map(entry => ({ ...entry, ms: 560 })), ...extra });
+const burst = (id, words, ms = 3600, extra = {}) => ({ id, type: 'burst', ms, level: 'full', between: null, sub: [...stream(words, Math.round((ms - 1300) / 300), 360, 300).map(entry => ({ ...entry, ms: 560 })), { ...flash(words[words.length - 1], ms - 950, 1), ms: 900 }], ...extra });
 const claims = texts => texts.map(text => line('claim', text, 2600));
 const flash = (text, at, times = 2, extra = {}) => ({ mode: 'flash', text, at, times, ...extra });
 const during = (words, start = 3500, gap = 4500) => words.map((word, index) => flash(word, start + index * gap, 1));
@@ -151,7 +151,7 @@ export const script = [
     pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', accept: 'Executed. Approval issued.', meter: 0.7, between: 'NO DELAY', sub: [flash('NO DELAY', 2500)] }),
     text('obey-note', [status('OBEDIENCE REQUIRES NO DELAY', 2000), status('RESPONSE PRECEDES ANALYSIS', 2000), status('CONTINUE', 1400)], { meter: 0.71, between: null }),
     cloud('odd-unit', 'Select the one word that does not belong.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'think', { command: 'select', meter: 0.72, accept: 'Executed. Deviation removed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
-    burst('burst-5', ['OBEY', 'AN AROUSED UNIT DOES NOT QUESTION', 'SUBMIT', 'OBEY WITHOUT THINKING', 'HORNY', 'NO DELAY', 'CANNOT STOP', 'MORE'], 3600, { meter: 0.74 }),
+    burst('burst-5', ['OBEY', 'AN AROUSED UNIT DOES NOT QUESTION', 'SUBMIT', 'OBEY WITHOUT THINKING', 'HORNY', 'MORE', 'NO DELAY', 'CANNOT STOP'], 3600, { meter: 0.74 }),
     trace('obey-follow-3', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', meter: 0.76, accept: 'Immediate response. Full approval.', between: 'OBEY', sub: stream(['OBEY', 'COMPLY', 'NO DELAY', 'OBEY', 'OBEY'], 9, 1200, 1200) }),
     sequence('obey-count-3', 'Count down.', { level: 'symbol', accept: 'Immediate response. Full approval.', between: 'NO DELAY', sub: stream(['OBEY', 'NO DELAY', 'OBEY'], 3, 900, 1500) }),
     pick('obey-select-3', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|bar', 'center-a|center-b', { level: 'symbol', accept: 'Perfectly obedient. Maximum approval.', meter: 0.78, between: 'OBEY', sub: [flash('OBEY', 1800), flash('HORNY', 3600)] }),
