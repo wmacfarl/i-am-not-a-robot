@@ -6,6 +6,7 @@ let chamber = false;
 let epoch = 0;
 let base = { cross: 0.25, cutoff: 900 };
 let surge = false;
+let climax = 0;
 let bursting = false;
 let burstTimers = [];
 const Tone = () => window.Tone;
@@ -55,8 +56,9 @@ function applyCross(amount, seconds) {
   carrier.cross.forEach(node => node.gain.rampTo(Math.sin(angle), seconds));
 }
 function applyBase(seconds) {
-  applyCross(base.cross + (surge ? 0.25 : 0), seconds);
-  carrier.filter.frequency.rampTo(base.cutoff * (surge ? 1.6 : 1), seconds);
+  applyCross(climax > 0 ? Math.max(base.cross, climax) : base.cross + (surge ? 0.25 : 0), seconds);
+  carrier.filter.frequency.rampTo(climax > 0 ? base.cutoff + climax * 5200 : base.cutoff * (surge ? 1.6 : 1), seconds);
+  carrier.pulse.volume.rampTo(-16 + 8 * climax, seconds);
 }
 export function setChamber(on) {
   if (on === chamber) return;
@@ -83,6 +85,12 @@ export function setSurge(on) {
   if (on === surge) return;
   surge = on;
   if (carrier && !bursting) applyBase(on ? 0.15 : 0.5);
+}
+export function setClimax(progress) {
+  const next = Math.min(1, Math.max(0, progress));
+  if (Math.abs(next - climax) < 0.02 && (next === 0) === (climax === 0)) return;
+  climax = next;
+  if (carrier && !bursting) applyBase(0.5);
 }
 export function setBurst(on, ms = 3600) {
   if (on === bursting || !carrier) return;

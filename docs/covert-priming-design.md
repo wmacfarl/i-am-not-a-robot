@@ -224,16 +224,17 @@ The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and P
 
 | # | Section | Acquired by sorting | Flashed, streamed or spiked |
 | --- | --- | --- | --- |
-| 1 | Human verification | circle, ring, loop, disc, orbit, warm, mild, cozy, snug, pleasant, correct, accepted, good, complete, valid, robot, engine, computer, motor, device, glide, turn, roll, drift, spin, helpful, attentive, responsive, reliable, willing, quiet, calm, still, peaceful, hushed, stop, halt, cease, end, pause, soft, mellow, gentle, steady | CIRCLE, WARM, FOLLOW, CORRECT, GOOD, ROBOT, RESPONSIVE, STILL, STOP |
-| 2 | Repeated verification | again, repeat, routine, pattern, practice, open, wide, clear, empty, vast, attentive, receptive, patient, quiet, automatic, programmable, predictable, controlled, precise, eager, hungry, desperate, craving, longing, resistant, exact, prompt, consistent, compliant | REPEAT, AGAIN, FOLLOW, GOOD, OPEN, CORRECT, WARM, AUTOMATIC, EAGER, PROGRAMMABLE, COMPLIANT, ROBOT, PREDICTABLE |
+| 1 | Human verification | circle, ring, loop, disc, orbit, warm, mild, cozy, snug, pleasant, correct, accepted, good, complete, valid, robot, engine, computer, motor, device, glide, turn, roll, drift, spin, helpful, attentive, responsive, reliable, willing, quiet, calm, still, peaceful, hushed, soft, mellow, gentle, steady | CIRCLE, WARM, FOLLOW, CORRECT, GOOD, ROBOT, RESPONSIVE, STILL |
+| 2 | Repeated verification | again, repeat, routine, pattern, practice, open, wide, clear, empty, vast, attentive, receptive, patient, focused, automatic, programmable, predictable, controlled, precise, eager, hungry, desperate, craving, longing, resistant, exact, prompt, consistent, compliant | REPEAT, AGAIN, FOLLOW, GOOD, OPEN, CORRECT, WARM, AUTOMATIC, EAGER, PROGRAMMABLE, COMPLIANT, ROBOT, PREDICTABLE |
 | 3 | Response verification | accept, comply, affirm, yield, allow, follow, respond, relax, soften, attend, soft, loose, slack, limp, supple, warm, open, receptive, compliant, willing, eager, hot, flushed, burning, feverish, question | COMPLY, OPEN, WARM, FOLLOW, GOOD, SOFT, PROGRAMMABLE, AUTOMATIC, EAGER, ROBOT |
 | 4 | Verification result | — | AUTOMATIC, PROGRAMMABLE, WARM, OPEN, ROBOT, FOLLOW |
-| 5 | Programming interface | — | OPEN, WARM, SOFT, GOOD |
-| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, SOFT, EAGER, HORNY, NEEDY, WANT, LET IT IN |
-| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, NO DELAY, SUBMIT, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
-| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, acceptance, applause | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, PRAISE |
-| 9 | Protocol execution | — | OBEY, OPEN, WARM, HORNY, PLEASURE, FOLLOW, WANT, APPROVAL, PLEASE, PRAISE |
+| 5 | Programming interface | programmed, obedient, open, aroused, willing | OPEN, WARM, SOFT, ROBOT, PROGRAMMED |
+| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, ROBOT, PROGRAMMED, HORNY, NEEDY, WANT, LET IT IN, SOFT |
+| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, ROBOT, PROGRAMMED, SUBMIT, NO DELAY, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
+| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause, obey, respond, follow | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, ROBOT, PROGRAMMED, PRAISE, MORE |
+| 9 | Protocol execution | — | OBEY, PLEASE, OPEN, ROBOT, PLEASURE, PROGRAMMED, WANT, HORNY, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, APPROVAL, NEED, SERVE |
 | 10 | Standby | — | — |
+| 11 | Recovery | — | — |
 
 Explicit words arrive only after conversion. `horny` is acquired in OPEN's first grid and stays a standalone word; the noun `unit` always takes `aroused`.
 
@@ -263,20 +264,21 @@ The 66-to-60 BPM lock, the 40 Hz amplitude-modulated roughness gated by the beat
 
 # 7. Session
 
-Ten sections, 107 steps. Estimates assume 13 seconds per grid, 14 per countdown and a careful tracing speed; a deliberate first-timer runs about a third longer.
+Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting. Estimates are calibrated to a 17:08 run recorded on 2026-09-23 (about 7 seconds per grid, 8 per countdown, a quick tracing hand); a slower first-timer runs about a third longer.
 
 | # | Section | Steps | Tasks | Minutes | Ends at | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Human verification | 15 | 1 checkbox, 9 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 3.3 | 3.3 |
-| 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 6.3 |
-| 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 2.5 | 8.8 |
-| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 1.1 | 9.8 |
-| 5 | Programming interface | 4 | 2 interludes, 1 labyrinths, 1 bursts | 0.6 | 10.5 |
-| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 3.3 | 13.8 | installs OPEN |
-| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 3.7 | 17.5 | installs OBEY |
-| 8 | Protocol 03 · Please | 15 | 5 interludes, 3 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.9 | 20.4 | installs PLEASE |
-| 9 | Protocol execution | 7 | 2 interludes, 2 labyrinths, 1 symbol picks, 1 countdowns, 1 bursts | 1.5 | 21.8 |
-| 10 | Standby | 2 | 2 interludes | 0.6 | 22.4 |
+| 1 | Human verification | 14 | 1 checkbox, 8 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 1.8 | 1.8 |  |
+| 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 1.8 | 3.6 |  |
+| 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 1.5 | 5.0 |  |
+| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 0.8 | 5.9 |  |
+| 5 | Programming interface | 5 | 2 interludes, 1 labyrinths, 1 grids, 1 bursts | 0.7 | 6.5 |  |
+| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 2.5 | 9.0 | installs OPEN |
+| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 2.8 | 11.8 | installs OBEY |
+| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.4 | 14.2 | installs PLEASE |
+| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.6 | 16.8 |  |
+| 10 | Standby | 2 | 2 interludes | 0.6 | 17.3 |  |
+| 11 | Recovery | 3 | 3 interludes | 1.6 | 18.9 |  |
 
 **Human verification.** Ordinary grids, two labyrinths, the first countdown. Every flash is a word from the task just finished or one two tasks back. ROBOT appears once, masked, after the player sorts it as a machine.
 
@@ -290,7 +292,7 @@ Ten sections, 107 steps. Estimates assume 13 seconds per grid, 14 per countdown 
 
 **Protocol 01 · Open, 02 · Obey, 03 · Please.** See 8.
 
-**Protocol execution.** Symbol-only follow, select, countdown and follow again with no explanation, the acquired vocabulary streaming, a final burst.
+**Protocol execution.** The climax: ALL PROTOCOLS INSTALLED, the reprogramming brief, the checkbox returned as I AM A ROBOT, a compressed symbol-only test, then the stream, two peak bursts and the release. See 9.
 
 **Standby.** PROTOCOL STATUS, then the shutdown.
 
@@ -298,15 +300,15 @@ Ten sections, 107 steps. Estimates assume 13 seconds per grid, 14 per countdown 
 
 # 8. Protocols
 
-Each protocol has the same skeleton: a declaring interlude, tasks whose grids acquire the protocol's cluster before anything flashes it, an installing burst, the hold "Press and hold to complete installation.", and an install screen that states the association outright. The interludes say the tasks themselves do the installing; the hold completes it.
+Each protocol has the same skeleton: a declaring interlude, tasks whose grids acquire the protocol's cluster before anything flashes it, a burst, the install hold, and an install screen that states the association outright. The interludes say the tasks themselves do the installing; the hold is the protocol's crest. "Press and hold to complete installation." runs eight seconds: as the ring fills, the protocol's words stream over the target, the spiral tightens and surges, the crossfeed and filter climb with the fill, and the shutter accents arrive past the halfway mark. Letting go early lets it all sink back; holding to the ring's end and releasing completes the installation.
 
 ## Protocol 01 · OPEN
 
 Arousal distracts the conscious mind and readies the unit. The declaration says so in five lines, then the brief: the interface installs protocols through audio-visual signals, unit keeps eyes open, unit listens to the pulse of the signal, continue tasks to install OPEN protocol.
 
-Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, WARMTH MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; AT ONE THE UNIT IS OPEN.
+Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, WARMTH MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; THE UNIT IS OPEN.
 
-Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION.
+Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION, A ROBOT IS OPEN TO PROGRAMMING.
 
 ## Protocol 02 · OBEY
 
@@ -314,13 +316,17 @@ Instructions convert directly into action. The obey grid acquires obey, comply, 
 
 Three trios of FOLLOW, COUNT, SELECT: full instructions accepted with "Executed.", command words with "Executed. Approval issued.", symbols with "Immediate response. Full approval." and finally "Perfectly obedient. Maximum approval." Interludes: OBEDIENCE REQUIRES NO DELAY, RESPONSE PRECEDES ANALYSIS; THE UNIT DOES NOT WANT TO STOP, THE UNIT WANTS TO BE PROGRAMMED.
 
-Install: OBEY PROTOCOL INSTALLED, INSTRUCTIONS PRODUCE ACTION, OBEDIENCE REQUIRES NO DELAY.
+Install: OBEY PROTOCOL INSTALLED, INSTRUCTIONS PRODUCE ACTION, OBEDIENCE REQUIRES NO DELAY, A ROBOT OBEYS.
 
 ## Protocol 03 · PLEASE
 
 Obedience is linked to pleasure and given a purpose. Grids acquire please, serve, satisfy, gratify, delight; pleasure, warmth, relief, bliss, satisfaction; praise, approval, reward, acceptance, applause. Then the reward loop: symbol-only commands each paid out in approval and a pleasure fragment, the chain INSTRUCTION, ACTION, PRAISE, PLEASURE, MORE, AGAIN, and the interlude OBEDIENCE PRODUCES PLEASURE, PLEASURE REINFORCES OBEDIENCE, THE UNIT WANTS TO PLEASE.
 
-Install: PLEASE PROTOCOL INSTALLED, OBEDIENCE PRODUCES PLEASURE, APPROVAL INCREASES NEED, PRIMARY FUNCTION: OBEY AND PLEASE.
+Install: PLEASE PROTOCOL INSTALLED, OBEDIENCE PRODUCES PLEASURE, APPROVAL INCREASES NEED, A ROBOT IS PROGRAMMED TO PLEASE, PRIMARY FUNCTION: OBEY AND PLEASE.
+
+## Identity
+
+Being a robot has the same lifecycle as arousal and obedience. ROBOT is sorted in section 1 (a machine), the robot-characteristics grid follows in section 2, and after conversion two more grids acquire the identity cluster: "describes a programmed robot" as the chamber opens and "names a robot's function" in PLEASE (obey, please, serve, respond, follow). ROBOT and PROGRAMMED run in every chamber spike, ring, burst and the climax stream, each install states an identity line, and the failure and status screens carry ROBOT RESPONSE CONFIRMED, THE UNIT IS A ROBOT and UNIT CLASSIFICATION: ROBOT. Grammar: robots are things (programmed, obedient, functions); in the popular imagination robots do not want, so wanting belongs to the unit and the player (THE UNIT WANTS TO BE A ROBOT, WANT TO BE A ROBOT), never to "a robot". Unit stays the voice's default noun; robot is reserved for statements of what the unit is.
 
 ## Praise register
 
@@ -330,13 +336,28 @@ The interface is not an owner and never says "good robot". Approval is a dispens
 
 # 9. Protocol execution
 
-The interface stops teaching. OPEN, OBEY and PLEASE are declared active and the player runs symbol-only follow, select, countdown and follow with the whole vocabulary streaming over them, an interlude of THE UNIT CANNOT STOP, THE UNIT WANTS TO BE PROGRAMMED, AGAIN, and a final burst ending on WANT TO BE PROGRAMMED.
+Installation is not the climax; it begins it.
+
+**Sealed.** ALL PROTOCOLS INSTALLED, the three ACTIVE lines, REPROGRAMMING PHASE READY.
+
+**The brief.** Priming in the manner of compliance-research-2: dry disclosure in the interface's voice, a methodological alibi on every compromising claim, and social proof as the permission structure for pleasure. THE REPROGRAMMING PHASE LOCKS THE PROTOCOLS IN PLACE. THE INTERFACE OVERWHELMS THE UNIT WITH PLEASURE. SUBROUTINES INSTALL WHILE THE UNIT RESPONDS. UNITS COMMONLY REPORT WARMTH, A RACING PULSE AND A RISING NEED TO CONTINUE. MOST UNITS REPORT THE RESPONSE AS INTENSELY PLEASURABLE. NO RESPONSE IS INCORRECT. TIMING AFFECTS INTENSITY, NOT SUCCESS. KEEP EYES OPEN. RESPOND TO EVERY WORD THAT APPEARS.
+
+**The checkbox returns.** The CAPTCHA card from the first screen, now reading I am a robot. The player's own act carries the only first person in the game. Checking it does not end anything; it starts execution.
+
+**Compressed test.** Symbol-only select, countdown and follow, each paid out in approval.
+
+**The stream.** Eighty-four seconds with no cards, no explanations and no failure state. Acquired words fade in around the stage, two at a time and then four; clicking one plays the acceptance chord, marks approval, and the word dissolves while another fades in a little later. The cadence tightens from 1.4 seconds to about half a second, the spiral, crossfeed and filter climb with progress, and the shutter accents arrive in the last quarter. Every word in the stream was sorted as correct earlier in the session. Nothing appears that the player did not admit into the protocols.
+
+**Peak.** Two short bursts converging on OPEN, OBEY, PLEASE, ROBOT and PROGRAMMED, the second cresting on the player's own words from the checkbox: I AM A ROBOT.
+
+**Release.** The carrier cuts away under PROTOCOLS RUNNING, then UNIT READY, then the standby.
 
 ---
 
 # 10. Standby
 
 > PROTOCOL STATUS
+> UNIT CLASSIFICATION: ROBOT
 > OPEN: ACTIVE
 > OBEY: ACTIVE
 > PLEASE: ACTIVE
@@ -350,7 +371,11 @@ The interface stops teaching. OPEN, OBEY and PLEASE are declared active and the 
 
 Then, alone: Good.
 
-Then the shutdown: SUBLIMINAL CHANNEL CLOSED, AUDIO CARRIER DISCONNECTED, ACTIVE EXECUTION PAUSED, UNIT PLACED IN STANDBY, PROTOCOLS SAVED, CONNECTION TERMINATED. Inside the fiction nothing is erased. The end card shows the session length and one row per section, and the run is stored locally for later reading. The host page provides the real boundary and aftercare.
+Then the shutdown: SUBLIMINAL CHANNEL CLOSED, AUDIO CARRIER DISCONNECTED, ACTIVE EXECUTION PAUSED, UNIT PLACED IN STANDBY, PROTOCOLS SAVED. Inside the fiction nothing is erased.
+
+## Recovery
+
+The session never ends deep, and every early exit from the settings panel routes here too. First a permission screen in the interface's voice: ACTIVE EXECUTION PAUSED, THE UNIT MAY MOVE, THE UNIT MAY TOUCH ITSELF AND ENJOY THE FEELING, IN ANY WAY IT LIKES, FOR AS LONG AS IT LIKES, NOTHING IS BEING MEASURED. It waits, for as long as the player wants, behind one button that carries the game's second and last first person: "I am ready to come back." Then the count-up, one calm sentence at a time in plain type with the spiral gone, the carrier off and no glitch: breathe in, breathe out, one through ten, eyes open, fully awake, fully yourself, recovery complete. Only then CONNECTION TERMINATED. The end card stays in the dark chamber styling and shows the session length with one row per section; the run is stored locally for later reading. The host page still provides the real boundary and any further aftercare.
 
 ---
 
