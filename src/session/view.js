@@ -2,6 +2,7 @@ import { steps, phases, symbols, glyphOf, arrangeWords, firstChamberIndex, meter
 import { isLocalDev } from './app.js';
 const verificationId = String(10000 + (Date.now() % 90000));
 const canvases = new Map();
+const clock = ms => { const total = Math.round(ms / 1000); return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`; };
 function canvas(id, attrs) {
   let element = canvases.get(id);
   if (!element) { element = document.createElement('canvas'); element.id = id; canvases.set(id, element); }
@@ -35,9 +36,14 @@ export function sessionView(state, emit) {
   const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY'];
   const progress = chamber ? meter : s.index / firstChamberIndex;
   const scatter = [[-1.6, 1], [0.2, 1.3], [1.5, 0.9], [-0.7, 1.1], [1.1, 0.85], [-1.3, 1.2], [0.5, 1]];
+  const spikeSpots = [[18, 22, 0.9], [78, 30, 0.85], [24, 74, 0.9], [76, 70, 0.85], [50, 14, 0.8], [14, 50, 0.85], [86, 52, 0.8], [50, 86, 0.8]];
   const flashLayer = () => [...flashes].reverse().map(entry => {
     const parts = entry.key.split(':');
-    const [dy, scale] = step.type === 'burst' ? scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length] : [0, 1];
+    if (parts[parts.length - 2] === 'spike') {
+      const [x, y, scale] = spikeSpots[(Number(parts[parts.length - 1]) || 0) % spikeSpots.length];
+      return html`<div id=${`stim-${entry.key}`} class="stim-flash is-spike" style=${`--ms:${entry.ms}ms; --x:${x}%; --y:${y}%; --scale:${scale}`} aria-hidden="true"><b>${entry.text}</b></div>`;
+    }
+    const [dy, scale] = step.type !== 'burst' ? [0, 1] : entry.ms >= 800 ? [0, 1.35] : scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length];
     const long = entry.text.length > 18;
     return html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms; --dy:${long ? dy / 2 : dy}em; --scale:${scale}; --fit:${long ? 0.72 : 1}`} aria-hidden="true"><b>${entry.text}</b></div>`;
   });
@@ -47,7 +53,7 @@ export function sessionView(state, emit) {
     if (level === 'word') return html`<span class="command-label">${glyph(step.command, 30)}${step.label || symbols[step.command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
     return html`<span class="command-label is-symbol">${glyph(step.command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
-  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${step.lines && (step.type === 'hold' || step.type === 'sequence') ? html`<p class="captcha-instruction" id=${`claim-${s.line}`}>${step.lines[s.line].text}</p>` : level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
+  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
   const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
   const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
   const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : 'retry'}`}>${text}</span>` : ''}</div>`; };
@@ -146,6 +152,7 @@ export function sessionView(state, emit) {
     <p class="screen-label">Connection terminated</p>
     <p>The programming session has closed.</p>
     <p>Unit placed in standby.</p>
+    ${s.duration ? html`<div class="session-log"><p class="session-log-total"><span>Session length</span><span>${clock(s.duration)}</span></p>${s.timeline.map(entry => html`<p><span>${entry.title}</span><span>${clock(entry.ms)}</span></p>`)}</div>` : ''}
     <p class="completion-meta">Verification ID: ${verificationId}</p>
     ${s.returnUrl ? html`<button class="secondary-button" type="button" onclick=${() => emit('session:leave')}>Return</button>` : html`<button class="secondary-button" type="button" onclick=${() => emit('session:restart')}>Reconnect</button>`}
   </section>`;
@@ -161,7 +168,7 @@ export function sessionView(state, emit) {
       </section>
     </div>`;
   };
-  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && step.type === 'burst' ? 'is-burst' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}">
+  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking) ? 'is-burst' : ''} ${playing && step.type === 'burst' && !s.prelude && !s.done ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div>
     ${chamber ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
     <div class="study-shell">${playing ? card() : endCard()}</div>
     ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}
