@@ -114,7 +114,7 @@ function draw(now) {
 }
 
 function drawInterference(context, width, height, now) {
-  const strength = 0.2 + burstNow * 0.8;
+  const strength = 0.2 + state.intensity * 0.6 + burstNow * 0.8;
   for (let i = 0; i < 4; i++) {
     const bandHeight = (14 + i * 16) * (i === 1 ? 1 + burstNow : 1);
     const y = ((now / 1000 * (40 + i * 27) + i * 173) % (height + bandHeight)) - bandHeight;
@@ -125,11 +125,11 @@ function drawInterference(context, width, height, now) {
     context.fillStyle = band;
     context.fillRect(0, y, width, bandHeight);
   }
-  if (burstNow > 0.2 && Math.random() < 0.14 * burstNow) {
+  if (Math.random() < 0.02 * state.intensity + 0.14 * burstNow) {
     const ratio = canvas.width / width;
     const tearHeight = 8 + Math.random() * 42;
     const tearY = Math.random() * (height - tearHeight);
-    const shift = (Math.random() - 0.5) * 40 * burstNow;
+    const shift = (Math.random() - 0.5) * (12 + 40 * burstNow);
     context.drawImage(canvas, 0, tearY * ratio, canvas.width, tearHeight * ratio, shift, tearY, width, tearHeight);
   }
 }
