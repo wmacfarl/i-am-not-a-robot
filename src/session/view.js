@@ -47,7 +47,7 @@ export function sessionView(state, emit) {
     if (level === 'word') return html`<span class="command-label">${glyph(step.command, 30)}${step.label || symbols[step.command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
     return html`<span class="command-label is-symbol">${glyph(step.command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
-  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${step.lines && step.type === 'hold' ? html`<p class="captcha-instruction" id=${`claim-${s.line}`}>${step.lines[s.line].text}</p>` : level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
+  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${step.lines && (step.type === 'hold' || step.type === 'sequence') ? html`<p class="captcha-instruction" id=${`claim-${s.line}`}>${step.lines[s.line].text}</p>` : level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
   const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
   const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
   const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : 'retry'}`}>${text}</span>` : ''}</div>`; };
@@ -94,6 +94,18 @@ export function sessionView(state, emit) {
           <button class="cycle-verify ${!s.done && s.selected.length ? 'is-open' : ''}" type="button" disabled=${s.done || !s.selected.length} onclick=${() => emit('session:verify')}>${chamber ? 'Accept' : 'Verify'}</button>
         </div>
       </div>`;
+    if (step.type === 'sequence') {
+      const numbers = arrangeWords(Array.from({ length: step.from - step.to + 1 }, (_, i) => String(step.from - i)), s.index);
+      return html`<div class="captcha-experience">
+        ${instructionRow()}
+        <div class="captcha-grid-stage ${s.done ? 'is-verified' : ''}" id=${`stage-${step.id}`} style="--scan-ms: 2200ms">
+          <div class="grid-scan" aria-hidden="true"></div>
+          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${numbers.map(n => { const accepted = s.selected.includes(n); return html`<button class="captcha-tile is-text is-number ${accepted ? 'is-accepted' : ''} ${s.rejected === n ? 'is-rejected' : ''}" type="button" disabled=${s.done || accepted} aria-label=${n} onclick=${() => emit('session:select', n)}><span class="tile-text">${n}</span><span class="selection-frame" aria-hidden="true"></span></button>`; })}</div>
+          ${flashLayer()}
+        </div>
+        <div class="verification-cycle">${cycleStatus()}</div>
+      </div>`;
+    }
     if (step.type === 'burst') return html`<div class="captcha-experience burst-experience">
       <div class="captcha-instruction-row"><p class="captcha-instruction">Optical programming channel active.</p></div>
       <div class="captcha-grid-stage burst-stage" id=${`stage-${step.id}`}>${flashLayer()}</div>

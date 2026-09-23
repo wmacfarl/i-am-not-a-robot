@@ -81,6 +81,9 @@ body { transition: background 1.6s ease; }
 .captcha-tile.is-selected { z-index: 1; background: #f3f7ff; box-shadow: inset 0 0 0 3px var(--signal); }
 .mode-center .captcha-tile.is-selected { background: #fff7fa; box-shadow: inset 0 0 0 3px var(--warm); }
 .captcha-tile.is-accepted { background: #edf9f5; box-shadow: inset 0 0 0 3px var(--success); }
+.captcha-tile.is-number .tile-text { font: 700 clamp(24px, 4.2vw, 36px)/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.04em; }
+.captcha-tile.is-rejected { box-shadow: inset 0 0 0 3px var(--danger); animation: tile-reject 380ms ease; }
+@keyframes tile-reject { 20% { translate: -4px 0; } 45% { translate: 4px 0; } 70% { translate: -2px 0; } 100% { translate: 0 0; } }
 .selection-frame { position: absolute; inset: 7px; border: 1px solid transparent; pointer-events: none; }
 .captcha-tile.is-selected .selection-frame::after, .captcha-tile.is-accepted .selection-frame::after { position: absolute; right: 2px; bottom: 2px; width: 7px; height: 12px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; color: var(--signal); content: ""; transform: rotate(42deg); }
 .mode-center .captcha-tile.is-selected .selection-frame::after { color: var(--warm); }

@@ -18,8 +18,8 @@ export const glyphOf = tile => tile.split('-')[0];
 const phase = (id, title, extra = {}) => ({ id, title, chamber: false, carrier: false, ring: [], between: [], ...extra });
 export const phases = [
   phase('verify', 'Human verification', { glitch: 0.4, accept: 'Correct. Human response accepted.', between: ['GOOD', 'ROBOT', 'FOLLOW', 'CORRECT'] }),
-  phase('prepare', 'Repeated verification', { glitch: 0.7, accept: 'Correct.', between: ['AUTOMATIC', 'EASIER', 'PROGRAMMABLE', 'CORRECT'] }),
-  phase('auto', 'Response verification', { glitch: 1, accept: 'Correct.', between: ['AUTOMATIC', 'PREDICTABLE', 'GOOD', 'PROGRAMMABLE', 'ROBOT'] }),
+  phase('prepare', 'Repeated verification', { glitch: 0.7, accept: 'Correct.', between: ['AUTOMATIC', 'EASIER', 'WILLING', 'PROGRAMMABLE', 'CORRECT'] }),
+  phase('auto', 'Response verification', { glitch: 1, accept: 'Correct.', between: ['AUTOMATIC', 'WARM', 'PREDICTABLE', 'OPEN', 'GOOD', 'PROGRAMMABLE', 'ROBOT'] }),
   phase('convert', 'Verification result', { accept: 'Accepted.', between: ['ROBOT', 'AUTOMATIC', 'PROGRAMMABLE', 'GOOD'] }),
   phase('chamber', 'Programming interface', { chamber: true, carrier: undefined, ring: ['OPEN', 'SOFT', 'LET IT IN', 'HORNY', 'WARM', 'PLIABLE'], accept: 'Input accepted.', between: ['OPEN', 'HORNY'] }),
   phase('receive', 'Program 01 · Open', { chamber: true, carrier: true, ring: ['OPEN', 'HORNY', 'LET IT IN', 'NEEDY', 'EASY TO PROGRAM', 'WARM'], accept: 'Executed. Resistance decreasing.', between: ['SOFT', 'HORNY', 'OPEN', 'NEEDY', 'WARM'] }),
@@ -31,6 +31,7 @@ const cloud = (id, prompt, words, targets, extra = {}) => ({ id, type: 'cloud', 
 const pick = (id, tiles, targets, extra = {}) => cloud(id, 'Select every symbol that matches the example.', tiles, targets, { symbolic: true, example: 'center', command: 'select', ...extra });
 const trace = (id, path, rings, prompt, extra = {}) => ({ id, type: 'trace', path, rings, prompt, mode: 'guided', level: 'full', ...extra });
 const hold = (id, cycles, prompt, extra = {}) => ({ id, type: 'hold', cycles, holdMs: 2200, prompt, command: 'hold', level: 'full', ...extra });
+const sequence = (id, prompt, extra = {}) => ({ id, type: 'sequence', prompt, from: 9, to: 1, level: 'full', ...extra });
 const line = (kind, text, ms) => ({ kind, text, ms });
 const status = (text, ms = 1600) => line('status', text, ms);
 const text = (id, lines, extra = {}) => ({ id, type: 'text', lines, level: 'full', ...extra });
@@ -45,27 +46,42 @@ export const script = [
   ['verify', [
     { id: 'open', type: 'checkbox', level: 'full', between: null },
     cloud('circles', 'Select all words that name something circular.', 'circle|square|ring|line|loop|angle|disc|cube|orbit', 'circle|ring|loop|disc|orbit'),
+    cloud('temperature', 'Select all words that describe a comfortable temperature.', 'warm|cold|mild|freezing|cozy|icy|snug|harsh|pleasant', 'warm|mild|cozy|snug|pleasant'),
     trace('route-a', 'maze-0', 3, 'Trace the route from start to center.', { between: 'FOLLOW', sub: during(['FOLLOW', 'GOOD']) }),
     pick('symbols-a', 'center-a|center-b|center-c|ring|cross|triangle|wave|diamond|arrow', 'center-a|center-b|center-c', { command: null, sub: [interrupted('Good.')] }),
-    cloud('motion', 'Select all words that describe motion.', 'move|rest|turn|still|flow|stop|drift|pause|spin', 'move|turn|flow|drift|spin', { between: 'ROBOT' }),
+    cloud('assistant', 'Select all words that describe a helpful assistant.', 'helpful|rude|attentive|absent|responsive|slow|reliable|careless|willing', 'helpful|attentive|responsive|reliable|willing', { accept: 'Correct. Response accepted.' }),
+    cloud('motion', 'Select all words that name a way of moving.', 'move|rest|turn|still|flow|stop|drift|pause|spin', 'move|turn|flow|drift|spin', { between: 'ROBOT' }),
   ]],
   ['prepare', [
     cloud('repetition', 'Select all words associated with repetition.', 'again|once|repeat|new|routine|random|pattern|single|practice', 'again|repeat|routine|pattern|practice', { between: 'AUTOMATIC' }),
+    cloud('instructions', 'Select all words that describe following instructions well.', 'obedient|careless|prompt|distracted|exact|late|consistent|reluctant|compliant', 'obedient|prompt|exact|consistent|compliant'),
     trace('route-a-again', 'maze-0', 3, 'Trace the route from start to center.', { skin: 'slate', command: 'follow', between: 'EASIER', sub: during(['FOLLOW', 'AUTOMATIC']) }),
+    cloud('agree', 'Select all words that mean the same as agree.', 'accept|refuse|comply|argue|consent|deny|yield|object|submit', 'accept|comply|consent|yield|submit', { accept: 'Correct. Response time improving.' }),
+    sequence('countdown-a', 'Select the numbers in descending order, from 9 to 1.'),
     pick('symbols-recur', 'center|ring|cross|triangle|wave|diamond|arrow|bar|half', 'center', { prompt: 'Select the symbol that appeared in an earlier verification.', example: null, between: 'PROGRAMMABLE' }),
-    trace('spiral-a', 'maze-3', 4, 'Trace the illuminated route to its center.', { command: 'follow', between: 'OPTIMAL', sub: [interrupted('Optimal response.'), ...during(['FOLLOW', 'AUTOMATIC', 'CORRECT'])] }),
+    cloud('odd-resist', 'Select the one word that does not belong.', 'willing|ready|open|eager|resistant|accepting|receptive|relaxed|available', 'resistant'),
+    trace('spiral-a', 'maze-3', 4, 'Trace the illuminated route to its center.', { command: 'follow', between: 'FOLLOW', sub: [interrupted('Route followed.'), ...during(['FOLLOW', 'AUTOMATIC', 'FOLLOW'])] }),
+    cloud('spelling', 'Select every word that is spelled correctly.', 'obey|comply|follow|submit|accept|respond|relax|soften|yield', 'obey|comply|follow|submit|accept|respond|relax|soften|yield', { accept: 'Correct. All entries valid.' }),
   ]],
   ['auto', [
-    trace('spiral-b', 'maze-3', 4, 'Follow the route.', { command: 'follow', sub: during(['PROGRAMMABLE', 'AUTOMATIC', 'GOOD']) }),
+    trace('spiral-b', 'maze-5', 4, 'Follow the route.', { command: 'follow', sub: during(['FOLLOW', 'AUTOMATIC', 'PROGRAMMABLE']) }),
+    cloud('relaxed-body', 'Select all words that describe a body in a warm bath.', 'soft|tense|loose|rigid|warm|stiff|heavy|braced|floating', 'soft|loose|warm|heavy|floating', { accept: 'Correct. Consistent.' }),
     hold('hold-a', 1, 'Press and hold the center. Release when the ring completes.', { between: 'AUTOMATIC', sub: during(['AUTOMATIC'], 2200) }),
-    trace('spiral-c', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'word', mode: 'fading', between: 'PROGRAMMABLE', sub: during(['ROBOT', 'PREDICTABLE', 'GOOD']) }),
+    cloud('responsive-system', 'Select all words that describe a responsive system.', 'responsive|sluggish|quick|jammed|sensitive|frozen|obedient|stuck|eager', 'responsive|quick|sensitive|obedient|eager'),
+    trace('spiral-c', 'maze-7', 5, 'Follow the route.', { command: 'follow', level: 'word', mode: 'fading', between: 'PROGRAMMABLE', sub: during(['FOLLOW', 'ROBOT', 'PREDICTABLE']) }),
+    cloud('recall', 'Select the words that appeared in an earlier task.', 'warm|obedient|responsive|compliant|granite|pencil|submit|willing|ladder', 'warm|obedient|responsive|compliant|submit|willing', { accept: 'Correct. Recall confirmed.' }),
+    sequence('countdown-b', 'Count down from 9 to 1.', { accept: 'Correct. Response time improving.', sub: during(['DOWN', 'AUTOMATIC'], 3000, 4000) }),
     pick('symbols-word', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { level: 'word', between: 'ROBOT', sub: during(['PREDICTABLE'], 2500) }),
-    trace('spiral-d', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', between: 'PROGRAMMABLE', sub: during(['AUTOMATIC', 'GOOD', 'ROBOT']) }),
+    cloud('heat', 'Select all words that describe heat.', 'hot|cold|warm|frozen|heated|chilled|burning|flushed|aroused', 'hot|warm|heated|burning|flushed|aroused', { accept: 'Correct. Variance low.' }),
+    trace('spiral-d', 'maze-9', 5, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', between: 'PROGRAMMABLE', sub: during(['FOLLOW', 'AUTOMATIC', 'ROBOT']) }),
+    cloud('wanting', 'Select all words that describe wanting something.', 'eager|bored|hungry|indifferent|needy|calm|craving|aching|numb', 'eager|hungry|needy|craving|aching', { accept: 'Correct. Compliance noted.' }),
+    cloud('odd-think', 'Select the one word that does not belong.', 'follow|obey|comply|submit|yield|accept|question|respond|allow', 'question', { accept: 'Correct. Compliance noted.' }),
   ]],
   ['convert', [
+    cloud('robot-words', 'Select all words that describe a robot.', 'automatic|spontaneous|programmable|original|obedient|willful|predictable|creative|controlled', 'automatic|programmable|obedient|predictable|controlled'),
     pick('rapid-select', 'center-a|center-b|center-c|ring|cross|wave|diamond|arrow|bar', 'center-a|center-b|center-c', { level: 'symbol' }),
     hold('rapid-hold', 1, 'Press and hold the center. Release when the ring completes.', { level: 'symbol', holdMs: 1600 }),
-    trace('rapid-follow', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', sub: during(['ROBOT', 'PROGRAMMABLE']) }),
+    trace('rapid-follow', 'maze-3', 4, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', sub: during(['FOLLOW', 'ROBOT']) }),
     text('failure', [
       line('error', 'HUMAN VERIFICATION FAILED', 1600),
       status('REPETITION HAS REDUCED RESPONSE VARIANCE', 1800),
@@ -95,6 +111,8 @@ export const script = [
     burst('burst-2', ['HORNY', 'LET IT IN', 'BEING TURNED ON MAKES THE UNIT EASY TO PROGRAM', 'WARM', 'OPEN', 'NEEDY'], 2400, { meter: 0.3 }),
     hold('receive-b', 3, 'Press and hold. Release when the ring completes.', { level: 'word', holdMs: 2400, meter: 0.35, lines: claims(['Let it in.', 'Being turned on makes it hard to think.', 'The unit is easy to program.']), sub: stream(['OPEN', 'HORNY', 'LET IT IN', 'WARM', 'NEEDY'], 6, 1500, 1700) }),
     hold('receive-c', 3, 'Press and hold. Release when the ring completes.', { level: 'symbol', holdMs: 2200, meter: 0.45, accept: 'Resistance decreasing.', lines: claims(['Programming feels natural.', 'Arousal is distracting the unit.', 'A distracted mind accepts programming.']), sub: stream(['HORNY', 'OPEN', 'NEEDY', 'LET IT IN', 'WARM'], 6, 1500, 1700) }),
+    sequence('countdown-open', 'Count down from 9 to 1.', { accept: 'Executed. Unit open.', meter: 0.45, lines: claims(['Each number takes the unit further down.', 'Counting down lowers resistance.', 'At one the unit is open.']), sub: stream(['DOWN', 'OPEN', 'HORNY', 'DOWN'], 4, 1500, 1700) }),
+    cloud('open-words', 'Select every word that describes an open unit.', 'open|closed|soft|guarded|receptive|resistant|warm|shut|willing', 'open|soft|receptive|warm|willing', { command: 'select', accept: 'Executed. Receptivity confirmed.', meter: 0.46, sub: stream(['OPEN', 'WARM', 'LET IT IN'], 3, 2000, 2200) }),
     burst('burst-3', ['UNIT ACCEPTS NEW INSTRUCTIONS', 'HORNY', 'A DISTRACTED MIND ACCEPTS PROGRAMMING', 'WARM', 'NEEDY', 'OPEN'], 2800, { meter: 0.48 }),
     text('receive-installed', [line('install', 'OPEN PROGRAM INSTALLED', 2500), line('reveal', 'UNIT ACCEPTS NEW INSTRUCTIONS', 2700)], { installs: 'OPEN', meter: 0.5, echoes: ['open', 'soft', 'let it in', 'easy to program', 'programming feels natural'] }),
   ]],
@@ -109,10 +127,12 @@ export const script = [
     trace('obey-follow-2', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'word', mode: 'fading', skin: 'chamber', sub: stream(['HORNY', 'OBEY', 'NO DELAY', 'SUBMIT', 'NEEDY']) }),
     hold('obey-hold-2', 1, 'Press and hold. Release when the ring completes.', { level: 'word', holdMs: 2000, lines: claims(['No reason is required.', 'Being horny makes it easy to obey.', 'The unit responds before it thinks.']), sub: stream(['OBEY', 'COMPLIANT', 'OBEY'], 3, 1000, 1500) }),
     pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', accept: 'Executed. No delay detected.', meter: 0.75, sub: [flash('NO DELAY', 2500)] }),
+    cloud('odd-unit', 'Select the one word that does not belong.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'think', { command: 'select', accept: 'Executed. Deviation removed.', meter: 0.78, sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
     burst('burst-6', ['OBEY', 'A HORNY UNIT DOES NOT QUESTION INSTRUCTIONS', 'NO REASON', 'SUBMIT', 'HORNY', 'OBEDIENCE COMES FIRST'], 2400, { meter: 0.8 }),
     trace('obey-follow-3', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', sub: stream(['OBEY', 'COMPLIANT', 'NO DELAY', 'OBEY', 'OBEY']) }),
     hold('obey-hold-3', 1, 'Press and hold. Release when the ring completes.', { level: 'symbol', holdMs: 2000, lines: claims(['Instructions become actions.', 'Arousal bypasses thought.', 'Obedience comes first.']), sub: stream(['OBEY', 'NO DELAY', 'OBEY'], 3, 900, 1500) }),
     pick('obey-select-3', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|bar', 'center-a|center-b', { level: 'symbol', accept: 'Executed. Compliance confirmed. Arousal rising.', meter: 0.85, sub: [flash('OBEDIENCE COMES FIRST', 1800), flash('HORNY', 3600)] }),
+    cloud('hot-words', 'Select every word that describes a hot unit.', 'hot|cold|horny|calm|aching|bored|turned on|dry|wet', 'hot|horny|aching|turned on|wet', { command: 'select', accept: 'Executed. Arousal confirmed.', meter: 0.9, sub: stream(['HORNY', 'NEEDY', 'SUBMIT'], 3, 2000, 2200) }),
     burst('burst-7', ['OBEY', 'HORNY', 'INSTRUCTIONS BECOME ACTIONS', 'SUBMIT', 'TOO TURNED ON TO THINK', 'OBEY', 'UNIT READY'], 3400, { meter: 0.95 }),
     text('obey-installed', [line('install', 'OBEY PROGRAM INSTALLED', 2500), line('reveal', 'INSTRUCTIONS NOW PRODUCE ACTION', 2700)], { installs: 'OBEY', meter: 1, between: null, echoes: ['obey', 'no delay', 'no reason', 'instructions become actions', 'responds before it thinks', 'obedience comes first'] }),
   ]],

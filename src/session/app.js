@@ -8,7 +8,7 @@ import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
-  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null });
+  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null });
   state.session = fresh();
   let frame;
   let dialogOpen = false;
@@ -16,6 +16,7 @@ export function sessionStore(state, emitter) {
   let advanceTimer = null;
   let lineTimer = null;
   let stimuliRun = null;
+  let rejectTimer = null;
   let armed = false;
   const s = () => state.session;
   const step = () => steps[s().index];
@@ -66,7 +67,7 @@ export function sessionStore(state, emitter) {
     cancelAdvance();
     disarm();
     const current = step();
-    Object.assign(s(), { selected: [], feedback: '', done: false, starting: false, triggered: false, line: 0, stimuli: [] });
+    Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [] });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
     s().holdTask = current.type === 'hold' ? { ...current, progress: 0 } : null;
     if (current.phase.carrier !== undefined) s().carrier = current.phase.carrier;
@@ -109,7 +110,19 @@ export function sessionStore(state, emitter) {
     }, 900);
   });
   emitter.on('session:select', word => {
-    if (!active() || step().type !== 'cloud') return;
+    if (!active()) return;
+    if (step().type === 'sequence') {
+      const next = String(step().from - s().selected.length);
+      if (word !== next) {
+        s().rejected = word; s().feedback = `Out of sequence. Continue from ${next}.`; sound('retry');
+        clearTimeout(rejectTimer); rejectTimer = setTimeout(() => { rejectTimer = null; s().rejected = null; emitter.emit('render'); }, 380);
+        render(); return;
+      }
+      s().selected = [...s().selected, word]; s().rejected = null; s().feedback = '';
+      if (word === String(step().to)) finish(acceptanceFor(step())); else { sound('select'); render(); }
+      return;
+    }
+    if (step().type !== 'cloud') return;
     s().selected = s().selected.includes(word) ? s().selected.filter(item => item !== word) : [...s().selected, word];
     s().feedback = ''; sound('select'); render();
   });

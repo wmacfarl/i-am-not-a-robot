@@ -28,6 +28,7 @@ async function begin(t, search = '', hostname = 'example.com') {
 async function complete(state, emit, t) {
   const step = steps[state.session.index];
   if (step.type === 'cloud') { for (const word of step.targets || []) emit('session:select', word); emit('session:verify'); }
+  else if (step.type === 'sequence') { for (let n = step.from; n >= step.to; n--) emit('session:select', String(n)); }
   else if (step.type === 'trace') emit('session:traceComplete');
   else if (step.type === 'hold') emit('session:holdComplete');
   else if (step.type === 'burst') advance(t, step.ms);
@@ -52,6 +53,7 @@ test('authored script: unique ids, usable tasks, symbols taught before they stan
     }
     if (step.type === 'trace') { assert.ok(step.path.startsWith('maze-') && Number(step.path.slice(5)) < 12, step.id); assert.ok(['guided', 'fading', 'cue'].includes(step.mode)); }
     if (step.type === 'hold') { assert.ok(step.cycles >= 1); assert.ok(step.holdMs >= 0); }
+    if (step.type === 'sequence') assert.equal(step.from - step.to + 1, 9, step.id);
     if (step.type === 'text') { assert.ok(step.lines.length); for (const line of step.lines) { assert.ok(line.ms > 0); assert.ok(line.kind); } }
     if (step.type === 'burst') { assert.ok(step.ms >= 2000 && step.phase.chamber, step.id); assert.ok(step.sub.length >= 7, `${step.id} needs a dense flash stream`); }
     if (!['checkbox', 'text', 'burst'].includes(step.type) && step.phase.id !== 'close') assert.ok(step.between, `${step.id} has no transition flash`);
@@ -223,4 +225,15 @@ test('tracing eases toward nearby input, preserves position, and completes labyr
       unmountTrace(); assert.equal(Object.keys(handlers).length, 0);
     }
   } finally { unmountTrace(); globalThis.requestAnimationFrame = originalRAF; }
+});
+test('countdown accepts only the next number and finishes on the last', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state, emit } = await begin(t, '?start=countdown-a', 'localhost');
+  assert.equal(steps[state.session.index].id, 'countdown-a');
+  emit('session:select', '8');
+  assert.deepEqual(state.session.selected, []); assert.equal(state.session.rejected, '8'); assert.match(state.session.feedback, /Continue from 9/);
+  t.mock.timers.tick(400); assert.equal(state.session.rejected, null);
+  for (let n = 9; n >= 2; n--) emit('session:select', String(n));
+  assert.equal(state.session.done, false); assert.equal(state.session.selected.length, 8); assert.equal(state.session.feedback, '');
+  emit('session:select', '1'); assert.equal(state.session.done, true); assert.equal(state.session.feedback, 'Correct.');
 });
