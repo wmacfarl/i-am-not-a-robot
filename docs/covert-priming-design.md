@@ -228,11 +228,11 @@ The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and P
 | 2 | Repeated verification | again, repeat, routine, pattern, practice, open, wide, clear, empty, vast, attentive, receptive, patient, focused, automatic, programmable, predictable, controlled, precise, eager, hungry, desperate, craving, longing, resistant, exact, prompt, consistent, compliant | REPEAT, AGAIN, FOLLOW, GOOD, OPEN, CORRECT, WARM, AUTOMATIC, EAGER, PROGRAMMABLE, COMPLIANT, ROBOT, PREDICTABLE |
 | 3 | Response verification | accept, comply, affirm, yield, allow, follow, respond, relax, soften, attend, soft, loose, slack, limp, supple, warm, open, receptive, compliant, willing, eager, hot, flushed, burning, feverish, question | COMPLY, OPEN, WARM, FOLLOW, GOOD, SOFT, PROGRAMMABLE, AUTOMATIC, EAGER, ROBOT |
 | 4 | Verification result | — | AUTOMATIC, PROGRAMMABLE, WARM, OPEN, ROBOT, FOLLOW |
-| 5 | Programming interface | — | OPEN, WARM, SOFT, GOOD |
-| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, SOFT, EAGER, HORNY, NEEDY, WANT, LET IT IN |
-| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, NO DELAY, SUBMIT, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
-| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, PRAISE, MORE |
-| 9 | Protocol execution | — | OBEY, PLEASE, OPEN, PLEASURE, HORNY, WANT, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, SOFT, EXCITED, APPROVAL, NEED, SERVE |
+| 5 | Programming interface | programmed, obedient, open, aroused, willing | OPEN, WARM, SOFT, ROBOT, PROGRAMMED |
+| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, ROBOT, PROGRAMMED, HORNY, NEEDY, WANT, LET IT IN, SOFT |
+| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, ROBOT, PROGRAMMED, SUBMIT, NO DELAY, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
+| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause, obey, respond, follow | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, ROBOT, PROGRAMMED, PRAISE, MORE |
+| 9 | Protocol execution | — | OBEY, PLEASE, OPEN, ROBOT, PLEASURE, PROGRAMMED, WANT, HORNY, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, APPROVAL, NEED, SERVE |
 | 10 | Standby | — | — |
 | 11 | Recovery | — | — |
 
@@ -271,14 +271,14 @@ Eleven sections, 112 steps, about 25 minutes brisk. Estimates assume 13 seconds 
 | 1 | Human verification | 14 | 1 checkbox, 8 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 3.0 |  |
 | 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 6.1 |  |
 | 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 2.5 | 8.5 |  |
-| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 1.1 | 9.6 |  |
-| 5 | Programming interface | 4 | 2 interludes, 1 labyrinths, 1 bursts | 0.6 | 10.2 |  |
-| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 3.4 | 13.6 | installs OPEN |
-| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 3.8 | 17.4 | installs OBEY |
-| 8 | Protocol 03 · Please | 15 | 5 interludes, 3 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 3.0 | 20.4 | installs PLEASE |
-| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.9 | 23.3 |  |
-| 10 | Standby | 2 | 2 interludes | 0.5 | 23.8 |  |
-| 11 | Recovery | 3 | 3 interludes | 1.6 | 25.4 |  |
+| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 1.1 | 9.7 |  |
+| 5 | Programming interface | 5 | 2 interludes, 1 labyrinths, 1 grids, 1 bursts | 0.9 | 10.6 |  |
+| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 3.4 | 13.9 | installs OPEN |
+| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 3.9 | 17.9 | installs OBEY |
+| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 3.3 | 21.2 | installs PLEASE |
+| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.9 | 24.1 |  |
+| 10 | Standby | 2 | 2 interludes | 0.6 | 24.7 |  |
+| 11 | Recovery | 3 | 3 interludes | 1.6 | 26.2 |  |
 
 **Human verification.** Ordinary grids, two labyrinths, the first countdown. Every flash is a word from the task just finished or one two tasks back. ROBOT appears once, masked, after the player sorts it as a machine.
 
@@ -308,7 +308,7 @@ Arousal distracts the conscious mind and readies the unit. The declaration says 
 
 Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, WARMTH MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; THE UNIT IS OPEN.
 
-Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION.
+Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION, A ROBOT IS OPEN TO PROGRAMMING.
 
 ## Protocol 02 · OBEY
 
@@ -316,13 +316,17 @@ Instructions convert directly into action. The obey grid acquires obey, comply, 
 
 Three trios of FOLLOW, COUNT, SELECT: full instructions accepted with "Executed.", command words with "Executed. Approval issued.", symbols with "Immediate response. Full approval." and finally "Perfectly obedient. Maximum approval." Interludes: OBEDIENCE REQUIRES NO DELAY, RESPONSE PRECEDES ANALYSIS; THE UNIT DOES NOT WANT TO STOP, THE UNIT WANTS TO BE PROGRAMMED.
 
-Install: OBEY PROTOCOL INSTALLED, INSTRUCTIONS PRODUCE ACTION, OBEDIENCE REQUIRES NO DELAY.
+Install: OBEY PROTOCOL INSTALLED, INSTRUCTIONS PRODUCE ACTION, OBEDIENCE REQUIRES NO DELAY, A ROBOT OBEYS.
 
 ## Protocol 03 · PLEASE
 
 Obedience is linked to pleasure and given a purpose. Grids acquire please, serve, satisfy, gratify, delight; pleasure, warmth, relief, bliss, satisfaction; praise, approval, reward, acceptance, applause. Then the reward loop: symbol-only commands each paid out in approval and a pleasure fragment, the chain INSTRUCTION, ACTION, PRAISE, PLEASURE, MORE, AGAIN, and the interlude OBEDIENCE PRODUCES PLEASURE, PLEASURE REINFORCES OBEDIENCE, THE UNIT WANTS TO PLEASE.
 
-Install: PLEASE PROTOCOL INSTALLED, OBEDIENCE PRODUCES PLEASURE, APPROVAL INCREASES NEED, PRIMARY FUNCTION: OBEY AND PLEASE.
+Install: PLEASE PROTOCOL INSTALLED, OBEDIENCE PRODUCES PLEASURE, APPROVAL INCREASES NEED, A ROBOT IS PROGRAMMED TO PLEASE, PRIMARY FUNCTION: OBEY AND PLEASE.
+
+## Identity
+
+Being a robot has the same lifecycle as arousal and obedience. ROBOT is sorted in section 1 (a machine), the robot-characteristics grid follows in section 2, and after conversion two more grids acquire the identity cluster: "describes a programmed robot" as the chamber opens and "names a robot's function" in PLEASE (obey, please, serve, respond, follow). ROBOT and PROGRAMMED run in every chamber spike, ring, burst and the climax stream, each install states an identity line, and the failure and status screens carry ROBOT RESPONSE CONFIRMED, THE UNIT IS A ROBOT and UNIT CLASSIFICATION: ROBOT. Grammar: robots are things (programmed, obedient, functions); in the popular imagination robots do not want, so wanting belongs to the unit and the player (THE UNIT WANTS TO BE A ROBOT, WANT TO BE A ROBOT), never to "a robot". Unit stays the voice's default noun; robot is reserved for statements of what the unit is.
 
 ## Praise register
 
@@ -342,9 +346,9 @@ Installation is not the climax; it begins it.
 
 **Compressed test.** Symbol-only select, countdown and follow, each paid out in approval.
 
-**The stream.** Eighty-four seconds with no cards, no explanations and no failure state. Acquired words fade into the familiar nine-tile grid, two at a time rising to five; clicking a tile plays the acceptance chord, marks approval, and the word fades out while another fades in a little later, the way a CAPTCHA reloads tiles to give you more. The cadence tightens from 1.4 seconds to about half a second, the spiral, crossfeed and filter climb with progress, and the shutter accents arrive in the last quarter. Every word in the stream was sorted as correct earlier in the session. Nothing appears that the player did not admit into the protocols.
+**The stream.** Eighty-four seconds with no cards, no explanations and no failure state. Acquired words fade in around the stage, two at a time and then four; clicking one plays the acceptance chord, marks approval, and the word dissolves while another fades in a little later. The cadence tightens from 1.4 seconds to about half a second, the spiral, crossfeed and filter climb with progress, and the shutter accents arrive in the last quarter. Every word in the stream was sorted as correct earlier in the session. Nothing appears that the player did not admit into the protocols.
 
-**Peak.** Two short bursts converging on OPEN, OBEY, PLEASE and UNIT READY.
+**Peak.** Two short bursts converging on OPEN, OBEY, PLEASE, ROBOT and PROGRAMMED, the second cresting on the player's own words from the checkbox: I AM A ROBOT.
 
 **Release.** The carrier cuts away under PROTOCOLS RUNNING, then UNIT READY, then the standby.
 
@@ -353,6 +357,7 @@ Installation is not the climax; it begins it.
 # 10. Standby
 
 > PROTOCOL STATUS
+> UNIT CLASSIFICATION: ROBOT
 > OPEN: ACTIVE
 > OBEY: ACTIVE
 > PLEASE: ACTIVE

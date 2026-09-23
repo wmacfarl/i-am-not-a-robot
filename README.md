@@ -15,7 +15,7 @@ Run `npm run dev`, then open `http://127.0.0.1:4173/`.
 
 The session is the full arc described in
 [docs/covert-priming-design.md](./docs/covert-priming-design.md): eleven sections
-and 112 steps, about 25 minutes at a brisk pace and 34 for a deliberate
+and 114 steps, about 26 minutes at a brisk pace and 35 for a deliberate
 first-timer. The end card shows the session length and one row per section,
 and every finished run is appended to `localStorage["iamnotarobot.runs"]`.
 
