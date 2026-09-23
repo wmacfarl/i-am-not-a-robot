@@ -264,21 +264,21 @@ The 66-to-60 BPM lock, the 40 Hz amplitude-modulated roughness gated by the beat
 
 # 7. Session
 
-Eleven sections, 112 steps, about 25 minutes brisk. Estimates assume 13 seconds per grid, 14 per countdown and a careful tracing speed; a deliberate first-timer runs about a third longer.
+Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting. Estimates are calibrated to a 17:08 run recorded on 2026-09-23 (about 7 seconds per grid, 8 per countdown, a quick tracing hand); a slower first-timer runs about a third longer.
 
 | # | Section | Steps | Tasks | Minutes | Ends at | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Human verification | 14 | 1 checkbox, 8 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 3.0 |  |
-| 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 6.1 |  |
-| 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 2.5 | 8.5 |  |
-| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 1.1 | 9.7 |  |
-| 5 | Programming interface | 5 | 2 interludes, 1 labyrinths, 1 grids, 1 bursts | 0.9 | 10.6 |  |
-| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 3.4 | 13.9 | installs OPEN |
-| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 3.9 | 17.9 | installs OBEY |
-| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 3.3 | 21.2 | installs PLEASE |
-| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.9 | 24.1 |  |
-| 10 | Standby | 2 | 2 interludes | 0.6 | 24.7 |  |
-| 11 | Recovery | 3 | 3 interludes | 1.6 | 26.2 |  |
+| 1 | Human verification | 14 | 1 checkbox, 8 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 1.8 | 1.8 |  |
+| 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 1.8 | 3.6 |  |
+| 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 1.5 | 5.0 |  |
+| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 0.8 | 5.9 |  |
+| 5 | Programming interface | 5 | 2 interludes, 1 labyrinths, 1 grids, 1 bursts | 0.7 | 6.5 |  |
+| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 2.5 | 9.0 | installs OPEN |
+| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 2.8 | 11.8 | installs OBEY |
+| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.4 | 14.2 | installs PLEASE |
+| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.6 | 16.8 |  |
+| 10 | Standby | 2 | 2 interludes | 0.6 | 17.3 |  |
+| 11 | Recovery | 3 | 3 interludes | 1.6 | 18.9 |  |
 
 **Human verification.** Ordinary grids, two labyrinths, the first countdown. Every flash is a word from the task just finished or one two tasks back. ROBOT appears once, masked, after the player sorts it as a machine.
 
