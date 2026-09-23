@@ -31,8 +31,9 @@ async function complete(state, emit, t) {
   else if (step.type === 'sequence') { for (let n = step.from; n >= step.to; n--) emit('session:select', String(n)); }
   else if (step.type === 'trace') emit('session:traceComplete');
   else if (step.type === 'hold') emit('session:holdComplete');
-  else if (step.type === 'burst') advance(t, step.ms);
-  else if (step.type === 'text') { if (step.trigger) { await emit('session:start'); t.mock.timers.tick(900); } advance(t, total(step)); }
+  else if (step.type === 'burst' || step.type === 'stream') advance(t, step.ms);
+  else if (step.type === 'checkbox') { await emit('session:start'); t.mock.timers.tick(900); }
+  else if (step.type === 'text') { if (step.trigger) { await emit('session:start'); t.mock.timers.tick(900); } advance(t, total(step)); if (step.gate) emit('session:continue'); }
 }
 test('authored script: unique ids, usable tasks, symbols taught before they stand alone, reveals earned by fragments', () => {
   assert.equal(new Set(steps.map(step => step.id)).size, steps.length);
@@ -53,6 +54,7 @@ test('authored script: unique ids, usable tasks, symbols taught before they stan
     }
     if (step.type === 'trace') { assert.ok(step.path.startsWith('maze-') && Number(step.path.slice(5)) < 12, step.id); assert.ok(['guided', 'fading', 'cue'].includes(step.mode)); }
     if (step.type === 'sequence') assert.equal(step.from - step.to + 1, 9, step.id);
+    if (step.type === 'stream') { assert.ok(step.words.length >= 8 && step.ms >= 30000, step.id); assert.equal(step.phase.chamber, true); }
     if (step.type === 'hold') { assert.ok(step.cycles >= 1); assert.ok(step.holdMs >= 0); }
     if (step.type === 'text') { assert.ok(step.lines.length); for (const line of step.lines) { assert.ok(line.ms > 0); assert.ok(line.kind); } }
     if (step.type === 'burst') { assert.ok(step.ms >= 2000 && step.phase.chamber, step.id); assert.ok(step.sub.length >= 7, `${step.id} needs a dense flash stream`); }
@@ -95,7 +97,7 @@ test('complete authored session runs from the checkbox to the terminated connect
     if (step.id === 'route-a-again') { t.mock.timers.tick(3500); sawStimulus = state.session.stimuli.some(e => e.mode === 'flash'); }
     if (step.phase.id === 'receive') sawCarrier = sawCarrier || state.session.carrier;
     await complete(state, emit, t);
-    assert.equal(state.session.done, true, step.id);
+    if (step.type !== 'checkbox') assert.equal(state.session.done, true, step.id);
     t.mock.timers.tick(850);
   }
   assert.ok(sawStimulus); assert.ok(sawCarrier);
@@ -124,7 +126,7 @@ test('wrong selections stay editable; pause and settings block input and clear t
   t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
   emit('session:pause'); assert.deepEqual(state.session.stimuli, []);
   emit('session:pause'); t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
-  emit('session:exit'); assert.equal(state.session.screen, 'end'); assert.deepEqual(state.session.stimuli, []);
+  emit('session:exit'); assert.equal(steps[state.session.index].id, 'recovery-permission'); assert.deepEqual(state.session.stimuli, []);
 });
 test('text sequences advance line by line, toggle the carrier, and pause holds the current line', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -146,7 +148,7 @@ test('accepted tasks celebrate then advance automatically; settings suspend the 
   emit('session:settings', false); t.mock.timers.tick(850); assert.equal(state.session.index, 2);
   assert.equal(state.session.done, false);
   emit('session:traceComplete'); emit('session:exit');
-  t.mock.timers.tick(2000); assert.equal(state.session.screen, 'end'); assert.equal(state.session.index, 2);
+  t.mock.timers.tick(2000); assert.equal(steps[state.session.index].id, 'recovery-permission'); assert.equal(state.session.screen, 'play');
 });
 test('dev skip and ?start deep links are localhost-only', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -244,7 +246,7 @@ test('countdown accepts only the next number and finishes on the last', async t 
 });
 
 const FAMILY = { obedience: 'obey', obedient: 'obey', obeys: 'obey', obeying: 'obey', arousal: 'aroused', arousing: 'aroused', arouse: 'aroused', warmth: 'warm', warmer: 'warm', receptivity: 'receptive', submission: 'submit', submissive: 'submit', compliance: 'comply', compliant: 'comply', responsive: 'respond', responds: 'respond', needy: 'need', needs: 'need', pleased: 'please', pleasing: 'please', thought: 'think', thinking: 'think', thinks: 'think', approval: 'approve', approved: 'approve', acceptance: 'accept', resistance: 'resist', resistant: 'resist' };
-const ALLOWED = new Set('a an the is are be been being was it its to of in into on at by for with and or not no now than then this that these those has have had do does did will can may more less most each every one all any some before after without within when while as if so let make makes made easy easier easily hard harder take takes become becomes produce produces increase increases lower lowers reduce reduces require requires required occupy occupies reinforce reinforces precede precedes confirmed detected first new further down up out unit units program programs programming programmed status active installed install channel carrier verification human response instruction instructions action actions delay attention analysis ready use mind number numbers route center ring term purpose revealed capable unnecessary reason saved follow hold count select cannot keep going feel protocol protocols primary function'.split(' '));
+const ALLOWED = new Set('a an the is are be been being was it its to of in into on at by for with and or not no now than then this that these those has have had do does did will can may more less most each every one all any some before after without within when while as if so let make makes made easy easier easily hard harder take takes become becomes produce produces increase increases lower lowers reduce reduces require requires required occupy occupies reinforce reinforces precede precedes confirmed detected first new further down up out unit units program programs programming programmed status active installed install channel carrier verification human response instruction instructions action actions delay attention analysis ready use mind number numbers route center ring term purpose revealed capable unnecessary reason saved follow hold count select cannot keep going feel protocol protocols primary function stop'.split(' '));
 const stemOf = word => (FAMILY[word] || word).replace(/(ness|ment|ence|ance|ity|ion|ing|ed|es|ly|al|s)$/, '');
 test('every flashed, paired, bound or installed word was sorted as correct by the player first', () => {
   const acquired = new Set();
@@ -261,7 +263,35 @@ test('every flashed, paired, bound or installed word was sorted as correct by th
     for (const l of step.lines || []) if (['claim', 'flash', 'reveal', 'install'].includes(l.kind)) check(step.id, l.kind, l.text);
     if (step.type === 'cloud' && !step.symbolic && step.targets) for (const word of step.targets) acquired.add(stemOf(word.toLowerCase()));
     for (const word of spikeOf(step) || []) check(step.id, 'spike', word);
+    for (const word of step.words && step.type === 'stream' ? step.words : []) check(step.id, 'stream', word);
     if (step.between) check(step.id, 'between', step.between);
   }
   assert.ok(acquired.has('horny') && acquired.has('obey') && acquired.has('pleasure') && acquired.has('please'));
+});
+
+test('the climax stream spawns words, rewards every click, and ends on its own clock', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state, emit } = await begin(t, '?start=climax', 'localhost');
+  const step = steps[state.session.index];
+  assert.equal(step.type, 'stream');
+  advance(t, 100);
+  assert.ok(state.session.stream.slots.length >= 1);
+  const first = state.session.stream.slots[0];
+  assert.ok(step.words.includes(first.word));
+  emit('session:hit', first.id);
+  assert.equal(state.session.stream.hits, 1); assert.equal(first.hit, true); assert.equal(state.session.feedback, 'Approval issued.');
+  emit('session:hit', first.id); assert.equal(state.session.stream.hits, 1);
+  advance(t, 3000);
+  assert.ok(state.session.stream.spawned >= 2); assert.equal(state.session.done, false);
+  advance(t, step.ms); assert.ok(state.session.done || state.session.index > stepIndex('climax'), 'the stream ends on its own clock');
+});
+
+test('recovery waits for the player before counting up', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state, emit } = await begin(t, '?start=recovery-permission', 'localhost');
+  const step = steps[state.session.index];
+  advance(t, total(step) + 20);
+  assert.equal(state.session.done, false); assert.equal(state.session.waiting, true);
+  emit('session:continue'); assert.equal(state.session.done, true);
+  t.mock.timers.tick(850); assert.equal(steps[state.session.index].id, 'recovery');
 });

@@ -26,7 +26,8 @@ export function sessionView(state, emit) {
   const s = state.session;
   const step = steps[s.index];
   const playing = s.screen === 'play';
-  const chamber = playing && step.phase.chamber;
+  const chamber = playing ? step.phase.chamber : true;
+  const recovery = playing && Boolean(step.phase.recovery);
   const level = step.level;
   const busy = s.paused || s.settings || s.exiting;
   const interrupted = s.stimuli.find(entry => entry.mode === 'interrupted');
@@ -36,14 +37,14 @@ export function sessionView(state, emit) {
   const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY', 'PLEASE'];
   const progress = chamber ? meter : s.index / firstChamberIndex;
   const scatter = [[-1.6, 1], [0.2, 1.3], [1.5, 0.9], [-0.7, 1.1], [1.1, 0.85], [-1.3, 1.2], [0.5, 1]];
-  const spikeSpots = [[18, 22, 0.9], [78, 30, 0.85], [24, 74, 0.9], [76, 70, 0.85], [50, 14, 0.8], [14, 50, 0.85], [86, 52, 0.8], [50, 86, 0.8]];
+  const spikeSpots = [[24, 22, 0.9], [76, 30, 0.85], [28, 74, 0.9], [74, 70, 0.85], [50, 14, 0.8], [22, 50, 0.85], [78, 52, 0.8], [50, 86, 0.8]];
   const flashLayer = () => [...flashes].reverse().map(entry => {
     const parts = entry.key.split(':');
     if (parts[parts.length - 2] === 'spike') {
       const [x, y, scale] = spikeSpots[(Number(parts[parts.length - 1]) || 0) % spikeSpots.length];
       return html`<div id=${`stim-${entry.key}`} class="stim-flash is-spike" style=${`--ms:${entry.ms}ms; --x:${x}%; --y:${y}%; --scale:${scale}`} aria-hidden="true"><b>${entry.text}</b></div>`;
     }
-    const [dy, scale] = step.type !== 'burst' ? [0, 1] : entry.ms >= 800 ? [0, 1.35] : scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length];
+    const [dy, scale] = step.type !== 'burst' ? [0, 1] : entry.ms >= 800 ? [0, 1.15] : scatter[(Number(parts[parts.length - 2]) || 0) % scatter.length];
     const long = entry.text.length > 18;
     return html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms; --dy:${long ? dy / 2 : dy}em; --scale:${scale}; --fit:${long ? 0.72 : 1}`} aria-hidden="true"><b>${entry.text}</b></div>`;
   });
@@ -57,14 +58,14 @@ export function sessionView(state, emit) {
   const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
   const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
   const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : 'retry'}`}>${text}</span>` : ''}</div>`; };
-  const robotCheck = ({ checked, failed, checking, onclick }) => html`<button class="robot-check ${checked ? 'is-checked' : ''} ${failed ? 'is-failed' : ''} ${checking ? 'is-checking' : ''}" type="button" disabled=${!onclick || checking} aria-label="I am not a robot" onclick=${onclick || null}><span class="custom-check" aria-hidden="true">${checked && !checking ? (failed ? crossIcon(15) : checkIcon(15)) : ''}</span><span class="robot-check-label">I am not a robot</span><span class="robot-check-brand" aria-hidden="true"><span class="seal-mini"><span class="seal-mini-box"></span><span class="seal-mini-grid"></span></span><span>Verification<br />Privacy · Terms</span></span></button>`;
+  const robotCheck = ({ checked, failed, checking, onclick, label = 'I am not a robot' }) => html`<button class="robot-check ${checked ? 'is-checked' : ''} ${failed ? 'is-failed' : ''} ${checking ? 'is-checking' : ''}" type="button" disabled=${!onclick || checking} aria-label=${label} onclick=${onclick || null}><span class="custom-check" aria-hidden="true">${checked && !checking ? (failed ? crossIcon(15) : checkIcon(15)) : ''}</span><span class="robot-check-label">${label}</span><span class="robot-check-brand" aria-hidden="true"><span class="seal-mini"><span class="seal-mini-box"></span><span class="seal-mini-grid"></span></span><span>Verification<br />Privacy · Terms</span></span></button>`;
   const content = () => {
     if (step.type === 'checkbox') return html`<div class="gate-content robot-gate">
       <div class="captcha-seal" aria-hidden="true"><span class="seal-checkbox">${checkIcon()}</span><span class="seal-grid"></span></div>
-      <p class="screen-label">Automated verification</p>
-      <h2>Verification required.</h2>
-      ${robotCheck({ checked: s.starting, failed: false, checking: s.starting, onclick: () => emit('session:start') })}
-      <p class="muted-text robot-gate-note">${s.starting ? 'Verifying…' : 'Confirm to continue.'}</p>
+      <p class="screen-label">${step.screen || 'Automated verification'}</p>
+      <h2>${step.heading || 'Verification required.'}</h2>
+      ${robotCheck({ checked: s.starting, failed: false, checking: s.starting, label: step.label, onclick: () => emit('session:start') })}
+      <p class="muted-text robot-gate-note">${s.starting ? (step.label ? 'Confirming…' : 'Verifying…') : (step.note || 'Confirm to continue.')}</p>
     </div>`;
     if (step.type === 'text') {
       const armed = !step.trigger || s.triggered;
@@ -86,6 +87,7 @@ export function sessionView(state, emit) {
         ${step.trigger && !armed ? html`<p class="muted-text robot-gate-note">${s.starting ? 'Verifying…' : 'Confirm to continue.'}</p>` : ''}
         ${readout.length ? html`<div class="diagnostic-lines" aria-live="polite">${readout.map(line => html`<p class="line-${line.kind} ${line === current ? 'is-current' : ''}">${line.text}</p>`)}</div>` : ''}
         ${headline ? html`<div class="model-result ${current?.kind === 'flash' ? 'is-flash' : ''}" id=${`headline-${s.line}`}><span>${headline.label}</span><strong>${headline.word}</strong><p>${headline.text}</p></div>` : ''}
+        ${s.waiting && step.gate ? html`<button class="gate-button" type="button" onclick=${() => emit('session:continue')}>${step.gate}</button>` : ''}
       </div>`;
     }
     if (step.type === 'cloud') return html`<div class="captcha-experience">
@@ -111,6 +113,17 @@ export function sessionView(state, emit) {
         </div>
         <div class="verification-cycle">${cycleStatus()}</div>
       </div>`;
+    }
+    if (step.type === 'stream') {
+      const cells = Array.from({ length: 9 }, (_, cell) => (s.stream ? s.stream.slots : []).find(slot => slot.cell === cell) || null);
+      return html`<div class="captcha-experience stream-experience">
+      ${instructionRow()}
+      <div class="captcha-grid-stage" id=${`stage-${step.id}`}>
+        <div class="captcha-grid" role="group" aria-label="Respond to every word that appears">${cells.map(slot => html`<button class="captcha-tile is-text stream-tile ${slot ? 'has-word' : ''} ${slot && slot.hit ? 'is-hit' : ''}" type="button" disabled=${!slot || slot.hit} aria-label=${slot ? slot.word : 'empty'} onclick=${slot ? () => emit('session:hit', slot.id) : null}>${slot ? html`<span class="tile-text" id=${`word-${slot.id}`}>${slot.word}</span>` : ''}<span class="selection-frame" aria-hidden="true"></span></button>`)}</div>
+        ${flashLayer()}
+      </div>
+      <div class="verification-cycle">${cycleStatus()}</div>
+    </div>`;
     }
     if (step.type === 'burst') return html`<div class="captcha-experience burst-experience">
       <div class="captcha-instruction-row"><p class="captcha-instruction">Optical programming channel active.</p></div>
@@ -168,8 +181,8 @@ export function sessionView(state, emit) {
       </section>
     </div>`;
   };
-  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking) ? 'is-burst' : ''} ${playing && step.type === 'burst' && !s.prelude && !s.done ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div>
-    ${chamber ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
+  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking || (step.type === 'hold' && !s.done && s.holdFill > 0.3)) ? 'is-burst' : ''} ${playing && ((step.type === 'burst' && !s.prelude && !s.done) || (step.type === 'stream' && !s.done && s.climax > 0.75) || (step.type === 'hold' && !s.done && s.holdFill > 0.6)) ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''} ${playing && step.type === 'stream' && !s.done ? 'is-climax' : ''} ${recovery ? 'is-recovery' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div>
+    ${playing && chamber && !recovery ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
     <div class="study-shell">${playing ? card() : endCard()}</div>
     ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}
     ${busy ? overlay() : ''}

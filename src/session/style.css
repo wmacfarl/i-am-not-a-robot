@@ -288,7 +288,7 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 
 .burst-stage { aspect-ratio: auto; min-height: 340px; border-color: rgba(240, 166, 200, 0.55); box-shadow: inset 0 0 60px rgba(240, 166, 200, 0.18); }
 .burst-stage .stim-flash { background: transparent; animation: none; }
-.burst-stage .stim-flash b { padding: 0.1em 0.3em 0.08em 0.5em; background: transparent; max-width: 94%; white-space: normal; text-align: center; line-height: 1.05; font-size: calc(clamp(30px, 6.4vw, 56px) * var(--fit, 1)); letter-spacing: 0.22em; color: #fbe9f3; opacity: 0.92; filter: none; translate: 0 var(--dy, 0); scale: var(--scale, 1); text-shadow: 3px 0 rgba(140, 255, 220, 0.35), -3px 0 rgba(255, 140, 200, 0.42), 0 0 34px rgba(240, 166, 200, 0.75); animation: burst-word var(--ms) ease-in-out forwards; }
+.burst-stage .stim-flash b { padding: 0.1em 0.3em 0.08em 0.5em; background: transparent; max-width: 88%; white-space: normal; text-align: center; line-height: 1.05; font-size: calc(clamp(30px, 6.4vw, 56px) * var(--fit, 1)); letter-spacing: 0.22em; color: #fbe9f3; opacity: 0.92; filter: none; translate: 0 var(--dy, 0); scale: var(--scale, 1); text-shadow: 3px 0 rgba(140, 255, 220, 0.35), -3px 0 rgba(255, 140, 200, 0.42), 0 0 34px rgba(240, 166, 200, 0.75); animation: burst-word var(--ms) ease-in-out forwards; }
 @keyframes burst-word { 0% { opacity: 0; transform: translateX(-8px) skewX(-8deg); } 14% { opacity: 0.92; transform: none; } 48% { opacity: 0.88; } 54% { opacity: 0.45; transform: translateX(5px) skewX(4deg); } 58% { opacity: 0.92; transform: none; } 100% { opacity: 0; transform: translateX(6px); } }
 .is-burst .test-card.pulse-card { background: rgba(28, 18, 32, 0.2); border-color: rgba(240, 166, 200, 0.5); }
 .is-burst .test-card.pulse-card::after { opacity: 0.5; }
@@ -305,3 +305,30 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-shutter .shutter { animation: shutter 500ms steps(1, end) infinite; }
 @keyframes shutter { 0% { opacity: 0.14; } 15%, 100% { opacity: 0; } }
 .is-prelude .captcha-grid-stage::before, .is-prelude .captcha-grid-stage::after, .is-prelude .stim-flash b { animation-play-state: paused; }
+.is-climax .test-card.pulse-card { background: rgba(28, 18, 32, 0.14); }
+.is-climax .captcha-grid-stage::after { animation-duration: 606ms; }
+.is-chamber .test-card.pulse-card { overflow: visible; }
+.is-chamber .captcha-grid-stage { overflow: visible; }
+.is-chamber .grid-scan { display: none; }
+.is-chamber .stim-flash { overflow: visible; }
+.burst-stage { border: 0; box-shadow: none; background: transparent; }
+.burst-stage::before, .burst-stage::after { display: none; }
+.is-burst .test-card.pulse-card { background: rgba(28, 18, 32, 0.08); border-color: rgba(240, 166, 200, 0.22); }
+.is-chamber .complete-card { background: rgba(28, 18, 32, 0.92); border-color: rgba(226, 150, 196, 0.28); color: #efe4ec; }
+.is-chamber .complete-card p, .is-chamber .complete-card .screen-label, .is-chamber .completion-meta { color: #e8d6e2; }
+.is-chamber .session-log { color: #b58aa5; }
+.is-chamber .session-log p { border-bottom-color: rgba(226, 150, 196, 0.18); }
+.is-chamber .session-log .session-log-total { color: #efe4ec; border-bottom-color: rgba(226, 150, 196, 0.4); }
+.is-chamber .secondary-button { background: transparent; border: 1px solid rgba(240, 166, 200, 0.6); color: #f0a6c8; border-radius: 2px; }
+.is-recovery .test-card.pulse-card::after { display: none; }
+.is-recovery .diagnostic-lines { font-family: system-ui, sans-serif; font-size: 18px; line-height: 1.8; letter-spacing: normal; text-transform: none; text-shadow: none; background: transparent; border-color: transparent; }
+.is-recovery .diagnostic-lines p::before, .is-recovery .diagnostic-lines p.is-current::after { content: none; }
+.is-recovery .diagnostic-lines .line-title, .is-recovery .diagnostic-lines .line-status { color: #efe4ec; }
+.readout .gate-button { margin-top: 18px; }
+.stream-tile .tile-text { font-size: clamp(20px, 3vw, 30px); letter-spacing: 0.14em; text-transform: uppercase; animation: tile-word-in 480ms ease both; }
+.stream-tile.has-word:not(.is-hit) { cursor: pointer; }
+.is-chamber .stream-tile.has-word:not(.is-hit):hover { background: rgba(70, 36, 58, 0.98); }
+.stream-tile.is-hit { background: rgba(70, 36, 58, 0.98); box-shadow: inset 0 0 0 3px #f0a6c8; }
+.stream-tile.is-hit .tile-text { animation: tile-word-out 400ms ease forwards; }
+@keyframes tile-word-in { from { opacity: 0; scale: 0.9; } }
+@keyframes tile-word-out { to { opacity: 0; scale: 1.15; } }
