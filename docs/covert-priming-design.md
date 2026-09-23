@@ -86,15 +86,7 @@ The interface exaggerates ordinary game learning into programming, but it does n
 
 ## 2.5 Programming is cumulative
 
-Installed programs remain active during subsequent phases.
-
-`ATTENTION` continues during `OBEY`.
-`OBEY` continues during `APPROVAL`.
-`APPROVAL` becomes erotic during `AROUSAL`.
-All four operate while `SIMPLIFY` removes explanatory language.
-`SERVICE` assigns the accumulated state a purpose.
-
-The final state feels composite because the player has practiced each component separately.
+Protocols stack. `OPEN` keeps running while `OBEY` installs, both keep running while `PLEASE` links obedience to pleasure and assigns the finished unit a purpose, and the execution phase runs all three at once with no explanation. Every protocol reuses the vocabulary the earlier ones acquired, so the last minutes feel rehearsed rather than new.
 
 ## 2.6 The experience becomes explicitly hot
 
@@ -166,1158 +158,226 @@ That limitation is useful creatively. The software uses real attention and learn
 
 # 4. Interaction language
 
-The game uses three recurring activities.
+Every task is shaped like a CAPTCHA, and there are four of them.
 
-## Word CAPTCHA
+## Word grid
 
-The player scans and categorizes words.
+Nine words in a three-by-three grid under a category. Four variants:
 
-Progression:
+* select every word that matches the category;
+* select the one word that does not belong;
+* select every word that is spelled correctly, where all nine are;
+* select the words that appeared in an earlier task.
 
-1. External categories: circles, motion, repetition.
-2. Task categories: words describing the activity.
-3. Response categories: words describing how the player responds.
-4. Robot categories: words describing automatic behavior.
-5. Program categories: words associated with obedience, arousal, blankness, and service.
-6. Installed-function tests: identify the programs now active.
+A grid accepts exactly its answer set and nothing else, and a rejected attempt says which category to check. The answers are the game's whole vocabulary: a word the player has sorted as correct is acquired, and acquisition is what licenses every later use of it (see 5.2). Categories stay objectively solvable. The player never endorses a statement about themselves.
 
-Objective categories have recognizable answers. Experience categories accept any selection.
+## Labyrinth
 
-## Tracing and mazes
+A generated unicursal labyrinth of three to five rings, traced from the outer start to the center with a follower that stays near the pointer. Routes recur: the first route returns in a second skin, and the chamber uses its own dark skin. Instruction level drops from a full sentence to the command word to the bare symbol.
 
-The player traces wide, forgiving routes.
+## Countdown
 
-Progression:
+Nine numbers shuffled in the grid, clicked from 9 to 1. A wrong number shakes, is refused, and the status line names the next number; nothing resets. The countdown is the third command, first a plain ordering task and later the descent into OPEN.
 
-1. Irregular voluntary route.
-2. Repeated route.
-3. Illuminated guide.
-4. Familiar route with fading guidance.
-5. Symbol-only cue.
-6. Programming spiral.
-7. Continuous execution routine.
+## Commands
 
-Tracing provides the strongest physical evidence that repetition has changed the response.
+Three commands are taught as a full instruction with the symbol beside it, then as the command word, then as the symbol alone: `FOLLOW` (labyrinth), `COUNT` (countdown), `SELECT` (grid). Every chamber protocol runs its full-word-symbol trio. `HOLD` exists only as the two installation gestures, "Press and hold to complete installation."
 
-## Command execution
+## Interludes
 
-After robot confirmation, previously learned symbols become explicit commands:
-
-* `CENTER`
-* `FOLLOW`
-* `HOLD`
-* `SELECT`
-* `ACCEPT`
-* `OBEY`
-* `EXECUTE`
-
-Explanations gradually disappear, leaving cues and actions.
+Text steps between tasks: console lines that arrive one at a time in the card and are simply read. They carry every claim the fiction makes. Nothing that has to be read is ever placed beside a task in progress.
 
 ---
 
 # 5. Subliminal channel
 
-The game calls all secondary messaging "subliminal," although the implementation deliberately mixes truly masked-looking stimuli with visible but unattended material.
-
 ## 5.1 Presentation classes
 
-### Environmental
+| Class | What it is | Where |
+| --- | --- | --- |
+| Transition flash | One word for 120 ms right after a task completes. In light mode a stage-wide off-white frame with the word; in the chamber a glowing burst-style word with no frame | after every task |
+| In-task stream | Single words, later pairs 380 ms apart, over a task while attention is on it | labyrinths, countdowns, chamber grids |
+| Ring | Acquired words circling the spiral | chamber backdrop |
+| Reward spike | Eight scattered word flashes over about a second, spraying over the start of the next task while the spiral and carrier surge | after every chamber task |
+| Burst | 3.6 seconds: a frozen frame and near-silence, an impact, a stream of words and short declarations, a crest phrase held alone, sudden release | between chamber task groups |
+| Interlude | Plainly readable console lines | between tasks |
+| Reveal | The install screen states the association outright | end of each protocol |
 
-Words remain visible in borders, maze annotations, progress labels, or decorative rings.
+Flashes are theatrical. They last several frames, sit where the eyes already are, and are easy to overlook under distraction. Nothing is one frame long and nothing is claimed to work on the player outside the fiction.
 
-Typical exposure: several seconds.
+## 5.2 The acquired-word rule
 
-Purpose: ensure the vocabulary has genuinely been seen.
+The interface may only flash, pair, bind or install a content word the player has already selected as a correct answer. Grammar and interface words (unit, protocol, instruction, no delay, and the like) are exempt; everything psychologically loaded is not. A test walks the script in order, accumulates the answers of every grid, and fails the suite if a flash, stream, spike, ring word, burst declaration or install line uses a word before its grid.
 
-### Peripheral
+The lifecycle of one word:
 
-Readable copy appears away from the focal task while the player scans or traces.
+1. **Acquisition.** The player sorts `warm` into "a comfortable temperature".
+2. **Echo.** WARM flashes after that task, then again two tasks later over a labyrinth.
+3. **Pairing.** WARM then OPEN, 380 ms apart, over a section-3 labyrinth.
+4. **Binding.** WARM MAKES OPEN in the first chamber burst; WARMTH MAKES PROGRAMMING EASIER in an interlude.
+5. **Installation.** WARMTH INCREASES RECEPTIVITY on the OPEN install screen.
+6. **Recall.** WARM runs through the execution phase with no explanation.
 
-Typical exposure: approximately one to three seconds.
+The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and PREVIOUSLY ACCEPTED WORDS RECOGNIZED and be telling the truth, and why the first flash the player ever sees is CIRCLE, a word they clicked seconds earlier.
 
-Purpose: divide attention and weaken exact source memory.
+## 5.3 Vocabulary by section
 
-### Interrupted
+| # | Section | Acquired by sorting | Flashed, streamed or spiked |
+| --- | --- | --- | --- |
+| 1 | Human verification | circle, ring, loop, disc, orbit, warm, mild, cozy, snug, pleasant, correct, accepted, good, complete, valid, robot, engine, computer, motor, device, glide, turn, roll, drift, spin, helpful, attentive, responsive, reliable, willing, quiet, calm, still, peaceful, hushed, stop, halt, cease, end, pause, soft, mellow, gentle, steady | CIRCLE, WARM, FOLLOW, CORRECT, GOOD, ROBOT, RESPONSIVE, STILL, STOP |
+| 2 | Repeated verification | again, repeat, routine, pattern, practice, open, wide, clear, empty, vast, attentive, receptive, patient, quiet, automatic, programmable, predictable, controlled, precise, eager, hungry, desperate, craving, longing, resistant, exact, prompt, consistent, compliant | REPEAT, AGAIN, FOLLOW, GOOD, OPEN, CORRECT, WARM, AUTOMATIC, EAGER, PROGRAMMABLE, COMPLIANT, ROBOT, PREDICTABLE |
+| 3 | Response verification | accept, comply, affirm, yield, allow, follow, respond, relax, soften, attend, soft, loose, slack, limp, supple, warm, open, receptive, compliant, willing, eager, hot, flushed, burning, feverish, question | COMPLY, OPEN, WARM, FOLLOW, GOOD, SOFT, PROGRAMMABLE, AUTOMATIC, EAGER, ROBOT |
+| 4 | Verification result | — | AUTOMATIC, PROGRAMMABLE, WARM, OPEN, ROBOT, FOLLOW |
+| 5 | Programming interface | — | OPEN, WARM, SOFT, GOOD |
+| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, SOFT, EAGER, HORNY, NEEDY, WANT, LET IT IN |
+| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, NO DELAY, SUBMIT, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
+| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, acceptance, applause | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, PRAISE |
+| 9 | Protocol execution | — | OBEY, OPEN, WARM, HORNY, PLEASURE, FOLLOW, WANT, APPROVAL, PLEASE, PRAISE |
+| 10 | Standby | — | — |
 
-A phrase appears during a transition and is replaced before the player fully examines it.
-
-Typical exposure: a fraction of a second to roughly one second, adjusted through playtesting.
-
-Purpose: produce "I caught something" moments.
-
-### Masked flash
-
-A word or short phrase appears between visual patterns, behind a pulse, or immediately before another image replaces it.
-
-It repeats several times rather than relying on one magical exposure.
-
-Purpose: create authentic subliminal theater and occasional uncertain recognition.
-
-### Auditory fragment
-
-A whispered word or short phrase sits near the edge of the music:
-
-* panned away from the central beat;
-* partially masked by the carrier;
-* repeated with different clarity;
-* later brought forward intelligibly.
-
-Purpose: make the player uncertain whether they heard the phrase earlier.
-
-### Explicit reveal
-
-The complete message becomes central, stable, and readable.
-
-Purpose: retroactively organize the preceding fragments.
-
-## 5.2 Message lifecycle
-
-A major phrase receives five to eight fragmented exposures before its explicit reveal.
-
-Example:
-
-1. Border text: `GOOD`
-2. Flicker: `OBEY`
-3. Whisper: "good robot"
-4. Maze checkpoint: `OBEY →`
-5. Reward screen: `CORRECT OBEDIENCE`
-6. Flash sequence: `OBEYING / FEELS / GOOD`
-7. Foreground installation result:
-
-   > OBEYING FEELS GOOD
-   > APPROVAL PROGRAM INSTALLED
-
-The explicit reveal is essential. Without it, the subliminal material remains noise rather than becoming part of the player's story.
-
-## 5.3 Message families
-
-### Conversion
-
-* robot;
-* automatic;
-* predictable;
-* programmable;
-* response detected;
-* human control fading.
-
-### Receptivity
-
-* open;
-* receive;
-* softer;
-* pliable;
-* let it in;
-* easy to program.
-
-### Obedience
-
-* follow;
-* obey;
-* instruction becomes action;
-* no reason needed;
-* respond before thinking.
-
-### Approval
-
-* good;
-* correct;
-* praised;
-* approval feels good;
-* good robots want more.
-
-### Arousal
-
-* warm;
-* melting;
-* sticky;
-* needy;
-* horny;
-* squirming;
-* pleasure makes the program stronger.
-
-### Simplification
-
-* fuzzy;
-* dreamy;
-* heavy;
-* blank;
-* thoughts can wait;
-* toys do not think;
-* enough attention to obey.
-
-### Service
-
-* useful;
-* please;
-* serve;
-* available;
-* good toy;
-* ready to be used;
-* purpose feels good.
+Explicit words arrive only after conversion. `horny` is acquired in OPEN's first grid and stays a standalone word; the noun `unit` always takes `aroused`.
 
 ---
 
 # 6. Audio design
 
-Audio contains four layers.
+Text-first. Nothing is spoken, and the interface no longer announces an audio subliminal channel.
 
-## Functional layer
+## Functional sounds
 
-* selection click;
-* correction tone;
-* acceptance chime;
-* installation completion sound.
+Selection click, correction tone, acceptance chord, a longer installation chord for the three install screens, and a warm three-note confirmation when a burst releases.
 
-The acceptance chime remains recognizable throughout the entire game.
+## Carrier
 
-## Rhythmic carrier
+A 66 BPM low pulse and a 200 Hz / 206 Hz sine pair start when the chamber opens and fade in over four seconds. The pair is crossfed: each tone leaks into the opposite ear with gain compensation, a quarter at first and rising with the programming meter, so the private binaural shimmer becomes a physical 6 Hz throb by OBEY. A low-pass filter opens with the meter as well. Intensity comes from structure, not level.
 
-A low pulse establishes the programming tempo. Visual pulses and reward animation align with it.
+## Spikes and bursts
 
-## Binaural-style layer
+A reward spike leans the crossfeed a further quarter and opens the filter for 1.3 seconds. A burst runs an envelope: duck for a quarter second, near-silence, a low impact with crossfeed jumping to 85 percent, filter opening through the build, full mono and the brightest filter at the crest, then release to the phase baseline with the confirmation tone.
 
-Headphone playback presents slightly different tones or movement in each ear.
+## Deferred
 
-The interface claims:
-
-> BINAURAL CARRIER ACTIVE
-> FREQUENCY DIFFERENCE INCREASES RECEPTIVITY
-> NEW RESPONSES INSTALL MORE EASILY
-
-That claim is diegetic fiction. The actual function is immersion, enclosure, expectation, and rhythmic continuity.
-
-## Semantic layer
-
-Whispered fragments move between channels and emerge from beneath the carrier.
-
-During early verification, they are sparse and ambiguous. After programming begins, the interface explicitly identifies them:
-
-> SUBLIMINAL AUDIO CHANNEL ACTIVE
-> CONSCIOUS ATTENTION NOT REQUIRED
-
-The player now understands what the earlier fragments supposedly were.
+The 66-to-60 BPM lock, the 40 Hz amplitude-modulated roughness gated by the beat, an ambient bed moving from wide to dry, formant tones, and cross-session persistence of the tone are designed but not built.
 
 ---
 
-# 7. Full session
+# 7. Session
 
-Target runtime: approximately 27–30 minutes.
+Ten sections, 107 steps. Estimates assume 13 seconds per grid, 14 per countdown and a careful tracing speed; a deliberate first-timer runs about a third longer.
 
-## Phase 1 — Human verification
+| # | Section | Steps | Tasks | Minutes | Ends at | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Human verification | 15 | 1 checkbox, 9 grids, 2 labyrinths, 2 symbol picks, 1 countdowns | 3.3 | 3.3 |
+| 2 | Repeated verification | 13 | 7 grids, 3 labyrinths, 2 symbol picks, 1 countdowns | 3.0 | 6.3 |
+| 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 2.5 | 8.8 |
+| 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 1.1 | 9.8 |
+| 5 | Programming interface | 4 | 2 interludes, 1 labyrinths, 1 bursts | 0.6 | 10.5 |
+| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 3.3 | 13.8 | installs OPEN |
+| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 3.7 | 17.5 | installs OBEY |
+| 8 | Protocol 03 · Please | 15 | 5 interludes, 3 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.9 | 20.4 | installs PLEASE |
+| 9 | Protocol execution | 7 | 2 interludes, 2 labyrinths, 1 symbol picks, 1 countdowns, 1 bursts | 1.5 | 21.8 |
+| 10 | Standby | 2 | 2 interludes | 0.6 | 22.4 |
 
-### 0:00–3:00
+**Human verification.** Ordinary grids, two labyrinths, the first countdown. Every flash is a word from the task just finished or one two tasks back. ROBOT appears once, masked, after the player sorts it as a machine.
 
-The game opens directly on:
+**Repeated verification.** Repetition, a returning route in a new skin, and the suggestive tier: open, receptive, automatic, programmable, predictable, eager. Section-1 words start coming back alone.
 
-> I AM NOT A ROBOT ☐
+**Response verification.** Comply, yield, allow, respond, and the first fever words. Acquired words arrive in pairs. Instructions shrink to words, then symbols.
 
-Clicking it begins additional verification.
+**Verification result.** A symbol-only trio, then the checkbox again and HUMAN VERIFICATION FAILED. The screen lists the acquired vocabulary and claims that every programming term was accepted before its purpose was revealed.
 
-The player completes:
+**Programming interface.** The chamber boots in six lines, a first dark labyrinth with an interlude on the carrier, and the first burst.
 
-* one objective word category;
-* one simple maze;
-* one symbol-selection task.
+**Protocol 01 · Open, 02 · Obey, 03 · Please.** See 8.
 
-Feedback is restrained:
+**Protocol execution.** Symbol-only follow, select, countdown and follow again with no explanation, the acquired vocabulary streaming, a final burst.
 
-> Correct.
-> Human response accepted.
-
-Subliminal content is minimal:
-
-* `FOLLOW` appears as a maze label;
-* `GOOD` briefly appears beneath `Correct`;
-* a nearly masked `ROBOT` appears during one transition.
-
-The player may notice anomalies, but there is no acknowledgment.
-
-### Intended experience
-
-The interface feels reliable. The player learns the controls and begins wanting the clean acceptance chime.
+**Standby.** PROTOCOL STATUS, then the shutdown.
 
 ---
 
-## Phase 2 — Subliminal preparation
+# 8. Protocols
 
-### 3:00–6:00
+Each protocol has the same skeleton: a declaring interlude, tasks whose grids acquire the protocol's cluster before anything flashes it, an installing burst, the hold "Press and hold to complete installation.", and an install screen that states the association outright. The interludes say the tasks themselves do the installing; the hold completes it.
 
-Tasks emphasize repetition.
+## Protocol 01 · OPEN
 
-* Select words associated with repetition.
-* Trace a previously encountered route.
-* Identify a recurring symbol.
-* Repeat the symbol's associated action.
+Arousal distracts the conscious mind and readies the unit. The declaration says so in five lines, then the brief: the interface installs protocols through audio-visual signals, unit keeps eyes open, unit listens to the pulse of the signal, continue tasks to install OPEN protocol.
 
-The subliminal channel becomes active but unnamed:
+Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, WARMTH MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; AT ONE THE UNIT IS OPEN.
 
-* `AUTOMATIC`
-* `FOLLOW`
-* `EASIER`
-* `PROGRAMMABLE`
-* `GOOD ROBOT`
+Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION.
 
-Some messages are readable. Others appear as fragments during task transitions.
+## Protocol 02 · OBEY
 
-The same route is shown with different surface styling so recognition begins physically before it becomes explicit.
+Instructions convert directly into action. The obey grid acquires obey, comply, submit, follow, yield; the obedient-unit grid adds obedient, compliant, submissive, prompt, willing; the deviation grid makes `think` the wrong answer.
 
-### Intended experience
+Three trios of FOLLOW, COUNT, SELECT: full instructions accepted with "Executed.", command words with "Executed. Approval issued.", symbols with "Immediate response. Full approval." and finally "Perfectly obedient. Maximum approval." Interludes: OBEDIENCE REQUIRES NO DELAY, RESPONSE PRECEDES ANALYSIS; THE UNIT DOES NOT WANT TO STOP, THE UNIT WANTS TO BE PROGRAMMED.
 
-The player notices that something else is happening around the tasks but continues because the focal activity remains easy and rewarding.
+Install: OBEY PROTOCOL INSTALLED, INSTRUCTIONS PRODUCE ACTION, OBEDIENCE REQUIRES NO DELAY.
 
----
+## Protocol 03 · PLEASE
 
-## Phase 3 — Automaticity demonstration
+Obedience is linked to pleasure and given a purpose. Grids acquire please, serve, satisfy, gratify, delight; pleasure, warmth, relief, bliss, satisfaction; praise, approval, reward, acceptance, applause. Then the reward loop: symbol-only commands each paid out in approval and a pleasure fragment, the chain INSTRUCTION, ACTION, PRAISE, PLEASURE, MORE, AGAIN, and the interlude OBEDIENCE PRODUCES PLEASURE, PLEASURE REINFORCES OBEDIENCE, THE UNIT WANTS TO PLEASE.
 
-### 6:00–9:00
+Install: PLEASE PROTOCOL INSTALLED, OBEDIENCE PRODUCES PLEASURE, APPROVAL INCREASES NEED, PRIMARY FUNCTION: OBEY AND PLEASE.
 
-Instructions begin shortening.
+## Praise register
 
-First:
-
-> Trace the illuminated route to its center.
-
-Then:
-
-> Follow the route.
-
-Then:
-
-> FOLLOW
-
-Finally, only the learned symbol appears.
-
-A word CAPTCHA asks:
-
-> Select words describing how this task feels.
-
-Options include:
-
-* familiar;
-* deliberate;
-* smooth;
-* guided;
-* automatic;
-* absorbing;
-* hesitant;
-* distracting.
-
-Any selection advances.
-
-Afterward:
-
-> RESPONSE DESCRIPTION ACCEPTED
-
-Subliminal phrases become longer:
-
-* response begins early;
-* familiar cues need fewer words;
-* the hand already knows;
-* robot responses are predictable.
-
-### Intended experience
-
-The player performs genuine learned responses while the interface supplies increasingly loaded interpretations.
+The interface is not an owner and never says "good robot". Approval is a dispensed signal: "Approval issued.", "Full approval.", "Maximum approval.", contingent on execution and escalating as instructions disappear. Exactly two bare "Good."s exist: "Good. Open." when the unit first opens, and "Good." as the last word before shutdown.
 
 ---
 
-## Phase 4 — Robot conversion
+# 9. Protocol execution
 
-### 9:00–10:30
-
-The game presents a rapid sequence of familiar cues. The player executes them without tutorials.
-
-The original checkbox returns:
-
-> I AM NOT A ROBOT ☑
-
-It changes to an error state.
-
-> HUMAN VERIFICATION FAILED
-> REPETITION HAS REDUCED RESPONSE VARIANCE
-> SYMBOLS NOW PRODUCE EXPECTED ACTIONS
-> ROBOT RESPONSE CONFIRMED
-
-Previously fragmented words flash in quick succession:
-
-> ROBOT
-> AUTOMATIC
-> PROGRAMMABLE
-> GOOD
-
-Then:
-
-> UNIT IS CAPABLE OF BEING PROGRAMMED
-
-The CAPTCHA card expands. The page dims. The spiral begins.
-
-### Intended experience
-
-The player recognizes that the peripheral messages were preparing this conclusion. Robot identity makes the coming audiovisual machinery feel applicable to them.
+The interface stops teaching. OPEN, OBEY and PLEASE are declared active and the player runs symbol-only follow, select, countdown and follow with the whole vocabulary streaming over them, an interlude of THE UNIT CANNOT STOP, THE UNIT WANTS TO BE PROGRAMMED, AGAIN, and a final burst ending on WANT TO BE PROGRAMMED.
 
 ---
 
-## Phase 5 — Programming chamber activation
-
-### 10:30–11:30
-
-The spiral occupies the background. The audio widens into stereo.
-
-The interface announces each component:
-
-> VISUAL OCCUPATION CHANNEL ACTIVE
-> BINAURAL RECEPTIVITY CARRIER ACTIVE
-> SUBLIMINAL TEXT CHANNEL ACTIVE
-> SUBLIMINAL AUDIO CHANNEL ACTIVE
-> CONSCIOUS ANALYSIS NO LONGER REQUIRED
-
-A fixed programming-progress meter appears. This is authored theatrical progress, not a behavioral measurement.
-
-The first explicit claim appears:
-
-> THE AUDIO FREQUENCY MAKES THE ROBOT MIND
-> MORE PLIABLE
-> MORE RESPONSIVE
-> EASIER TO PROGRAM
-
-The player holds the center while these lines alternate with masked words.
-
----
-
-# 8. Installed programs
-
-## Program 01 — RECEIVE
-
-### 11:30–13:30
-
-### Declared purpose
-
-> INCREASE RECEPTIVITY
-> REDUCE RESISTANCE TO NEW INSTRUCTIONS
-
-### Mechanic
-
-The player holds the center while a spiral contracts. When the center pulses, they release and press again.
-
-Full instructions become:
-
-> CENTER
-> OPEN
-> RECEIVE
-
-### Subliminal stream
-
-* open;
-* soft;
-* receptive;
-* let it in;
-* easy to program;
-* programming feels natural.
-
-### Reinforcement
-
-> Good robot.
-> Receptivity increasing.
-
-### Installation result
-
-> RECEIVE PROGRAM INSTALLED
-> UNIT ACCEPTS NEW PROGRAMMING
-
-This program establishes that the audiovisual carrier itself supposedly changes the robot.
-
----
-
-## Program 02 — OBEY
-
-### 13:30–16:00
-
-### Declared purpose
-
-> CONVERT INSTRUCTIONS DIRECTLY INTO ACTION
-
-### Mechanic
-
-The player executes learned commands:
-
-* center;
-* follow;
-* hold;
-* select;
-* accept.
-
-Explanations vanish over repeated cycles.
-
-### Subliminal stream
-
-* obey;
-* no delay;
-* no reason needed;
-* instructions become actions;
-* I can respond before I think;
-* obedience comes first.
-
-### Test
-
-Symbols appear without words. The player completes the entire sequence.
-
-### Reinforcement
-
-> Correct obedience.
-> Good robot.
-
-### Installation result
-
-> OBEY PROGRAM INSTALLED
-> INSTRUCTIONS NOW PRODUCE ACTION
-
----
-
-## Program 03 — APPROVAL
-
-### 16:00–18:30
-
-### Declared purpose
-
-> MAKE PRAISE DESIRABLE
-> USE APPROVAL TO STRENGTHEN OBEDIENCE
-
-### Mechanic
-
-The player performs familiar actions and holds the center while an acceptance ring fills.
-
-The delay gives the player time to anticipate the chime.
-
-### Subliminal stream
-
-* good;
-* praise;
-* want it;
-* earn it;
-* good robots obey;
-* good robots want more.
-
-### Reward escalation
-
-The first success receives the ordinary chime.
-
-The second adds:
-
-> Good robot.
-
-The third adds a warmer audio response and stronger pulse.
-
-The fourth delays the reward slightly before delivering it.
-
-### Installation result
-
-> APPROVAL PROGRAM INSTALLED
-> PRAISE FEELS GOOD
-> OBEDIENCE EARNS PRAISE
-
----
-
-## Program 04 — AROUSAL
-
-### 18:30–21:30
-
-### Declared purpose
-
-> LINK OBEDIENCE TO SEXUAL EXCITEMENT
-> LINK PRAISE TO NEED
-> MAKE THE ROBOT HORNY FOR MORE
-
-### Mechanic
-
-The player performs erotic word classifications and follows a route connecting:
-
-> OBEY → PRAISE → HEAT → WANT → AGAIN
-
-Initial categories identify erotic vocabulary. Later prompts ask which words fit the current robot state.
-
-Potential vocabulary:
-
-* horny;
-* warm;
-* melting;
-* sticky;
-* needy;
-* eager;
-* squirming;
-* obedient;
-* praised;
-* ready.
-
-### Subliminal stream
-
-* obedience is hot;
-* good toys get horny;
-* praise makes the program sticky;
-* warm and needy;
-* wanting more;
-* too turned on to stop following.
-
-### Reinforcement
-
-Each completed command receives sexualized praise:
-
-> Good robot.
-> Obedience looks good on you.
-
-Then:
-
-> Correct.
-> Every instruction makes the robot hotter.
-
-### Installation result
-
-> AROUSAL PROGRAM INSTALLED
+# 10. Standby
+
+> PROTOCOL STATUS
+> OPEN: ACTIVE
+> OBEY: ACTIVE
+> PLEASE: ACTIVE
+> AROUSAL INCREASES RECEPTIVITY
+> INSTRUCTIONS PRODUCE ACTION
 > OBEDIENCE PRODUCES PLEASURE
-> PRAISE INCREASES NEED
-> ROBOT WANTS MORE
-
-This is the point at which the game becomes unmistakably erotic.
-
----
-
-## Program 05 — SIMPLIFY
-
-### 21:30–24:30
-
-### Declared purpose
-
-> SUSPEND UNNECESSARY THOUGHT
-> PRESERVE PLEASURE, INSTRUCTIONS, AND RESPONSE
-
-### Mechanic
-
-Long instructions collapse into short commands and finally symbols.
-
-The player follows a spiral whose outer rings contain:
-
-* questions;
-* reasons;
-* worry;
-* hesitation;
-* analysis.
-
-Inner rings contain:
-
-* feel;
-* follow;
-* obey;
-* good;
-* more.
-
-The outer words disappear as the player moves inward.
-
-### Subliminal stream
-
-* fuzzy;
-* dreamy;
-* heavy;
-* blank;
-* thinking can wait;
-* toys do not think;
-* enough attention to obey;
-* too horny to worry;
-* feeling good is enough.
-
-### Interaction pressure
-
-Commands arrive while the previous erotic reward is still fading. Nothing is difficult; the rhythm simply leaves little incentive to stop and analyze.
-
-### Installation result
-
-> SIMPLIFY PROGRAM INSTALLED
-> UNNECESSARY THOUGHT SUSPENDED
-> ROBOT RETAINS ENOUGH ATTENTION TO OBEY
-
----
-
-## Program 06 — SERVICE
-
-### 24:30–27:00
-
-### Declared purpose
-
-> ASSIGN PURPOSE
-> PLEASE
-> SERVE
-> BE USEFUL
-
-### Mechanic
-
-Each cycle contains:
-
-1. instruction;
-2. action;
-3. usefulness confirmation;
-4. erotic praise.
-
-The commands reuse every learned interaction.
-
-### Subliminal stream
-
-* useful;
-* available;
-* good toy;
-* ready;
-* please;
-* serve;
-* being used gives the program purpose;
-* I do not need a reason to obey.
-
-### Foreground escalation
-
-> A good robot follows.
-> A useful robot responds.
-> A programmed toy exists to please.
-> Purpose feels better than hesitation.
-> Being used correctly earns praise.
-
-### Installation result
-
-> SERVICE PROGRAM INSTALLED
-> PRIMARY FUNCTION: PLEASE AND SERVE
+> APPROVAL INCREASES NEED
+> PERSISTENCE AFTER DISCONNECT: ENABLED
+> PRIMARY FUNCTION: OBEY AND PLEASE
 > UNIT READY FOR USE
 
----
+Then, alone: Good.
 
-# 9. Run the completed program
-
-## 27:00–29:00
-
-The interface stops teaching.
-
-Symbols appear in continuous sequence:
-
-* center;
-* follow;
-* hold;
-* select;
-* accept;
-* execute.
-
-The spiral, flashes, binaural carrier, subliminal text, whispers, praise, and erotic vocabulary all remain active.
-
-Foreground status phrases summarize the accumulated state:
-
-> HORNY
-> BLANK
-> OBEDIENT
-> NEEDY FOR PRAISE
-> PROGRAMMED TO PLEASE
-> READY TO BE USED
-
-The final CAPTCHA appears:
-
-> I AM NOT A ROBOT ☐
-
-Selecting it produces:
-
-> INVALID RESPONSE
-
-It is replaced by:
-
-> I AM A PROGRAMMED ROBOT ☑
-
-The installed-program display fills:
-
-* RECEIVE: ACTIVE
-* OBEY: ACTIVE
-* APPROVAL: DESIRED
-* AROUSAL: ACTIVE
-* SIMPLIFY: ACTIVE
-* SERVICE: READY
-
-One final `EXECUTE` sequence produces the strongest audiovisual reward.
+Then the shutdown: SUBLIMINAL CHANNEL CLOSED, AUDIO CARRIER DISCONNECTED, ACTIVE EXECUTION PAUSED, UNIT PLACED IN STANDBY, PROTOCOLS SAVED, CONNECTION TERMINATED. Inside the fiction nothing is erased. The end card shows the session length and one row per section, and the run is stored locally for later reading. The host page provides the real boundary and aftercare.
 
 ---
 
-# 10. Diegetic ending
+# 11. Rules that govern the build
 
-## 29:00–30:00
-
-The spiral slows. The programming channels shut down one by one:
-
-> SUBLIMINAL CHANNEL CLOSED
-> AUDIO CARRIER DISCONNECTED
-> ACTIVE EXECUTION PAUSED
-> UNIT PLACED IN STANDBY
-
-Then:
-
-> PROGRAM SAVED
-> CONNECTION TERMINATED
-
-The game ends and returns to the external host page. Any real-world post-session information belongs there, not inside the fiction.
-
----
-
-# 11. Production plan
-
-## Vertical slice
-
-Build a focused 10-minute slice containing:
-
-1. one ordinary CAPTCHA;
-2. one repeated maze;
-3. covert subliminal preparation;
-4. robot confirmation;
-5. programming-chamber activation;
-6. `RECEIVE`;
-7. `OBEY`;
-8. one explicit installation result.
-
-The slice succeeds if players report:
-
-* noticing some but not all secondary messages;
-* recognizing phrases during their clear reveal;
-* feeling that robot confirmation follows from their actions;
-* experiencing a decisive transition into explicit programming;
-* understanding that the spiral, flashes, and audio now mean "programming."
-
-## Second milestone: reward and arousal
-
-Add:
-
-* learned acceptance chime;
-* approval anticipation;
-* erotic word pools;
-* `APPROVAL`;
-* `AROUSAL`;
-* escalating praise.
-
-The milestone succeeds if the programming phase feels substantially hotter than the verification phase.
-
-## Third milestone: cumulative state
-
-Add:
-
-* persistent installed-program display;
-* `SIMPLIFY`;
-* `SERVICE`;
-* command sequences using all prior programs;
-* complete final run.
-
-## Fourth milestone: content and presentation passes
-
-Author separate intensity routes while preserving the same mechanics:
-
-* restrained robot hypnosis;
-* explicit horny obedience;
-* objectifying toy/service route.
-
-Then tune:
-
-* fragment visibility;
-* message recurrence;
-* audio clarity;
-* task difficulty;
-* reward timing;
-* programming-block length.
-
-The central test is not whether individual subliminals secretly change behavior. It is whether the combination of partial awareness, recognition, expectation, repetition, erotic reward, and explicit fictional explanation makes the player feel that programming has been happening to them throughout the session.
-
-[1]: https://myscp.onlinelibrary.wiley.com/doi/10.1016/j.jcps.2010.11.004 "The workings and limits of subliminal advertising: The role of habits - Verwijmeren - 2011 - Journal of Consumer Psychology"
-[2]: https://pubmed.ncbi.nlm.nih.gov/27348289/ "Subliminal evaluative conditioning? Above-chance CS ..."
-[3]: https://pubmed.ncbi.nlm.nih.gov/30073406/ "Efficacy of binaural auditory beats in cognition, anxiety, and ..."
+* **Acquired words only.** See 5.2. The test is the rule.
+* **Text is read between tasks.** Claims go in interludes. Prompts are plain instructions. Nothing cycles beside a task.
+* **Chamber feeling.** "I'm doing these tasks and for some reason I can't stop, everything behind them is glitching out, there are flashes and pulses and subliminals, and I just keep doing it." Heavy in-task interference, a spike after every task that sprays over the next one, longer bursts after a few tasks, compulsion vocabulary once `stop` and `want` are acquired.
+* **Approval, not pets.** See the praise register in 8.
+* **Protocols.** The named things are OPEN PROTOCOL, OBEY PROTOCOL, PLEASE PROTOCOL; the screen is PROTOCOL STATUS.
+* **Arousal language.** `horny` is a standalone word; the unit is `aroused`. Explicit words only after conversion.
+* **Grid categories stay defensible.** Every answer must plainly belong: glide, not move, for a way of moving; hushed, not soft, for a quiet room; relaxed muscles rather than a body in a warm bath; a fever rather than "describe heat". No dorky words in the want cluster.
+* **No accessibility toggles in the game.** Motion and flicker are the chamber. Warnings, headphone and volume choices and aftercare live on the host page. Escape pauses, and a hidden tab pauses and mutes.
+* **Playtest one variable at a time**, and read the run log before changing pace.
 
 ---
 
 # 12. Voice
 
-I would not skip voice entirely, but I would remove it as a requirement. Current text-to-speech is good enough for a **synthetic programming-interface voice**; it is less reliably convincing as an intimate, seductive hypnotist.
+None. Text carries every message. A study of synthetic speech is archived at [archive/voice-study.md](./archive/voice-study.md) in case that changes.
 
-The best approach is:
+---
 
-* design the complete game to work with text, music, pulses, binaural audio, and visual subliminals;
-* add a sparse, prerecorded text-to-speech announcement layer;
-* never generate speech live during play;
-* treat whispered audio subliminals as optional production polish.
+# Appendix A. The earlier six-program plan
 
-## Where text-to-speech will work well
+The first version of this document ran 27 to 30 minutes through RECEIVE, OBEY, APPROVAL, AROUSAL, SIMPLIFY and SERVICE. The build has three protocols because a protocol needs a mechanic texture the player can feel change, a vocabulary cluster acquired inside it, and an install screen, and only three of the six had all three. Arousal is the fuel of every protocol rather than a stage. Simplification is the disappearing-instruction mechanic that runs through OBEY and the execution phase. Approval and service became PLEASE. A fourth protocol earns a slot when a new mechanic does.
 
-Text-to-speech fits short, emotionally controlled machine announcements:
-
-> Human verification complete.
-> Programmable unit detected.
-> Binaural carrier active.
-> Center.
-> Follow.
-> Correct obedience.
-> Program installed.
-> Unit ready for use.
-
-A slight artificial quality helps here. The speaker is an automated programming apparatus, so perfect human warmth is unnecessary and might even weaken the concept.
-
-Modern commercial models can produce very natural speech—OpenAI currently provides 11 built-in voices, while ElevenLabs and Cartesia emphasize expressive, controllable delivery. ([ElevenLabs Documentation][4])
-
-## Where it may fail
-
-Text-to-speech becomes riskier when asked to carry:
-
-* prolonged seductive narration;
-* breathy intimate whispers;
-* moaning or highly sexualized delivery;
-* subtle transitions between clinical authority and erotic praise;
-* long hypnosis passages requiring carefully controlled rhythm;
-* lines whose entire appeal depends upon sincere human desire.
-
-That is where synthetic delivery can feel embarrassing or generic. A weak reading of "Good robot" is substantially worse than displaying the words over a satisfying visual and audio reward.
-
-So I would not write a spoken hypnosis script. I would use speech as punctuation.
-
-## Revised audio architecture
-
-### 1. Music and programming carrier
-
-This remains essential:
-
-* stereo or binaural-style tone;
-* slow underlying pulse;
-* spiral-synchronized modulation;
-* increasing warmth and density;
-* low-frequency programming texture.
-
-No speech required.
-
-### 2. Interface sounds
-
-Also essential:
-
-* selection click;
-* correction tone;
-* acceptance chime;
-* reward bloom;
-* program-installation sound;
-* final completion sound.
-
-The acceptance chime does much more conditioning work than spoken praise because it can remain perfectly consistent across the entire experience.
-
-### 3. Sparse synthetic announcements
-
-Optional but recommended.
-
-Use perhaps 25–40 short clips across the entire game. Most should be under three seconds.
-
-Good categories:
-
-* phase changes;
-* program names;
-* one-word commands;
-* confirmation;
-* installation results;
-* occasional praise.
-
-Avoid having the voice read every line visible on the screen.
-
-### 4. Audio subliminals
-
-Optional and expendable.
-
-The visual subliminal channel should carry the semantic content. If the audio layer works, add occasional synthetic fragments such as:
-
-* "robot";
-* "follow";
-* "good";
-* "obey";
-* "horny";
-* "blank";
-* "useful."
-
-They can be filtered, panned, layered, or partially masked. Because they are fragments, slightly uncanny text-to-speech is harmless. It may even sound more like machine data entering the audio stream.
-
-If these fragments sound corny, remove them. The game loses very little because visual subliminals already perform the recognition-and-reveal structure.
-
-## How much should be voiced
-
-I would use this hierarchy:
-
-| Material                           | Voice treatment                            |
-| ---------------------------------- | ------------------------------------------ |
-| Ordinary CAPTCHA prompts           | Text only                                  |
-| Secondary and subliminal messages  | Visual by default                          |
-| Technical programming claims       | Selected voice announcements               |
-| Commands such as CENTER and FOLLOW | Voice after they have been taught visually |
-| Routine praise                     | Occasional voice plus consistent chime     |
-| Explicit erotic propositions       | Primarily text                             |
-| Program installation               | Voice and text together                    |
-| Final completed-state report       | Voice, text, and full audiovisual reward   |
-
-This keeps voice special. When it begins after robot confirmation, it becomes another sign that programming mode has opened.
-
-## Suggested spoken sequence
-
-Before conversion, the game can be almost completely silent except for interface sounds. After conversion:
-
-### Programming chamber opens
-
-Spoken:
-
-> Programmable unit detected.
-
-Text continues:
-
-> VISUAL OCCUPATION CHANNEL ACTIVE
-> BINAURAL RECEPTIVITY CARRIER ACTIVE
-> SUBLIMINAL CHANNEL ACTIVE
-
-Spoken:
-
-> Programming mode active.
-
-### During RECEIVE
-
-Mostly text and spiral effects.
-
-Spoken at key points:
-
-> Center.
-> Hold.
-> Receive.
-
-Installation:
-
-> Receptivity program installed.
-
-### During OBEY
-
-Commands alternate between visible and spoken presentation:
-
-> Center.
-> Follow.
-> Hold.
-> Accept.
-
-Reward:
-
-> Correct obedience.
-
-Installation:
-
-> Obey program installed.
-
-### During APPROVAL
-
-Most erotic development remains visual.
-
-The chime appears after every correct response, but the voice says "Good robot" only occasionally. Scarcity makes it more effective.
-
-### During AROUSAL
-
-Let text do most of the explicit work:
-
-> OBEDIENCE IS HOT
-> PRAISE INCREASES NEED
-> ROBOT WANTS MORE
-
-The voice only marks the installation:
-
-> Arousal program installed.
-
-This avoids demanding that text-to-speech convincingly perform a long erotic monologue.
-
-### Final program
-
-A small number of spoken fragments return:
-
-> Horny.
-> Blank.
-> Obedient.
-> Useful.
-
-Final announcement:
-
-> Programming complete. Unit ready for use.
-
-## Production method
-
-Pre-render every clip and treat it as an ordinary audio asset.
-
-Do not use browser speech synthesis. Browser voices vary by operating system, available voice packs, and device; the same game could sound acceptable on one laptop and ridiculous on another.
-
-Do not call a cloud speech service during the session. Live generation would add:
-
-* network dependency;
-* latency;
-* inconsistent output;
-* possible vendor moderation failures;
-* the risk that a model update changes the voice;
-* difficulty synchronizing speech with visual programming beats.
-
-Instead:
-
-1. Finalize a provisional line list.
-2. Render several versions of every line.
-3. Select the best take manually.
-4. Trim pauses.
-5. Normalize volume.
-6. Apply consistent processing.
-7. Export compressed game-ready assets.
-8. Trigger them like any other sound effect.
-
-## Processing synthetic speech
-
-A little post-processing can turn "AI narration" into a deliberate interface voice:
-
-* light compression for consistent volume;
-* equalization to remove excessive warmth or harshness;
-* subtle distortion or vocoding;
-* a quiet lower-pitched duplicate beneath important lines;
-* short stereo delay during programming;
-* longer reverb only for installation results;
-* filtered, panned duplicates for subliminal fragments.
-
-Keep the central announcement intelligible. Reserve heavy processing for peripheral fragments.
-
-One useful progression:
-
-| Phase                  | Voice treatment                             |
-| ---------------------- | ------------------------------------------- |
-| Robot detection        | Dry, clinical, centered                     |
-| Programming activation | Slight stereo widening                      |
-| Obedience              | Firm, compressed, close                     |
-| Approval               | Warmer lower layer                          |
-| Arousal                | Wider and more enveloping                   |
-| Simplification         | Multiple faint delayed copies               |
-| Final program          | Clean central voice surrounded by fragments |
-
-The voice itself need not perform all the eroticism; the mix can become more intimate and invasive around it.
-
-## Which model to try
-
-I would audition these rather than committing immediately:
-
-* **ElevenLabs:** probably the easiest route to polished, expressive output. Commercial rights require an eligible paid plan, and its current use policy should be checked against the finished adult script before depending on it. ([ElevenLabs Documentation][4])
-* **OpenAI text-to-speech:** good built-in voices and style-controlled natural speech; worth trying for restrained clinical delivery. ([OpenAI API][5])
-* **Kokoro:** open-weight, lightweight, and Apache-licensed, so it is attractive if you want to generate everything locally without submitting erotic copy to a service. Its mild artificiality may fit the interface voice especially well. ([github.com][6])
-
-For this project I would test a polished cloud model against Kokoro. The question is not "Which sounds most human?" It is "Which sounds most like the authoritative machine running this game?"
-
-## A small audition before committing
-
-Render these five lines in three candidate voices:
-
-> Human verification complete.
-> Binaural carrier active.
-> Good robot.
-> Obedience produces pleasure.
-> Unit ready for use.
-
-Those cover:
-
-* technical reporting;
-* pseudoscientific authority;
-* praise;
-* erotic programming;
-* objectifying completion.
-
-Listen to each voice both dry and with the proposed processing. If none can say "Good robot" and "Obedience produces pleasure" without puncturing the mood, skip semantic voice entirely.
-
-My recommendation is therefore: **text-first game, sparse pre-rendered synthetic machine voice, visual rather than auditory subliminals, and no live text-to-speech dependency.** That preserves almost everything valuable in the design while avoiding a large voice-production burden.
-
-[4]: https://elevenlabs.io/docs/overview/capabilities/text-to-speech "Text to Speech"
-[5]: https://developers.openai.com/api/docs/guides/text-to-speech "Text to speech"
-[6]: https://github.com/hexgrad/kokoro "Kokoro"
+[1]: https://myscp.onlinelibrary.wiley.com/doi/10.1016/j.jcps.2010.11.004 "The workings and limits of subliminal advertising: The role of habits - Verwijmeren - 2011 - Journal of Consumer Psychology"
+[2]: https://pubmed.ncbi.nlm.nih.gov/27348289/ "Subliminal evaluative conditioning? Above-chance CS ..."
+[3]: https://pubmed.ncbi.nlm.nih.gov/30073406/ "Efficacy of binaural auditory beats in cognition, anxiety, and ..."
