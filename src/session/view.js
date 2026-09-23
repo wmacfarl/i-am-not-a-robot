@@ -33,7 +33,7 @@ export function sessionView(state, emit) {
   const flashes = s.stimuli.filter(entry => entry.mode === 'flash');
   const phaseNumber = playing ? phases.indexOf(step.phase) + 1 : phases.length;
   const meter = playing ? meterAt(s.index) : 1;
-  const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY'];
+  const installed = playing ? installedAt(s.index) : ['OPEN', 'OBEY', 'PLEASE'];
   const progress = chamber ? meter : s.index / firstChamberIndex;
   const scatter = [[-1.6, 1], [0.2, 1.3], [1.5, 0.9], [-0.7, 1.1], [1.1, 0.85], [-1.3, 1.2], [0.5, 1]];
   const spikeSpots = [[18, 22, 0.9], [78, 30, 0.85], [24, 74, 0.9], [76, 70, 0.85], [50, 14, 0.8], [14, 50, 0.85], [86, 52, 0.8], [50, 86, 0.8]];
@@ -76,8 +76,8 @@ export function sessionView(state, emit) {
       const lastFlash = [...visible].reverse().find(line => line.kind === 'flash');
       const headline = !current ? null : current.kind === 'flash' ? { label: 'Response model', word: current.text, text: 'Previously observed fragment.' }
         : current.kind === 'claim' ? { label: 'Response model', word: lastFlash?.text || 'ROBOT', text: current.text }
-        : current.kind === 'install' ? { label: 'Program status', word: step.installs || 'UNIT', text: current.text }
-        : current.kind === 'reveal' ? { label: 'Program status', word: step.installs || 'UNIT', text: html`${visible.find(line => line.kind === 'install')?.text}<br />${current.text}` }
+        : current.kind === 'install' ? { label: 'Protocol status', word: step.installs || 'UNIT', text: current.text }
+        : current.kind === 'reveal' ? { label: 'Protocol status', word: step.installs || 'UNIT', text: html`${visible.find(line => line.kind === 'install')?.text}<br />${current.text}` }
         : null;
       return html`<div class="classification-content readout">
         ${flashLayer()}
