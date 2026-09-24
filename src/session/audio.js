@@ -7,6 +7,7 @@ let muted = false;
 let chamber = false;
 let epoch = 0;
 let base = { cross: 0.25, cutoff: 900 };
+let intensity = null;
 let surge = false;
 let climax = 0;
 let windup = 0;
@@ -105,6 +106,8 @@ export function setChamber(on) {
   } catch { /* Audio is optional. */ }
 }
 export function setIntensity(meter) {
+  if (meter === intensity) return;
+  intensity = meter;
   base = { cross: 0.25 + 0.45 * meter, cutoff: 900 + 2600 * meter };
   if (carrier && !bursting) applyBase(0.6);
 }

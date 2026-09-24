@@ -125,7 +125,7 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
     context.fillStyle = skin.field;
     context.fillRect(0, 0, width, height);
 
-    const delta = Math.min(40, now - lastGuideAt);
+    const delta = Math.min(250, now - lastGuideAt);
     lastGuideAt = now;
     advanceMovement(Math.max(0, delta));
     engage += ((drawing ? 1 : 0) - engage) * (1 - Math.exp(-delta / 300));

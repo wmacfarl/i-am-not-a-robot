@@ -17,6 +17,13 @@ export function planStimuli(step, carry = null) {
   if (step.between) authored.push({ key: `${step.id}:between`, mode: 'flash', text: step.between, ms: 120, at: 'done', delay: 300 });
   return authored;
 }
+export function effectsOf(session, step) {
+  const running = session.screen === 'play' && !session.done;
+  return {
+    burst: session.screen === 'play' && (step.type === 'burst' || session.spiking || (running && step.type === 'hold' && session.holdFill > 0.3)),
+    shutter: running && ((step.type === 'burst' && !session.prelude) || (step.type === 'stream' && session.climax > 0.75) || (step.type === 'hold' && session.holdFill > 0.6)),
+  };
+}
 export function runStimuli(plan, { show, hide }) {
   const timers = new Set();
   const later = (fn, ms) => { const timer = setTimeout(() => { timers.delete(timer); fn(); }, ms); timers.add(timer); };

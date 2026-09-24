@@ -964,33 +964,6 @@ h3 {
   }
 }
 
-@media (orientation: landscape) and (max-height: 620px) {
-  .captcha-experience {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.95fr);
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    column-gap: 12px;
-  }
-
-  .captcha-instruction-row {
-    grid-column: 1;
-    grid-row: 2;
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .captcha-grid-stage {
-    grid-column: 2;
-    grid-row: 2 / span 2;
-    aspect-ratio: 1.48;
-  }
-
-  .verification-cycle {
-    grid-column: 1;
-    grid-row: 3;
-    grid-template-columns: 1fr;
-  }
-}
 
 .maze-test-body {
   min-height: 100%;

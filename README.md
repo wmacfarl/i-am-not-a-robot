@@ -34,8 +34,9 @@ The standalone twelve-maze experiment remains at `/trace`.
 
 ## Implementation
 
-Choo, nanohtml, Tone.js, plain CSS, JavaScript ES modules, and a small Node
-HTTP server. Browser libraries are bundled locally; there is no build step.
+Choo, nanohtml, PixiJS 7, Tone.js, plain CSS, JavaScript ES modules, and a small
+Node HTTP server. Browser libraries are bundled locally and loaded with script
+tags, as in `compliance-research-2`; there is no build step.
 
 - `src/session/content.js`: symbol vocabulary, phases, and the authored script.
   A step is a word grid, a labyrinth, a countdown, an installation (a countdown that turns into a hold), an
@@ -43,13 +44,20 @@ HTTP server. Browser libraries are bundled locally; there is no build step.
   `symbol`), its transition flash, its in-task streams and pairs, and in the
   chamber its reward-spike words.
 - `src/session/app.js`: session state, events, timers, run timing, and DOM sync.
-- `src/session/view.js`: card chrome, tasks, chamber, interludes, and the
-  stimulus layers.
+- `src/session/view.js`: card chrome, tasks, chamber, and interludes.
 - `src/session/stimuli.js`: the stimulus planner (flashes, pairs, spikes carried
-  into the next task) and timer runner.
-- `src/session/glitch.js`: picture tears through an SVG filter and the drifting
-  band overlay, scaled per section.
-- `src/session/spiral.js`: full-viewport programming spiral with interference.
+  into the next task), the timer runner, and which burst and shutter moments are
+  live.
+- `src/session/glitch.js`: picture tears on the task stage through an SVG
+  filter, scaled per section.
+- `src/pixi/backdrop.js`: the WebGL canvas behind the interface: the
+  programming spiral and its interference drawn by one shader, the word ring,
+  and the glow behind the stage.
+- `src/pixi/foreground.js`: the WebGL canvas in front of the interface: flashed,
+  spiked and burst words, the RELEASE command, the drifting bands, scanlines and
+  the shutter.
+- `src/pixi/hue-flash.js`: the colour-only hue flash both canvases run during
+  shutter moments.
 - `src/session/hold.js`: the press-and-hold controller behind the three installs.
 - `src/session/audio.js`: interface sounds, the 66 BPM carrier, the crossfed
   binaural pair, and the shaped burst envelope.

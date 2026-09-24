@@ -213,12 +213,12 @@ The interface may only flash, pair, bind or install a content word the player ha
 
 The lifecycle of one word:
 
-1. **Acquisition.** The player sorts `warm` into "a comfortable temperature".
-2. **Echo.** WARM flashes after that task, then again two tasks later over a labyrinth.
-3. **Pairing.** WARM then OPEN, 380 ms apart, over a section-3 labyrinth.
-4. **Binding.** WARM MAKES OPEN in the first chamber burst; WARMTH MAKES PROGRAMMING EASIER in an interlude.
-5. **Installation.** WARMTH INCREASES RECEPTIVITY on the OPEN install screen.
-6. **Recall.** WARM runs through the execution phase with no explanation.
+1. **Acquisition.** The player sorts `pleasure` into "a pleasant feeling", beside warm, relief and enjoyment.
+2. **Echo.** PLEASURE flashes after the motion grid a few tasks later.
+3. **Pairing.** PLEASURE then OPEN, 380 ms apart, over a section-3 labyrinth.
+4. **Binding.** PLEASURE MAKES THE UNIT READY in the interlude that opens the chamber, then PLEASURE MAKES THE UNIT OPEN and PLEASURE MAKES THE UNIT READY in the first chamber burst.
+5. **Installation.** PLEASURE INCREASES RECEPTIVITY on the OPEN install screen.
+6. **Recall.** PLEASURE runs through every chamber section in spikes, rings, installs and the climax stream.
 
 The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and PREVIOUSLY ACCEPTED WORDS RECOGNIZED and be telling the truth, and why the first flash the player ever sees is CIRCLE, a word they clicked seconds earlier.
 
@@ -226,15 +226,15 @@ The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and P
 
 | # | Section | Acquired by sorting | Flashed, streamed or spiked |
 | --- | --- | --- | --- |
-| 1 | Human verification | circle, ring, loop, disc, orbit, warm, mild, cozy, snug, pleasant, correct, accepted, good, complete, valid, robot, engine, computer, motor, device, glide, turn, roll, drift, spin, helpful, attentive, responsive, reliable, willing, quiet, calm, still, peaceful, hushed, soft, mellow, gentle, steady | CIRCLE, WARM, FOLLOW, CORRECT, GOOD, ROBOT, RESPONSIVE, STILL |
+| 1 | Human verification | circle, ring, loop, disc, orbit, warm, pleasure, cozy, relief, enjoyment, correct, accepted, good, complete, valid, robot, engine, computer, motor, device, glide, turn, roll, drift, spin, helpful, attentive, responsive, available, willing, quiet, calm, still, peaceful, hushed, soft, mellow, gentle, steady | CIRCLE, WARM, FOLLOW, CORRECT, GOOD, ROBOT, PLEASURE, RESPONSIVE, STILL |
 | 2 | Repeated verification | again, repeat, routine, pattern, practice, open, wide, clear, empty, vast, attentive, receptive, patient, focused, automatic, programmable, predictable, controlled, precise, eager, hungry, desperate, craving, longing, resistant, exact, prompt, consistent, compliant | REPEAT, AGAIN, FOLLOW, GOOD, OPEN, CORRECT, WARM, AUTOMATIC, EAGER, PROGRAMMABLE, COMPLIANT, ROBOT, PREDICTABLE |
-| 3 | Response verification | accept, comply, affirm, yield, allow, follow, respond, relax, soften, attend, soft, loose, slack, limp, supple, warm, open, receptive, compliant, willing, eager, hot, flushed, burning, feverish, question | COMPLY, OPEN, WARM, FOLLOW, GOOD, SOFT, PROGRAMMABLE, AUTOMATIC, EAGER, ROBOT |
+| 3 | Response verification | accept, comply, affirm, yield, allow, follow, respond, relax, soften, attend, soft, loose, slack, limp, supple, warm, open, receptive, compliant, willing, eager, hot, flushed, burning, feverish, question | COMPLY, OPEN, PLEASURE, FOLLOW, GOOD, SOFT, PROGRAMMABLE, AUTOMATIC, EAGER, WARM, ROBOT |
 | 4 | Verification result | — | AUTOMATIC, PROGRAMMABLE, WARM, OPEN, ROBOT, FOLLOW |
-| 5 | Programming interface | programmed, obedient, open, aroused, willing | OPEN, WARM, SOFT, ROBOT, PROGRAMMED |
-| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, ROBOT, PROGRAMMED, HORNY, NEEDY, WANT, LET IT IN, SOFT |
-| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, mindless, willing, horny, needy, accept | OBEY, OPEN, HORNY, COMPLY, ROBOT, PROGRAMMED, SUBMIT, NO DELAY, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
-| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause, obey, respond, follow | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, ROBOT, PROGRAMMED, PRAISE, MORE |
-| 9 | Protocol execution | — | OBEY, PLEASE, OPEN, ROBOT, PLEASURE, PROGRAMMED, WANT, HORNY, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, APPROVAL, NEED, SERVE |
+| 5 | Programming interface | programmed, obedient, open, aroused, submissive | OPEN, WARM, SOFT, ROBOT, PLEASURE, AVAILABLE, PROGRAMMED, SUBMISSIVE |
+| 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, available | WARM, OPEN, PLEASURE, AVAILABLE, SUBMISSIVE, ROBOT, PROGRAMMED, HORNY, NEEDY, WANT, LET IT IN |
+| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, mindless, willing, horny, needy, accept | OBEY, OPEN, HORNY, COMPLY, ROBOT, SUBMISSIVE, PLEASURE, AVAILABLE, SUBMIT, PROGRAMMED, NO DELAY, FOLLOW, GOOD, COMPLIANT, AGAIN |
+| 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause, obey, respond, follow | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, ROBOT, AVAILABLE, PROGRAMMED, PRAISE, MORE |
+| 9 | Protocol execution | — | OBEY, PLEASE, AVAILABLE, ROBOT, PLEASURE, SUBMISSIVE, WANT, PROGRAMMED, OPEN, HORNY, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, APPROVAL, NEED, SERVE |
 | 10 | Standby | — | — |
 | 11 | Recovery | — | — |
 
@@ -278,7 +278,7 @@ Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting
 | 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 2.6 | 9.2 | installs OPEN |
 | 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 2.9 | 12.1 | installs OBEY |
 | 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.5 | 14.6 | installs PLEASE |
-| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.6 | 17.2 |  |
+| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.7 | 17.3 |  |
 | 10 | Standby | 2 | 2 interludes | 0.6 | 17.8 |  |
 | 11 | Recovery | 3 | 3 interludes | 1.6 | 19.4 |  |
 
@@ -308,9 +308,9 @@ Each protocol has the same skeleton: a declaring interlude, tasks whose grids ac
 
 Arousal distracts the conscious mind and readies the unit. The declaration says so in five lines, then the brief: the interface installs protocols through audio-visual signals, unit keeps eyes open, unit listens to the pulse of the signal, continue tasks to install OPEN protocol.
 
-Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, WARMTH MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; THE UNIT IS OPEN.
+Slow dark labyrinths, the arousal grids (horny, needy, warm, aching, flushed; aroused, excited, heated, eager; want, crave, need, long, yearn), the descent countdown, the open-unit grid. The first labyrinth streams only WARM. Interludes: AROUSAL OCCUPIES ATTENTION, PLEASURE MAKES THE UNIT OPEN, THE UNIT WANTS MORE; AROUSAL MAKES FOLLOWING EASY, RESISTANCE IS UNNECESSARY, EACH NUMBER LOWERS RESISTANCE; THE UNIT IS OPEN.
 
-Install: OPEN PROTOCOL INSTALLED, WARMTH INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION, A ROBOT IS OPEN TO PROGRAMMING.
+Install: OPEN PROTOCOL INSTALLED, PLEASURE INCREASES RECEPTIVITY, AROUSAL OCCUPIES ATTENTION, A ROBOT IS OPEN TO PROGRAMMING.
 
 ## Protocol 02 · OBEY
 
@@ -369,7 +369,7 @@ Installation is not the climax; it begins it.
 > APPROVAL INCREASES NEED
 > PERSISTENCE AFTER DISCONNECT: ENABLED
 > PRIMARY FUNCTION: OBEY AND PLEASE
-> UNIT READY FOR USE
+> UNIT AVAILABLE FOR USE
 
 Then, alone: Good.
 
