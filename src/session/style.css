@@ -202,11 +202,10 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-chamber .study-page { width: 100%; padding: 0; }
 .is-chamber .study-shell { max-width: none; }
 .is-chamber .test-card.pulse-card { max-width: none; min-height: 100vh; min-height: 100svh; max-height: none; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #efe4ec; }
-.is-chamber .captcha-experience { flex: 0 0 auto; max-width: min(700px, calc((100svh - 300px) * 1.25)); margin-block: auto; }
+.is-chamber .captcha-experience { flex: 0 0 auto; grid-template-columns: minmax(0, 1fr); max-width: min(700px, calc((100svh - 300px) * 1.25)); margin-block: auto; }
 @media (orientation: landscape) and (max-height: 620px) {
-  .is-chamber .captcha-experience { grid-template-columns: minmax(0, 1fr); max-width: calc(100svh - 240px); }
-  .is-chamber .captcha-instruction-row, .is-chamber .captcha-grid-stage, .is-chamber .verification-cycle { grid-column: auto; grid-row: auto; }
-  .is-chamber .captcha-instruction-row:not(.is-full) { flex-direction: row; align-items: center; }
+  .captcha-experience { max-width: calc(100svh - 250px); }
+  .is-chamber .captcha-experience { max-width: calc(100svh - 240px); }
 }
 .is-chamber .card-header, .is-chamber .card-footer { background: transparent; border-color: transparent; color: #c9a9bd; }
 .is-chamber .card-label, .is-chamber .card-count, .is-chamber .settings-trigger { color: #d8b4c8; }
@@ -259,7 +258,8 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-chamber .center-cue-label { border-radius: 2px; }
 .is-chamber .captcha-grid-stage { border-radius: 2px; }
 .is-chamber .captcha-tile { border-radius: 0; }
-.is-chamber .tile-text { font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.is-chamber .captcha-tile.is-text { container-type: inline-size; }
+.is-chamber .tile-text { font-size: min(14px, calc((100cqi - 20px) / (var(--chars, 1) * 0.68))); letter-spacing: 0.06em; text-transform: uppercase; }
 .is-chamber .tile-index { color: #9c7f92; font-size: 9px; }
 .is-chamber .tile-index::before { content: "["; }
 .is-chamber .tile-index::after { content: "]"; }
@@ -305,7 +305,7 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-recovery .diagnostic-lines p::before, .is-recovery .diagnostic-lines p.is-current::after { content: none; }
 .is-recovery .diagnostic-lines .line-title, .is-recovery .diagnostic-lines .line-status { color: #efe4ec; }
 .readout .gate-button { margin-top: 18px; }
-.stream-tile .tile-text { font-size: clamp(20px, 3vw, 30px); letter-spacing: 0.14em; text-transform: uppercase; animation: tile-word-in 480ms ease both; }
+.stream-tile .tile-text { font-size: min(clamp(20px, 3vw, 30px), calc((100cqi - 20px) / (var(--chars, 1) * 0.76))); letter-spacing: 0.14em; text-transform: uppercase; animation: tile-word-in 480ms ease both; }
 .stream-tile.has-word:not(.is-hit) { cursor: pointer; }
 .is-chamber .stream-tile.has-word:not(.is-hit):hover { background: rgba(70, 36, 58, 0.98); }
 .stream-tile.is-hit { background: rgba(70, 36, 58, 0.98); box-shadow: inset 0 0 0 3px #f0a6c8; }

@@ -4,6 +4,7 @@ import { isLocalDev } from './app.js';
 import { stimulusRoot } from '../views/stimulus-root.js';
 const verificationId = String(10000 + (Date.now() % 90000));
 const canvases = new Map();
+const longest = text => Math.max(...text.split(' ').map(part => part.length));
 const clock = ms => { const total = Math.round(ms / 1000); return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`; };
 function canvas(id, attrs) {
   let element = canvases.get(id);
@@ -83,7 +84,7 @@ export function sessionView(state, emit) {
         ${instructionRow()}
         <div class="captcha-grid-stage ${s.done ? 'is-verified' : s.selected.length ? 'is-verify-ready' : ''}" id=${`stage-${step.id}`} style="--scan-ms: 2200ms">
           <div class="grid-scan" aria-hidden="true"></div>
-          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${arrangeWords(step.words, s.index).map((word, index) => { const active = s.selected.includes(word); return html`<button class="captcha-tile ${active ? 'is-selected' : ''} ${s.done && active ? 'is-accepted' : ''} ${step.symbolic ? 'is-shape' : 'is-text'}" type="button" disabled=${s.done} aria-pressed=${active ? 'true' : 'false'} aria-label=${step.symbolic ? `symbol ${glyphOf(word)}` : word} onclick=${() => emit('session:select', word)}>${step.symbolic ? html`<span class="tile-shape">${glyph(word, 52)}</span>` : html`<span class="tile-text">${word}</span>`}<span class="selection-frame" aria-hidden="true"></span><span class="tile-index" aria-hidden="true">${index + 1}</span></button>`; })}</div>
+          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${arrangeWords(step.words, s.index).map((word, index) => { const active = s.selected.includes(word); return html`<button class="captcha-tile ${active ? 'is-selected' : ''} ${s.done && active ? 'is-accepted' : ''} ${step.symbolic ? 'is-shape' : 'is-text'}" type="button" disabled=${s.done} aria-pressed=${active ? 'true' : 'false'} aria-label=${step.symbolic ? `symbol ${glyphOf(word)}` : word} onclick=${() => emit('session:select', word)}>${step.symbolic ? html`<span class="tile-shape">${glyph(word, 52)}</span>` : html`<span class="tile-text" style=${`--chars:${longest(word)}`}>${word}</span>`}<span class="selection-frame" aria-hidden="true"></span><span class="tile-index" aria-hidden="true">${index + 1}</span></button>`; })}</div>
         </div>
         <div class="verification-cycle has-action">
           ${cycleStatus()}
@@ -106,7 +107,7 @@ export function sessionView(state, emit) {
       return html`<div class="captcha-experience stream-experience">
       ${instructionRow()}
       <div class="captcha-grid-stage" id=${`stage-${step.id}`}>
-        <div class="captcha-grid" role="group" aria-label="Respond to every word that appears">${cells.map(slot => html`<button class="captcha-tile is-text stream-tile ${slot ? 'has-word' : ''} ${slot && slot.hit ? 'is-hit' : ''}" type="button" disabled=${!slot || slot.hit} aria-label=${slot ? slot.word : 'empty'} onclick=${slot ? () => emit('session:hit', slot.id) : null}>${slot ? html`<span class="tile-text" id=${`word-${slot.id}`}>${slot.word}</span>` : ''}<span class="selection-frame" aria-hidden="true"></span></button>`)}</div>
+        <div class="captcha-grid" role="group" aria-label="Respond to every word that appears">${cells.map(slot => html`<button class="captcha-tile is-text stream-tile ${slot ? 'has-word' : ''} ${slot && slot.hit ? 'is-hit' : ''}" type="button" disabled=${!slot || slot.hit} aria-label=${slot ? slot.word : 'empty'} onclick=${slot ? () => emit('session:hit', slot.id) : null}>${slot ? html`<span class="tile-text" id=${`word-${slot.id}`} style=${`--chars:${slot.word.length}`}>${slot.word}</span>` : ''}<span class="selection-frame" aria-hidden="true"></span></button>`)}</div>
       </div>
       <div class="verification-cycle">${cycleStatus()}</div>
     </div>`;
