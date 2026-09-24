@@ -42,7 +42,7 @@ function createController(surface, task, { onComplete, onFill, onFull }) {
   }
   function tick(now) {
     frame = requestAnimationFrame(tick);
-    const delta = Math.min(40, now - last);
+    const delta = Math.min(250, now - last);
     last = now;
     if (pressed && !full) { fill = Math.min(1, fill + delta / task.holdMs); if (fill >= 1) becomeFull(now); }
     else if (!pressed && !full) fill = Math.max(0, fill - delta / 400);

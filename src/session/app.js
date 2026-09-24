@@ -1,9 +1,10 @@
 import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt, carrierAt } from './content.js';
-import { planStimuli, runStimuli, spikeOf } from './stimuli.js';
+import { planStimuli, runStimuli, spikeOf, effectsOf } from './stimuli.js';
 import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge, setClimax, setBeat, snap } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
 import { mountHold, unmountHold } from './hold.js';
-import { mountSpiral, unmountSpiral, setSpiral } from './spiral.js';
+import { mountBackdrop, unmountBackdrop, setBackdrop, prepareBackdrop } from '../pixi/backdrop.js';
+import { mountForeground, unmountForeground } from '../pixi/foreground.js';
 import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
@@ -30,6 +31,7 @@ export function sessionStore(state, emitter) {
   const blocked = () => s().paused || s().settings || s().exiting;
   const active = () => s().screen === 'play' && !blocked() && !s().done;
   const render = () => { syncTimers(); emitter.emit('render'); };
+  const holdStage = fill => (fill > 0) + (fill > 0.3) + (fill > 0.6) + (fill === 1);
   function cancelAdvance() { clearTimeout(advanceTimer); advanceTimer = null; }
   function scheduleAdvance() {
     if (s().screen !== 'play' || !s().done || blocked()) { cancelAdvance(); return; }
@@ -44,8 +46,8 @@ export function sessionStore(state, emitter) {
   function arm() {
     armed = true;
     stimuliRun = runStimuli(planStimuli(step(), carry), {
-      show: entry => { s().stimuli = [...s().stimuli, entry]; if (entry.mode === 'flash') tear(); emitter.emit('render'); },
-      hide: key => { s().stimuli = s().stimuli.filter(item => item.key !== key); emitter.emit('render'); },
+      show: entry => { s().stimuli = [...s().stimuli, { ...entry, shownAt: performance.now() }]; if (entry.mode === 'flash') tear(); else emitter.emit('render'); },
+      hide: key => { const hidden = s().stimuli.find(item => item.key === key); s().stimuli = s().stimuli.filter(item => item.key !== key); if (hidden && hidden.mode !== 'flash') emitter.emit('render'); },
     });
     if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 1300); }
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
@@ -241,24 +243,40 @@ export function sessionStore(state, emitter) {
     setBeat(playing && !suspended && !session.done ? (current.type === 'hold' ? session.holdFill : current.type === 'trace' ? traceWind : 0) : 0);
     setSurge(spiking && current.type !== 'burst');
     setBurst(playing && !suspended && current.type === 'burst' && !session.done, current.ms);
-    const spiral = document.getElementById('session-spiral');
+    const stageElement = document.getElementById(`stage-${current.id}`);
+    const { burst, shutter } = effectsOf(session, current);
+    const shuttering = shutter && !suspended;
+    const backdrop = document.getElementById('backdrop-root');
     const idleHold = current.type === 'hold' && session.counted && !session.done && !session.holdFill;
-    if (spiral) mountSpiral(spiral, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : idleHold ? 0.35 : current.type === 'trace' ? 0.55 : 1 });
-    else unmountSpiral();
-    const stage = playing && !suspended && current.phase.glitch ? document.getElementById(`stage-${current.id}`) : null;
+    if (backdrop) mountBackdrop(backdrop, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : idleHold ? 0.35 : current.type === 'trace' ? 0.55 : 1, stage: current.type === 'burst' ? null : stageElement, climax: current.type === 'stream' && !session.done, hue: shuttering && current.phase.chamber });
+    else unmountBackdrop();
+    const foreground = document.getElementById('foreground-root');
+    if (foreground) mountForeground(foreground, { stimuli: () => s().stimuli, anchor: stageElement || document.querySelector('.readout'), chamber: current.phase.chamber, burstStage: current.type === 'burst', glitch: current.phase.glitch || 0, bandStage: stageElement, scanlines: current.phase.chamber && !current.phase.recovery ? (burst ? 0.5 : 1) : 0, shutter: shuttering, hue: shuttering && current.phase.chamber, frozen: suspended || session.prelude, release: Boolean(current.releaseOnCommand) && session.holdFill === 1 && !session.done, install: current.type === 'hold' });
+    else unmountForeground();
+    const stage = playing && !suspended && current.phase.glitch ? stageElement : null;
     if (stage) mountGlitch(stage, { intensity: current.phase.glitch }); else unmountGlitch();
     const running = playing && !suspended && !session.done;
     const traceCanvas = running && current.type === 'trace' ? document.getElementById('session-trace') : null;
     if (traceCanvas) {
       const task = session.traceTask;
       task.chamber = current.phase.chamber;
-      mountTrace(traceCanvas, task, () => { if (s().traceTask === task) emitter.emit('session:traceComplete'); }, { onGrab: () => sound('select'), onWind: (progress, engage) => { traceWind = Math.round(progress * engage * 0.5 * 100) / 100; setBeat(traceWind); setSpiral({ spin: engage * (2 + 9 * progress) }); } });
-    } else { unmountTrace(); setSpiral({ spin: 0 }); }
+      mountTrace(traceCanvas, task, () => { if (s().traceTask === task) emitter.emit('session:traceComplete'); }, { onGrab: () => sound('select'), onWind: (progress, engage) => { traceWind = Math.round(progress * engage * 0.5 * 100) / 100; setBeat(traceWind); setBackdrop({ spin: engage * (2 + 9 * progress) }); } });
+    } else { unmountTrace(); setBackdrop({ spin: 0 }); }
     const holdSurface = running && current.type === 'hold' && session.counted ? document.querySelector('.study-page') : null;
     if (holdSurface) {
       const task = session.holdTask;
-      mountHold(holdSurface, task, { onComplete: () => { if (s().holdTask === task) emitter.emit('session:holdComplete'); }, onFill: fill => { setSpiral({ contraction: fill }); if (fill > 0) stimuliRun?.press(); const level = Math.round(fill * 50) / 50; if (level !== s().holdFill) { s().holdFill = level; emitter.emit('render'); } }, onFull: () => sound('confirm') });
-    } else { unmountHold(); setSpiral({ contraction: 0 }); }
+      mountHold(holdSurface, task, { onComplete: () => { if (s().holdTask === task) emitter.emit('session:holdComplete'); }, onFill: fill => {
+        setBackdrop({ contraction: fill });
+        if (fill > 0) stimuliRun?.press();
+        const level = Math.round(fill * 50) / 50;
+        if (level === s().holdFill) return;
+        const stage = holdStage(s().holdFill);
+        s().holdFill = level;
+        setClimax(level); setBeat(level); setBackdrop({ burst: level });
+        document.querySelector('.hold-button').style.setProperty('--fill', level);
+        if (holdStage(level) !== stage) emitter.emit('render');
+      }, onFull: () => sound('confirm') });
+    } else { unmountHold(); setBackdrop({ contraction: 0 }); }
   }
   const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(sync); };
   emitter.on('render', schedule);
@@ -275,5 +293,6 @@ export function sessionStore(state, emitter) {
       }
       if (event.key === 'Escape' && s().screen === 'play') { s().paused = true; render(); }
     });
+    prepareBackdrop();
   });
 }

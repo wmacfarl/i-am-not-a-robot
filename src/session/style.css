@@ -115,14 +115,7 @@ body { transition: background 1.6s ease; }
 .trace-grid-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .trace-grid-stage canvas { cursor: crosshair; }
 
-.stim-flash { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; place-content: center; overflow: hidden; pointer-events: none; background: var(--wash, rgba(245, 247, 249, 0.72)); animation: stim-frame var(--ms) step-end forwards; }
-.stim-flash b { font: 800 clamp(26px, 5vw, 44px)/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.24em; color: #1f2937; opacity: 0.6; white-space: nowrap; text-shadow: 2px 0 rgba(37, 99, 235, 0.4), -2px 0 rgba(220, 38, 38, 0.32); }
-.captcha-grid-stage::before { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: var(--glitch, 0); background: repeating-linear-gradient(180deg, transparent 0 44px, rgba(37, 99, 235, 0.05) 44px 52px, transparent 52px 96px, rgba(37, 99, 235, 0.08) 96px 99px, transparent 99px 140px); animation: signal-drift 7s linear infinite; }
 .captcha-grid-stage.is-tearing { filter: url(#signal-tear); }
-@keyframes signal-drift { to { background-position: 0 140px; } }
-.mode-center .stim-flash { --wash: rgba(252, 243, 247, 0.72); }
-.mode-center .stim-flash b { color: var(--warm); }
-@keyframes stim-frame { 0% { opacity: 1; } 85%, 100% { opacity: 0; } }
 
 .readout { position: relative; max-width: 620px; text-align: center; }
 .readout .robot-check { margin-bottom: 18px; }
@@ -164,6 +157,9 @@ body { transition: background 1.6s ease; }
 .dev-skip { position: fixed; right: 12px; bottom: 12px; z-index: 5; }
 
 .pulse-backdrop { position: fixed; inset: 0; z-index: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+.pulse-backdrop canvas { display: block; width: 100%; height: 100%; }
+.pulse-foreground { position: fixed; inset: 0; z-index: 8; pointer-events: none; }
+.pulse-foreground canvas { display: block; width: 100%; height: 100%; }
 
 
 @media (max-width: 720px), (orientation: landscape) and (max-height: 620px) {
@@ -242,8 +238,6 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-chamber .model-result p { color: #e8d6e2; }
 .is-chamber .center-cue-label { background: transparent; border-color: transparent; color: #f0a6c8; }
 .is-chamber .command-label { color: #f0a6c8; }
-.is-chamber .stim-flash { background: transparent; animation: none; }
-.is-chamber .stim-flash b { color: #fbe9f3; opacity: 0.92; font-size: clamp(30px, 6.4vw, 56px); letter-spacing: 0.22em; text-shadow: 3px 0 rgba(140, 255, 220, 0.35), -3px 0 rgba(255, 140, 200, 0.42), 0 0 34px rgba(240, 166, 200, 0.75); animation: burst-word var(--ms) ease-in-out forwards; }
 .is-chamber .settings-backdrop, .is-chamber .modal-backdrop { background: rgba(7, 6, 13, 0.7); }
 .is-chamber .settings-panel, .is-chamber .modal-panel { background: #1c1220; border-color: rgba(226, 150, 196, 0.28); color: #efe4ec; }
 .is-chamber .settings-panel-header, .is-chamber .settings-group { border-color: rgba(226, 150, 196, 0.18); }
@@ -255,7 +249,6 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-chamber .dev-skip { background: #1c1220; color: #c9a9bd; border-color: #5b4b6b; }
 
 .is-chamber, .is-chamber button, .is-chamber .captcha-instruction, .is-chamber .tile-text, .is-chamber .card-footer, .is-chamber .cycle-status, .is-chamber .settings-panel, .is-chamber .modal-panel { font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace; }
-.is-chamber .test-card.pulse-card::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px); }
 .is-chamber .step-badge { border-radius: 2px; font-size: 11px; }
 .is-chamber .card-label::before { content: "// "; color: #8f6f82; }
 .is-chamber .card-bar, .is-chamber .card-bar-fill { border-radius: 0; }
@@ -294,38 +287,20 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 @keyframes cursor-blink { 50% { opacity: 0; } }
 
 .burst-stage { aspect-ratio: auto; min-height: 340px; border-color: rgba(240, 166, 200, 0.55); box-shadow: inset 0 0 60px rgba(240, 166, 200, 0.18); }
-.burst-stage .stim-flash { background: transparent; animation: none; }
-.burst-stage .stim-flash b { padding: 0.1em 0.3em 0.08em 0.5em; background: transparent; max-width: 88%; white-space: normal; text-align: center; line-height: 1.05; font-size: calc(clamp(30px, 6.4vw, 56px) * var(--fit, 1)); letter-spacing: 0.22em; color: #fbe9f3; opacity: 0.92; filter: none; translate: 0 var(--dy, 0); scale: var(--scale, 1); text-shadow: 3px 0 rgba(140, 255, 220, 0.35), -3px 0 rgba(255, 140, 200, 0.42), 0 0 34px rgba(240, 166, 200, 0.75); animation: burst-word var(--ms) ease-in-out forwards; }
-@keyframes burst-word { 0% { opacity: 0; transform: translateX(-8px) skewX(-8deg); } 14% { opacity: 0.92; transform: none; } 48% { opacity: 0.88; } 54% { opacity: 0.45; transform: translateX(5px) skewX(4deg); } 58% { opacity: 0.92; transform: none; } 100% { opacity: 0; transform: translateX(6px); } }
-.is-burst .test-card.pulse-card::after { opacity: 0.5; }
 .is-burst .captcha-instruction { text-shadow: 0 0 20px rgba(240, 166, 200, 0.6); }
 .session-log { margin: 14px auto 6px; max-width: 360px; text-align: left; font: 500 12px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; color: #4c5561; }
 .session-log p { display: flex; justify-content: space-between; gap: 12px; margin: 0; padding: 2px 0; border-bottom: 1px solid var(--line); }
 .session-log .session-log-total { font-weight: 700; color: #1e293b; border-bottom-color: var(--line-dark); }
-.is-chamber .captcha-grid-stage::before { display: none; }
-.is-chamber .study-page::before { content: ""; position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: var(--glitch, 0); background: repeating-linear-gradient(180deg, transparent 0 44px, rgba(240, 166, 200, 0.07) 44px 52px, transparent 52px 96px, rgba(240, 166, 200, 0.11) 96px 99px, transparent 99px 140px); animation: signal-drift 7s linear infinite; }
-.is-chamber .captcha-grid-stage::after { content: ""; position: absolute; inset: -16%; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, rgba(240, 166, 200, 0.34), transparent); animation: chamber-pulse 909ms ease-in-out infinite; }
-@keyframes chamber-pulse { 0%, 100% { opacity: 0.12; } 28% { opacity: 0.62; } }
-.stim-flash.is-spike { display: block; }
-.stim-flash.is-spike b { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; scale: var(--scale, 1); max-width: 44%; white-space: normal; text-align: center; line-height: 1.05; font-size: clamp(22px, 4.2vw, 40px); }
-.shutter { position: fixed; inset: 0; z-index: 9; pointer-events: none; background: #000; opacity: 0; }
-.is-shutter .shutter { animation: shutter 500ms steps(1, end) infinite; }
-@keyframes shutter { 0% { opacity: 0.14; } 15%, 100% { opacity: 0; } }
-.is-prelude .study-page::before, .is-prelude .captcha-grid-stage::before, .is-prelude .captcha-grid-stage::after, .is-prelude .stim-flash b { animation-play-state: paused; }
-.is-climax .captcha-grid-stage::after { animation-duration: 606ms; }
 .is-chamber .test-card.pulse-card { overflow: visible; }
 .is-chamber .captcha-grid-stage { overflow: visible; }
 .is-chamber .grid-scan { display: none; }
-.is-chamber .stim-flash { overflow: visible; }
 .burst-stage { border: 0; box-shadow: none; background: transparent; }
-.burst-stage::before, .burst-stage::after { display: none; }
 .is-chamber .complete-card { background: transparent; border-color: transparent; box-shadow: none; color: #efe4ec; }
 .is-chamber .complete-card p, .is-chamber .complete-card .screen-label, .is-chamber .completion-meta { color: #e8d6e2; }
 .is-chamber .session-log { color: #b58aa5; }
 .is-chamber .session-log p { border-bottom-color: rgba(226, 150, 196, 0.18); }
 .is-chamber .session-log .session-log-total { color: #efe4ec; border-bottom-color: rgba(226, 150, 196, 0.4); }
 .is-chamber .secondary-button { background: transparent; border: 1px solid rgba(240, 166, 200, 0.6); color: #f0a6c8; border-radius: 2px; }
-.is-recovery .test-card.pulse-card::after { display: none; }
 .is-recovery .diagnostic-lines { font-family: system-ui, sans-serif; font-size: 18px; line-height: 1.8; letter-spacing: normal; text-transform: none; text-shadow: none; background: transparent; border-color: transparent; }
 .is-recovery .diagnostic-lines p::before, .is-recovery .diagnostic-lines p.is-current::after { content: none; }
 .is-recovery .diagnostic-lines .line-title, .is-recovery .diagnostic-lines .line-status { color: #efe4ec; }
@@ -338,7 +313,6 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 @keyframes tile-word-in { from { opacity: 0; scale: 0.9; } }
 @keyframes tile-word-out { to { opacity: 0; scale: 1.15; } }
 .study-page:has(.task-hold:not(.is-complete)) { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
-.is-chamber .release-command b { padding-left: 0.22em; font-size: clamp(44px, 9vw, 88px); animation: burst-word 909ms ease-in-out infinite; }
 @property --fill { syntax: '<number>'; inherits: false; initial-value: 0; }
 .install-stage .captcha-grid { container-type: inline-size; }
 .install-stage .captcha-grid, .install-stage .captcha-tile { transition: opacity 600ms ease, background 600ms ease, box-shadow 100ms linear; }
@@ -350,6 +324,3 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .captcha-tile.hold-button.is-full { opacity: 0.4; }
 .captcha-tile.hold-button:disabled { cursor: default; }
 @keyframes hold-beckon { 0%, 100% { box-shadow: 0 0 16px rgba(240, 166, 200, 0.35); } 28% { box-shadow: 0 0 44px rgba(240, 166, 200, 0.85); } }
-.hue-flash { position: fixed; inset: 0; z-index: 8; pointer-events: none; mix-blend-mode: color; opacity: 0; }
-.is-chamber.is-shutter .hue-flash { opacity: 0.55; animation: hue-flash 455ms step-end infinite; }
-@keyframes hue-flash { 0% { background: #e879f9; } 25% { background: #a78bfa; } 50% { background: #818cf8; } 75% { background: #60a5fa; } }
