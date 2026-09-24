@@ -1,6 +1,7 @@
 import { routeForRound } from "../maze/routes.js";
 
 let active = null;
+const glowReach = 44;
 const skins = {
   paper: { field: "rgba(245,247,249,0.9)", corridor: "#cfd7e1", path: "#667587", traced: "#2563eb", core: "#ffffff", guide: "#2563eb", guideFill: "#ffffff", marker: "37,99,235", start: "#1d4ed8", end: "#0f766e", endpointFill: "#ffffff" },
   slate: { field: "rgba(232,237,244,0.94)", corridor: "#b9c3d0", path: "#475569", traced: "#0f766e", core: "#ffffff", guide: "#0f766e", guideFill: "#ffffff", marker: "15,118,110", start: "#0f766e", end: "#1d4ed8", endpointFill: "#ffffff" },
@@ -151,7 +152,7 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
     const beckon = drawing ? 0 : 0.5 + 0.5 * Math.sin(now / 260);
     context.beginPath();
     context.fillStyle = `rgba(${skin.marker},${drawing ? 0.22 : 0.05 + beckon * 0.12})`;
-    context.arc(marker.x, marker.y, drawing ? 26 : 30 + beckon * 14, 0, Math.PI * 2);
+    context.arc(marker.x, marker.y, drawing ? 26 : glowReach - 14 * (1 - beckon), 0, Math.PI * 2);
     context.fill();
     const missed = now - missedAt;
     if (missed < 600) {
@@ -200,7 +201,9 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
 
 export function buildPath(path, width, height, rings) {
   const maze = routeForRound(Number(path.replace("maze-", "")), { rings });
-  const size = Math.min(width, height) * 0.94;
+  const inset = Math.min(...maze.geometry.paths[0].points.map((point) => Math.min(point.x, point.y, 1 - point.x, 1 - point.y)));
+  const side = Math.min(width, height);
+  const size = Math.min(side * 0.94, (side - 2 * glowReach) / (1 - 2 * inset));
   const offsetX = (width - size) / 2;
   const offsetY = (height - size) / 2;
   const raw = maze.geometry.paths[0].points.map((point) => ({ x: offsetX + point.x * size, y: offsetY + point.y * size }));

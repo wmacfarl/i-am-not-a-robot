@@ -58,6 +58,8 @@ body { transition: background 1.6s ease; }
 .captcha-experience { display: grid; width: 100%; max-width: 700px; flex: 1 1 auto; grid-template-rows: auto minmax(0, 1fr) auto; align-self: center; gap: 12px; }
 .captcha-instruction-row { display: flex; min-height: 48px; align-items: center; justify-content: space-between; gap: 14px; }
 .captcha-instruction-row.is-symbol { justify-content: center; }
+.captcha-instruction-row.is-full { flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; }
+.captcha-instruction-row.is-full .center-cue-label { padding: 0; border: 0; background: transparent; }
 .captcha-instruction { margin: 0; color: #202631; font-size: 18px; font-weight: 680; line-height: 1.3; }
 .center-cue-label { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #b7c6e6; border-radius: 4px; background: rgba(255, 255, 255, 0.76); color: var(--signal); font: 700 12px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.07em; text-transform: uppercase; }
 .center-cue-label .glyph, .command-label .glyph { color: currentColor; }
@@ -113,7 +115,7 @@ body { transition: background 1.6s ease; }
 .trace-grid-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
 .trace-grid-stage canvas { cursor: crosshair; }
 
-.stim-flash { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; overflow: hidden; pointer-events: none; background: var(--wash, rgba(245, 247, 249, 0.72)); animation: stim-frame var(--ms) step-end forwards; }
+.stim-flash { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; place-content: center; overflow: hidden; pointer-events: none; background: var(--wash, rgba(245, 247, 249, 0.72)); animation: stim-frame var(--ms) step-end forwards; }
 .stim-flash b { font: 800 clamp(26px, 5vw, 44px)/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.24em; color: #1f2937; opacity: 0.6; white-space: nowrap; text-shadow: 2px 0 rgba(37, 99, 235, 0.4), -2px 0 rgba(220, 38, 38, 0.32); }
 .captcha-grid-stage::before { content: ""; position: absolute; inset: 0; z-index: 5; pointer-events: none; opacity: var(--glitch, 0); background: repeating-linear-gradient(180deg, transparent 0 44px, rgba(37, 99, 235, 0.05) 44px 52px, transparent 52px 96px, rgba(37, 99, 235, 0.08) 96px 99px, transparent 99px 140px); animation: signal-drift 7s linear infinite; }
 .captcha-grid-stage.is-tearing { filter: url(#signal-tear); }
@@ -205,6 +207,11 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .is-chamber .study-shell { max-width: none; }
 .is-chamber .test-card.pulse-card { max-width: none; min-height: 100vh; min-height: 100svh; max-height: none; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #efe4ec; }
 .is-chamber .captcha-experience { flex: 0 0 auto; max-width: min(700px, calc((100svh - 300px) * 1.25)); margin-block: auto; }
+@media (orientation: landscape) and (max-height: 620px) {
+  .is-chamber .captcha-experience { grid-template-columns: minmax(0, 1fr); max-width: calc(100svh - 240px); }
+  .is-chamber .captcha-instruction-row, .is-chamber .captcha-grid-stage, .is-chamber .verification-cycle { grid-column: auto; grid-row: auto; }
+  .is-chamber .captcha-instruction-row:not(.is-full) { flex-direction: row; align-items: center; }
+}
 .is-chamber .card-header, .is-chamber .card-footer { background: transparent; border-color: transparent; color: #c9a9bd; }
 .is-chamber .card-label, .is-chamber .card-count, .is-chamber .settings-trigger { color: #d8b4c8; }
 .is-chamber .settings-trigger:hover { background: rgba(255, 255, 255, 0.06); border-color: rgba(226, 150, 196, 0.3); color: #ffffff; }
@@ -331,12 +338,13 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 @keyframes tile-word-in { from { opacity: 0; scale: 0.9; } }
 @keyframes tile-word-out { to { opacity: 0; scale: 1.15; } }
 .study-page:has(.task-hold:not(.is-complete)) { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
-.is-chamber .release-command b { font-size: clamp(44px, 9vw, 88px); animation: burst-word 909ms ease-in-out infinite; }
+.is-chamber .release-command b { padding-left: 0.22em; font-size: clamp(44px, 9vw, 88px); animation: burst-word 909ms ease-in-out infinite; }
 @property --fill { syntax: '<number>'; inherits: false; initial-value: 0; }
+.install-stage .captcha-grid { container-type: inline-size; }
 .install-stage .captcha-grid, .install-stage .captcha-tile { transition: opacity 600ms ease, background 600ms ease, box-shadow 100ms linear; }
 .install-stage.is-counted .captcha-grid { background: transparent; }
 .install-stage.is-counted .captcha-tile:not(.hold-button) { opacity: 0; pointer-events: none; }
-.is-chamber .captcha-tile.hold-button { padding: 10px; background: linear-gradient(90deg, #fff4fa calc(var(--fill) * 100%), #f0a6c8 calc(var(--fill) * 100%)); color: #261b29; font: 800 14px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 0 0 calc(22px + 60px * var(--fill)) rgba(240, 166, 200, calc(0.45 + 0.45 * var(--fill))); transition: --fill 160ms linear, opacity 600ms ease; animation: hold-beckon 909ms ease-in-out infinite; }
+.is-chamber .captcha-tile.hold-button { padding: 10px; background: linear-gradient(90deg, #fff4fa calc(var(--fill) * 100%), #f0a6c8 calc(var(--fill) * 100%)); color: #261b29; font: 800 min(14px, 3.2cqi)/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 0 0 calc(22px + 60px * var(--fill)) rgba(240, 166, 200, calc(0.45 + 0.45 * var(--fill))); transition: --fill 160ms linear, opacity 600ms ease; animation: hold-beckon 909ms ease-in-out infinite; }
 .is-chamber .captcha-tile.hold-button:hover:not(:disabled) { background: linear-gradient(90deg, #fff4fa calc(var(--fill) * 100%), #f6bdd7 calc(var(--fill) * 100%)); }
 .captcha-tile.hold-button.is-holding { animation: none; }
 .captcha-tile.hold-button.is-full { opacity: 0.4; }

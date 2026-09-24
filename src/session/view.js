@@ -54,7 +54,7 @@ export function sessionView(state, emit) {
     if (level === 'word') return html`<span class="command-label">${glyph(command, 30)}${step.label || symbols[command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
     return html`<span class="command-label is-symbol">${glyph(command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
-  const instructionRow = (prompt = step.prompt, command = step.command) => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${level === 'full' ? html`<p class="captcha-instruction">${prompt}</p>` : ''}${cue(command)}</div>`;
+  const instructionRow = (prompt = step.prompt, command = step.command) => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''} ${level === 'full' ? 'is-full' : ''}">${cue(command)}${level === 'full' ? html`<p class="captcha-instruction">${prompt}</p>` : ''}</div>`;
   const numberTile = n => { const accepted = s.selected.includes(n); return html`<button class="captcha-tile is-text is-number ${accepted ? 'is-accepted' : ''} ${s.rejected === n ? 'is-rejected' : ''}" type="button" disabled=${s.done || accepted} aria-label=${n} onclick=${() => emit('session:select', n)}><span class="tile-text">${n}</span><span class="selection-frame" aria-hidden="true"></span></button>`; };
   const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
   const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
