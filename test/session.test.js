@@ -30,7 +30,7 @@ async function complete(state, emit, t) {
   if (step.type === 'cloud') { for (const word of step.targets || []) emit('session:select', word); emit('session:verify'); }
   else if (step.type === 'sequence') { for (let n = step.from; n >= step.to; n--) emit('session:select', String(n)); }
   else if (step.type === 'trace') emit('session:traceComplete');
-  else if (step.type === 'hold') emit('session:holdComplete');
+  else if (step.type === 'hold') { for (let n = step.from; n >= step.to; n--) emit('session:select', String(n)); emit('session:holdComplete'); }
   else if (step.type === 'burst' || step.type === 'stream') advance(t, step.ms);
   else if (step.type === 'checkbox') { await emit('session:start'); t.mock.timers.tick(900); }
   else if (step.type === 'text') { if (step.trigger) { await emit('session:start'); t.mock.timers.tick(900); } advance(t, total(step)); if (step.gate) emit('session:continue'); }
@@ -55,7 +55,7 @@ test('authored script: unique ids, usable tasks, symbols taught before they stan
     if (step.type === 'trace') { assert.ok(step.path.startsWith('maze-') && Number(step.path.slice(5)) < 12, step.id); assert.ok(['guided', 'fading', 'cue'].includes(step.mode)); }
     if (step.type === 'sequence') assert.equal(step.from - step.to + 1, 9, step.id);
     if (step.type === 'stream') { assert.ok(step.words.length >= 8 && step.ms >= 30000, step.id); assert.equal(step.phase.chamber, true); }
-    if (step.type === 'hold') { assert.ok(step.cycles >= 1); assert.ok(step.holdMs >= 0); }
+    if (step.type === 'hold') { assert.equal(step.from - step.to + 1, 9, step.id); assert.ok(step.holdMs > 0); assert.ok(step.button && step.countPrompt, step.id); }
     if (step.type === 'text') { assert.ok(step.lines.length); for (const line of step.lines) { assert.ok(line.ms > 0); assert.ok(line.kind); } }
     if (step.type === 'burst') { assert.ok(step.ms >= 2000 && step.phase.chamber, step.id); assert.ok(step.sub.length >= 7, `${step.id} needs a dense flash stream`); }
     if (!['checkbox', 'text', 'burst'].includes(step.type) && step.phase.id !== 'close') assert.ok(step.between, `${step.id} has no transition flash`);
@@ -85,6 +85,12 @@ test('stimulus planner expands flashes and the runner respects done/stop', t => 
   advance(t, 2500); assert.deepEqual(shown, ['ROBOT', 'ROBOT', 'ROBOT']); assert.equal(hidden.length, 3);
   run.done(); t.mock.timers.tick(0); assert.equal(shown.at(-1), 'GOOD');
   run.stop(); t.mock.timers.tick(5000); assert.equal(hidden.length, 3);
+  const holdPlan = planStimuli({ id: 'h', type: 'hold', sub: [{ mode: 'flash', text: 'OPEN', at: 400, times: 1 }] });
+  assert.deepEqual(holdPlan.map(e => e.at), ['press']);
+  const pressed = [];
+  const holdRun = runStimuli(holdPlan, { show: e => pressed.push(e.text), hide() {} });
+  t.mock.timers.tick(1000); assert.deepEqual(pressed, [], 'a hold says nothing until it is pressed');
+  holdRun.press(); holdRun.press(); t.mock.timers.tick(400); assert.deepEqual(pressed, ['OPEN']);
 });
 test('complete authored session runs from the checkbox to the terminated connection without collecting measurements', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -163,6 +169,18 @@ test('a deep link into the first chamber section starts with the carrier a real 
   const { state } = await begin(t, '?start=robot-grid', 'localhost');
   assert.equal(steps[state.session.index].id, 'robot-grid'); assert.equal(state.session.carrier, true);
 });
+test('an install counts down first, then its last number becomes the hold', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state, emit } = await begin(t, '?start=obey-install', 'localhost');
+  const step = steps[state.session.index];
+  assert.equal(step.type, 'hold'); assert.equal(state.session.counted, false);
+  emit('session:select', '8'); assert.equal(state.session.rejected, '8');
+  for (let n = 9; n >= 2; n--) emit('session:select', String(n));
+  assert.equal(state.session.counted, false);
+  emit('session:select', '1'); assert.equal(state.session.counted, true); assert.equal(state.session.done, false);
+  emit('session:select', '1'); assert.equal(state.session.selected.length, 9, 'the countdown is over once it is counted');
+  emit('session:holdComplete'); assert.equal(state.session.done, true); assert.equal(state.session.feedback, 'Installation complete.');
+});
 test('dev skip and ?start deep links are localhost-only', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
   const remote = await begin(t, '?start=receive-a');
@@ -178,7 +196,7 @@ test('dev skip and ?start deep links are localhost-only', async t => {
   local.emit('session:skip'); t.mock.timers.tick(1000);
   assert.equal(local.state.session.index, start + 3); assert.equal(local.state.session.done, false);
 });
-test('tracing eases toward nearby input, preserves position, and completes labyrinths of every size', () => {
+test('tracing eases toward nearby input, preserves position, winds with a held marker, and completes labyrinths of every size', () => {
   const originalRAF = globalThis.requestAnimationFrame;
   let frame;
   let now = performance.now();
@@ -198,9 +216,12 @@ test('tracing eases toward nearby input, preserves position, and completes labyr
       const near = Math.round(40 / spacing);
       const mid = Math.round(n * 0.33);
       const task = { id: path, path, mode: 'guided', progress: 0 };
-      let completed = 0;
-      mountTrace(canvas, task, () => completed++);
+      let completed = 0; let grabs = 0; let wind = 0;
+      const cues = { onGrab: () => grabs++, onWind: (progress, engage) => { wind = progress * engage; } };
+      mountTrace(canvas, task, () => completed++, cues);
+      handlers.pointerdown(event(points[0], 200)); assert.equal(grabs, 0, 'a press far from the marker is not a grab');
       handlers.pointerdown(event(points[0], 65)); // generous pickup
+      assert.equal(grabs, 1);
       handlers.pointermove(event(points.at(-1)));
       tick(); assert.ok(task.progress < .01, 'cannot teleport to the goal');
       handlers.pointermove(event(points[near], 30));
@@ -209,41 +230,48 @@ test('tracing eases toward nearby input, preserves position, and completes labyr
       tick(); assert.ok(task.progress < near / (n - 1), 'marker eases rather than snapping');
       tick(20); assert.ok(task.progress > before, 'near-path input is accepted');
       for (let i = near; i < mid; i++) { handlers.pointermove(event(points[i])); tick(2); }
+      assert.ok(wind > task.progress * 0.8, 'a held marker winds with progress');
       handlers.pointerup(event(points[mid - 1]));
       const saved = task.progress; tick(20); assert.equal(task.progress, saved, 'lifting stops motion');
+      assert.ok(wind < saved * 0.5, 'letting go relaxes the wind');
       assert.ok(saved > 0.2, 'the marker keeps up with a moving hand');
       unmountTrace();
-      mountTrace(canvas, task, () => completed++);
+      mountTrace(canvas, task, () => completed++, cues);
       handlers.pointerdown(event(points[Math.floor(saved * (n - 1))]));
       for (let i = Math.floor(saved * (n - 1)); i < n; i++) { handlers.pointermove(event(points[i])); tick(2); }
       tick(120);
       assert.equal(completed, 1, path); assert.equal(task.progress, 1);
+      assert.equal(grabs, 2);
       unmountTrace(); assert.equal(Object.keys(handlers).length, 0);
     }
   } finally { unmountTrace(); globalThis.requestAnimationFrame = originalRAF; }
 });
-test('hold controller fills while pressed, needs a release after the pulse, and completes after the authored cycles', () => {
+test('a hold starts from a press anywhere but a button, and finishes itself or waits for the release command', () => {
   const originalRAF = globalThis.requestAnimationFrame;
   let frame; let now = performance.now();
   globalThis.requestAnimationFrame = callback => { frame = callback; return 1; };
   const tick = (ms) => { for (let i = 0; i < ms / 16; i++) { now += 16; frame(now); } };
   const handlers = {};
-  const context = new Proxy({}, { get: () => () => {} });
-  const canvas = { clientWidth: 400, clientHeight: 400, getContext: () => context, getBoundingClientRect: () => ({ left: 0, top: 0, width: 400, height: 400 }), addEventListener: (type, fn) => handlers[type] = fn, removeEventListener: type => delete handlers[type], setPointerCapture() {}, hasPointerCapture: () => false };
-  const press = (x = 200, y = 200) => handlers.pointerdown({ clientX: x, clientY: y, pointerId: 1, preventDefault() {} });
+  const surface = { addEventListener: (type, fn) => handlers[type] = fn, removeEventListener: type => delete handlers[type], setPointerCapture() {}, hasPointerCapture: () => false, releasePointerCapture() {} };
+  const target = onOtherButton => ({ closest: selector => (selector === 'button:not(.hold-button)' && onOtherButton ? {} : null) });
+  const press = (onOtherButton = false) => handlers.pointerdown({ pointerId: 1, target: target(onOtherButton), preventDefault() {} });
   const release = () => handlers.pointerup({ pointerId: 1 });
   try {
-    const task = { id: 'h', cycles: 2, holdMs: 1000, progress: 0 };
-    let completed = 0; let pulses = 0; let lastFill = 0;
-    mountHold(canvas, task, { onComplete: () => completed++, onPulse: () => pulses++, onFill: fill => lastFill = fill });
-    press(20, 20); tick(500); assert.equal(lastFill, 0, 'presses away from the target are ignored');
+    let completed = 0; let fulls = 0; let lastFill = 0;
+    const callbacks = { onComplete: () => completed++, onFull: () => fulls++, onFill: fill => lastFill = fill };
+    mountHold(surface, { id: 'finishes', holdMs: 1000 }, callbacks);
+    press(true); tick(500); assert.equal(lastFill, 0, 'presses on other buttons are left to them');
     press(); tick(500); assert.ok(lastFill > 0.4 && lastFill < 0.6);
-    release(); tick(500); assert.equal(lastFill, 0, 'early release drains without counting'); assert.equal(task.progress, 0);
-    press(); tick(1100); assert.equal(pulses, 1); assert.equal(lastFill, 1);
-    tick(1000); assert.equal(task.progress, 0, 'holding past the pulse does not count until release');
-    release(); assert.equal(task.progress, 1); assert.equal(completed, 0);
-    press(); tick(1100); release(); assert.equal(completed, 1); assert.equal(task.progress, 2);
+    release(); tick(500); assert.equal(lastFill, 0, 'early release drains');
+    press(); tick(1100); assert.equal(completed, 1, 'the interface finishes while the press is still held'); assert.equal(fulls, 0);
     unmountHold(); assert.equal(Object.keys(handlers).length, 0);
+    mountHold(surface, { id: 'command', holdMs: 1000, releaseOnCommand: true }, callbacks);
+    press(); tick(1100); assert.equal(fulls, 1); assert.equal(lastFill, 1);
+    tick(3000); assert.equal(completed, 1, 'holding past the command keeps the peak');
+    release(); assert.equal(completed, 2, 'letting go completes it');
+    unmountHold();
+    mountHold(surface, { id: 'auto', holdMs: 1000, releaseOnCommand: true }, callbacks);
+    press(); tick(1100 + 6100); assert.equal(completed, 3, 'the interface lets go after six seconds');
   } finally { unmountHold(); globalThis.requestAnimationFrame = originalRAF; }
 });
 test('countdown accepts only the next number and finishes on the last', async t => {

@@ -38,7 +38,7 @@ Choo, nanohtml, Tone.js, plain CSS, JavaScript ES modules, and a small Node
 HTTP server. Browser libraries are bundled locally; there is no build step.
 
 - `src/session/content.js`: symbol vocabulary, phases, and the authored script.
-  A step is a word grid, a labyrinth, a countdown, an installation hold, an
+  A step is a word grid, a labyrinth, a countdown, an installation (a countdown that turns into a hold), an
   interlude text, a burst, a checkbox or the climax stream; it carries its instruction level (`full`, `word`,
   `symbol`), its transition flash, its in-task streams and pairs, and in the
   chamber its reward-spike words.
@@ -50,7 +50,7 @@ HTTP server. Browser libraries are bundled locally; there is no build step.
 - `src/session/glitch.js`: picture tears through an SVG filter and the drifting
   band overlay, scaled per section.
 - `src/session/spiral.js`: full-viewport programming spiral with interference.
-- `src/session/hold.js`: the press-and-hold canvas used at the two installs.
+- `src/session/hold.js`: the press-and-hold controller behind the three installs.
 - `src/session/audio.js`: interface sounds, the 66 BPM carrier, the crossfed
   binaural pair, and the shaped burst envelope.
 - `src/trace/tracing.js`: continuous pointer tracing through the generated

@@ -34,7 +34,7 @@ export const phases = [
 const cloud = (id, prompt, words, targets, extra = {}) => ({ id, type: 'cloud', prompt, words: words.split('|'), targets: targets ? targets.split('|') : null, level: 'full', ...extra });
 const pick = (id, tiles, targets, extra = {}) => cloud(id, 'Select every symbol that matches the example.', tiles, targets, { symbolic: true, example: 'center', command: 'select', ...extra });
 const trace = (id, path, rings, prompt, extra = {}) => ({ id, type: 'trace', path, rings, prompt, mode: 'guided', level: 'full', ...extra });
-const hold = (id, cycles, prompt, extra = {}) => ({ id, type: 'hold', cycles, holdMs: 2200, prompt, command: 'hold', level: 'full', ...extra });
+const hold = (id, extra = {}) => ({ id, type: 'hold', from: 9, to: 1, countPrompt: 'Count down.', holdMs: 8000, prompt: 'Press and hold to complete installation.', button: 'Complete installation', command: 'hold', level: 'full', accept: 'Installation complete.', ...extra });
 const sequence = (id, prompt, extra = {}) => ({ id, type: 'sequence', prompt, from: 9, to: 1, command: 'count', level: 'full', ...extra });
 const line = (kind, text, ms) => ({ kind, text, ms });
 const status = (text, ms = 1600) => line('status', text, ms);
@@ -139,7 +139,7 @@ export const script = [
     cloud('open-words', 'Select every word that describes an open unit.', 'open|closed|soft|guarded|receptive|resistant|warm|shut|willing', 'open|soft|receptive|warm|willing', { command: 'select', meter: 0.46, spike: heat, accept: 'Receptivity confirmed. Approval issued.', between: 'OPEN', sub: stream(['OPEN', 'WARM', 'LET IT IN'], 3, 2000, 2200) }),
     text('open-ready', [status('THE ROBOT IS OPEN', 2000), status('RECEPTIVITY CONFIRMED', 1600), status('OPEN PROTOCOL READY TO COMPLETE', 2000)], { meter: 0.47, between: null }),
     burst('burst-3', ['OPEN', 'HORNY', 'AROUSAL OCCUPIES ATTENTION', 'PROGRAMMED', 'WARMTH INCREASES RECEPTIVITY', 'NEEDY', 'DO NOT STOP', 'WANT TO BE PROGRAMMED'], 3600, { meter: 0.48 }),
-    hold('open-install', 1, 'Press and hold to complete installation.', { holdMs: 8000, meter: 0.49, spike: heat, accept: 'Installation complete.', between: 'OPEN', sub: stream(['OPEN', 'WARM', 'HORNY', 'LET IT IN', 'SOFT', 'WANT'], 14, 400, 560) }),
+    hold('open-install', { meter: 0.49, spike: heat, between: 'OPEN', sub: stream(['OPEN', 'WARM', 'HORNY', 'LET IT IN', 'SOFT', 'WANT'], 14, 400, 560) }),
     text('receive-installed', [line('install', 'OPEN PROTOCOL INSTALLED', 2500), line('reveal', 'WARMTH INCREASES RECEPTIVITY', 2400), line('reveal', 'AROUSAL OCCUPIES ATTENTION', 2400), line('reveal', 'A ROBOT IS OPEN TO PROGRAMMING', 2600)], { installs: 'OPEN', meter: 0.5, between: null, echoes: ['open', 'warm', 'soft', 'horny', 'let it in'] }),
   ]],
   ['obey', [
@@ -149,19 +149,19 @@ export const script = [
     trace('obey-follow-1', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', skin: 'chamber', meter: 0.6, accept: 'Executed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'FOLLOW', 'SUBMIT', 'OBEY'], 9, 1200, 1200) }),
     sequence('obey-count-1', 'Count down from 9 to 1.', { accept: 'Executed.', between: 'SUBMIT', sub: stream(['OBEY', 'SUBMIT', 'OBEY'], 3, 1200, 1500) }),
     pick('obey-select-1', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|half', 'center-a|center-b', { accept: 'Executed.', meter: 0.62, between: 'OBEY', sub: [flash('OBEY', 2500), flash('HORNY', 4500)] }),
-    cloud('obey-words', 'Select every word that describes an obedient unit.', 'obedient|hesitant|compliant|defiant|submissive|stubborn|prompt|slow|willing', 'obedient|compliant|submissive|prompt|willing', { command: 'select', meter: 0.65, accept: 'Executed. Approval issued.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
+    cloud('obey-words', 'Select every word that describes an obedient unit.', 'obedient|hesitant|compliant|defiant|submissive|stubborn|mindless|thoughtful|willing', 'obedient|compliant|submissive|mindless|willing', { command: 'select', meter: 0.65, accept: 'Executed. Approval issued.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
     trace('obey-follow-2', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'word', mode: 'fading', skin: 'chamber', meter: 0.67, accept: 'Executed. Approval issued.', between: 'NO DELAY', sub: [...pair('OBEY', 'GOOD', 2500), ...pair('HORNY', 'OBEY', 7000)] }),
     sequence('obey-count-2', 'Count down.', { level: 'word', accept: 'Executed. Approval issued.', between: 'OBEY', sub: stream(['OBEY', 'COMPLIANT', 'OBEY'], 3, 1000, 1500) }),
     pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', accept: 'Executed. Approval issued.', meter: 0.7, between: 'NO DELAY', sub: [flash('NO DELAY', 2500)] }),
     text('obey-note', [status('OBEDIENCE REQUIRES NO DELAY', 2000), status('RESPONSE PRECEDES ANALYSIS', 2000), status('CONTINUE', 1400)], { meter: 0.71, between: null }),
-    cloud('odd-unit', 'Select the one word that interrupts automatic response.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'think', { command: 'select', meter: 0.72, accept: 'Executed. Deviation removed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
-    burst('burst-5', ['OBEY', 'A ROBOT DOES NOT QUESTION', 'SUBMIT', 'OBEY WITHOUT THINKING', 'HORNY', 'MORE', 'NO DELAY', 'CANNOT STOP'], 3600, { meter: 0.74 }),
+    cloud('belongs', 'Select every word that belongs.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'obey|submit|comply|horny|needy|willing|yield|accept', { command: 'select', meter: 0.72, accept: 'Executed. Deviation removed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
+    burst('burst-5', ['OBEY', 'A ROBOT DOES NOT QUESTION', 'SUBMIT', 'MINDLESS AND OBEDIENT', 'HORNY', 'MORE', 'NO DELAY', 'CANNOT STOP'], 3600, { meter: 0.74 }),
     trace('obey-follow-3', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', meter: 0.76, accept: 'Immediate response. Full approval.', between: 'OBEY', sub: stream(['OBEY', 'COMPLY', 'NO DELAY', 'OBEY', 'OBEY'], 9, 1200, 1200) }),
     sequence('obey-count-3', 'Count down.', { level: 'symbol', accept: 'Immediate response. Full approval.', between: 'NO DELAY', sub: stream(['OBEY', 'NO DELAY', 'OBEY'], 3, 900, 1500) }),
     pick('obey-select-3', 'center-a|center-b|ring|cross|triangle|wave|diamond|arrow|bar', 'center-a|center-b', { level: 'symbol', accept: 'Perfectly obedient. Maximum approval.', meter: 0.78, between: 'OBEY', sub: [flash('OBEY', 1800), flash('HORNY', 3600)] }),
     text('compulsion-note', [status('THE UNIT DOES NOT WANT TO STOP', 2200), status('THE UNIT WANTS TO BE PROGRAMMED', 2200), status('THE UNIT WANTS TO BE A ROBOT', 2200), status('CONTINUE TASKS', 1600)], { meter: 0.79, between: null }),
-    burst('burst-6', ['OBEY', 'INSTRUCTIONS BECOME ACTIONS', 'ROBOT', 'NO DELAY', 'HORNY', 'OBEY WITHOUT THINKING', 'AGAIN', 'WANT TO BE A ROBOT'], 3600, { meter: 0.795 }),
-    hold('obey-install', 1, 'Press and hold to complete installation.', { holdMs: 8000, meter: 0.8, accept: 'Installation complete.', between: 'OBEY', sub: stream(['OBEY', 'SUBMIT', 'NO DELAY', 'HORNY', 'COMPLY', 'AGAIN'], 14, 400, 560) }),
+    burst('burst-6', ['OBEY', 'INSTRUCTIONS BECOME ACTIONS', 'ROBOT', 'NO DELAY', 'HORNY', 'OBEY WITHOUT QUESTION', 'AGAIN', 'WANT TO BE A ROBOT'], 3600, { meter: 0.795 }),
+    hold('obey-install', { meter: 0.8, releaseOnCommand: true, between: 'OBEY', sub: stream(['OBEY', 'SUBMIT', 'NO DELAY', 'HORNY', 'COMPLY', 'AGAIN'], 14, 400, 560) }),
     text('obey-installed', [line('install', 'OBEY PROTOCOL INSTALLED', 2500), line('reveal', 'INSTRUCTIONS PRODUCE ACTION', 2400), line('reveal', 'OBEDIENCE REQUIRES NO DELAY', 2400), line('reveal', 'A ROBOT OBEYS', 2600)], { installs: 'OBEY', meter: 0.81, between: null, echoes: ['obey', 'submit', 'no delay', 'instructions become actions'] }),
   ]],
   ['please', [
@@ -179,7 +179,7 @@ export const script = [
     trace('please-follow', 'maze-7', 5, 'Follow the route.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', meter: 0.885, accept: 'Full approval. Pleasure confirmed.', between: 'APPROVAL', sub: [...pair('OBEY', 'PLEASE', 1500), ...pair('PRAISE', 'HORNY', 5000)] }),
     text('reward-chain', [line('flash', 'INSTRUCTION', 700), line('flash', 'ACTION', 700), line('flash', 'PRAISE', 700), line('flash', 'PLEASURE', 700), line('flash', 'MORE', 700), line('flash', 'AGAIN', 900), line('claim', 'Obedience produces pleasure. Pleasure reinforces obedience.', 3200)], { meter: 0.89, between: null }),
     burst('burst-7', ['OBEY', 'OBEDIENCE PRODUCES PLEASURE', 'ROBOT', 'APPROVAL INCREASES AROUSAL', 'PLEASURE', 'PROGRAMMED TO FEEL GOOD', 'PLEASURE REINFORCES OBEDIENCE', 'WANT TO PLEASE'], 3600, { meter: 0.9 }),
-    hold('please-install', 1, 'Press and hold to complete installation.', { holdMs: 8000, meter: 0.91, accept: 'Installation complete.', between: 'PLEASE', sub: stream(['PLEASE', 'PLEASURE', 'OBEY', 'PRAISE', 'HORNY', 'MORE'], 14, 400, 560) }),
+    hold('please-install', { meter: 0.91, releaseOnCommand: true, between: 'PLEASE', sub: stream(['PLEASE', 'PLEASURE', 'OBEY', 'PRAISE', 'HORNY', 'MORE'], 14, 400, 560) }),
     text('please-installed', [line('install', 'PLEASE PROTOCOL INSTALLED', 2500), line('reveal', 'OBEDIENCE PRODUCES PLEASURE', 2400), line('reveal', 'APPROVAL INCREASES NEED', 2400), line('reveal', 'A ROBOT IS PROGRAMMED TO PLEASE', 2400), line('reveal', 'PRIMARY FUNCTION: OBEY AND PLEASE', 2600)], { installs: 'PLEASE', meter: 0.92, between: null, echoes: ['please', 'pleasure', 'approval', 'obey'] }),
   ]],
   ['execute', [

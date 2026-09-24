@@ -8,7 +8,10 @@ let angle = 0;
 let ringAngle = 0;
 let fadeNow = 1;
 let burstNow = 0;
-const state = { contraction: 0, intensity: 0.5, ring: [], paused: false, fade: 1, burst: 0 };
+let spinNow = 0;
+const ARMS = 2;
+const MAX_SWEEP = 3 * Math.PI * 2 / ARMS;
+const state = { contraction: 0, intensity: 0.5, ring: [], paused: false, fade: 1, burst: 0, spin: 0 };
 export function mountSpiral(element, next = {}) {
   if (element !== canvas) {
     unmountSpiral();
@@ -48,17 +51,20 @@ function draw(now) {
   last = now;
   fadeNow += (state.fade - fadeNow) * Math.min(1, dt * 1.6);
   burstNow += (state.burst - burstNow) * Math.min(1, dt * (state.burst > burstNow ? 6 : 1.8));
+  spinNow += (state.spin - spinNow) * Math.min(1, dt * 3);
   ringAngle -= dt * 0.05;
   const phase = beatPhase(now);
   const attack = 0.18;
   const rise = Math.min(1, phase / attack);
   const pulse = phase < attack ? rise * rise * (3 - 2 * rise) : Math.pow(1 - (phase - attack) / (1 - attack), 2);
-  angle += dt * (0.34 + state.contraction * 0.8) * (1 + pulse * 1.1) * (1 + burstNow * 2.4) * fadeNow;
+  const depth = state.intensity;
+  // An arm passes any point at most three times a second: moving stripes faster than that are a photosensitive trigger.
+  angle += dt * Math.min(MAX_SWEEP, (0.45 + 1.35 * depth + state.contraction * 0.8) * (1 + pulse * 1.1) * (1 + burstNow * 2.4) * (1 + spinNow) * fadeNow);
+  const turns = 5.5 + 3.5 * depth;
   const cx = width / 2;
   const cy = height / 2;
   const size = Math.min(width, height);
   const scale = 1 - 0.3 * state.contraction - 0.08 * burstNow;
-  const depth = state.intensity;
   const arm = blend([120, 92, 130], [226, 150, 196], 0.35 + depth * 0.65);
   const glow = blend([70, 40, 70], [162, 58, 106], depth);
   context.fillStyle = '#261b29';
@@ -80,18 +86,19 @@ function draw(now) {
   const maxRadius = Math.hypot(width, height) * 0.58;
   const alpha = Math.min(0.95, fadeNow * (0.16 + depth * 0.26 + state.contraction * 0.12) + burstNow * 0.35);
   context.lineCap = 'round';
-  for (let armIndex = 0; armIndex < 2; armIndex++) {
+  const points = Math.ceil(turns * 55);
+  for (let armIndex = 0; armIndex < ARMS; armIndex++) {
     context.beginPath();
-    for (let i = 0; i <= 260; i++) {
-      const p = i / 260;
-      const theta = p * Math.PI * 2 * 4.8 + angle + armIndex * Math.PI;
+    for (let i = 0; i <= points; i++) {
+      const p = i / points;
+      const theta = p * Math.PI * 2 * turns + angle + armIndex * Math.PI * 2 / ARMS;
       const radius = Math.pow(p, 1.18) * maxRadius * scale;
       const x = cx + Math.cos(theta) * radius;
       const y = cy + Math.sin(theta) * radius;
       if (i === 0) context.moveTo(x, y); else context.lineTo(x, y);
     }
     context.strokeStyle = `rgba(${arm},${alpha})`;
-    context.lineWidth = 3 + size * 0.01 + state.contraction * 2 + burstNow * 2.5;
+    context.lineWidth = (2 + size * 0.008) * 5.5 / turns + state.contraction * 2 + burstNow * 2.5;
     context.stroke();
   }
   drawInterference(context, width, height, now);
