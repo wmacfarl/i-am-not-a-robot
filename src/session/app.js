@@ -1,6 +1,6 @@
-import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt } from './content.js';
+import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt, carrierAt } from './content.js';
 import { planStimuli, runStimuli, spikeOf } from './stimuli.js';
-import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge, setClimax } from './audio.js';
+import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge, setClimax, setBeat, snap } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
 import { mountHold, unmountHold } from './hold.js';
 import { mountSpiral, unmountSpiral, setSpiral } from './spiral.js';
@@ -8,7 +8,7 @@ import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
-  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false, prelude: false, stream: null, climax: 0, holdFill: 0, waiting: false });
+  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false, prelude: false, stream: null, climax: 0, holdFill: 0, counted: false, waiting: false });
   state.session = fresh();
   let frame;
   let dialogOpen = false;
@@ -16,7 +16,6 @@ export function sessionStore(state, emitter) {
   let advanceTimer = null;
   let lineTimer = null;
   let stimuliRun = null;
-  let startedAt = null;
   let phaseStartedAt = null;
   let timeline = [];
   let carry = null;
@@ -25,6 +24,7 @@ export function sessionStore(state, emitter) {
   let streamTimer = null;
   let rejectTimer = null;
   let armed = false;
+  let traceWind = 0;
   const s = () => state.session;
   const step = () => steps[s().index];
   const blocked = () => s().paused || s().settings || s().exiting;
@@ -50,8 +50,8 @@ export function sessionStore(state, emitter) {
     if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 1300); }
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
     if (step().type === 'stream' && !s().done) {
-      s().stream.startedAt = Date.now();
-      lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms);
+      s().stream.startedAt = Date.now() - s().stream.elapsed;
+      lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms - s().stream.elapsed);
       spawn();
     }
     if (step().type === 'burst' && !s().done) {
@@ -61,6 +61,7 @@ export function sessionStore(state, emitter) {
     }
   }
   function disarm() {
+    if (armed && s().stream && !s().done) s().stream.elapsed = Date.now() - s().stream.startedAt;
     armed = false;
     stimuliRun?.stop(); stimuliRun = null;
     clearTimeout(lineTimer); lineTimer = null;
@@ -89,10 +90,11 @@ export function sessionStore(state, emitter) {
     const current = step();
     Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [], prelude: false });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
-    s().stream = current.type === 'stream' ? { slots: [], spawned: 0, hits: 0, startedAt: null } : null;
-    s().climax = 0; s().holdFill = 0; s().waiting = false;
-    s().holdTask = current.type === 'hold' ? { ...current, progress: 0 } : null;
-    if (current.phase.carrier !== undefined) s().carrier = current.phase.carrier;
+    s().stream = current.type === 'stream' ? { slots: [], spawned: 0, hits: 0, startedAt: null, elapsed: 0 } : null;
+    s().climax = 0; s().holdFill = 0; s().counted = false; s().waiting = false;
+    s().holdTask = current.type === 'hold' ? { ...current } : null;
+    s().carrier = carrierAt(s().index);
+    traceWind = 0;
   }
   function spawn() {
     const current = step(); const state = s().stream; const now = Date.now();
@@ -113,6 +115,7 @@ export function sessionStore(state, emitter) {
   function finish(message, silent = false) {
     s().done = true; s().feedback = message; s().spiking = Boolean(spikeOf(step()));
     clearTimeout(lineTimer); lineTimer = null;
+    clearTimeout(streamTimer); streamTimer = null;
     if (!silent) sound('accept');
     stimuliRun?.done();
     render();
@@ -124,7 +127,7 @@ export function sessionStore(state, emitter) {
     render();
   }
   function closePhase(phase) {
-    if (startedAt === null) return;
+    if (phaseStartedAt === null || phase.recovery) return;
     const now = Date.now();
     timeline.push({ title: phase.title, ms: now - phaseStartedAt });
     phaseStartedAt = now;
@@ -137,7 +140,7 @@ export function sessionStore(state, emitter) {
   function end() {
     disarm();
     closePhase(step().phase);
-    Object.assign(s(), { duration: startedAt === null ? 0 : Date.now() - startedAt, timeline: [...timeline] });
+    Object.assign(s(), { duration: timeline.reduce((total, entry) => total + entry.ms, 0), timeline: [...timeline] });
     recordRun();
     Object.assign(s(), { screen: 'end', carrier: false, exiting: false, paused: false, settings: false, done: false });
   }
@@ -145,7 +148,6 @@ export function sessionStore(state, emitter) {
     if (s().starting || s().triggered || !active() || (step().type !== 'checkbox' && step().trigger !== 'checkbox')) return;
     s().starting = true; emitter.emit('render');
     await Promise.race([startAudio(), new Promise(resolve => setTimeout(resolve, 1800))]);
-    muteAudio(s().muted);
     setTimeout(() => {
       if (!s().starting) return;
       s().starting = false;
@@ -157,7 +159,7 @@ export function sessionStore(state, emitter) {
         return;
       }
       const jump = s().index === 0 && isLocalDev() ? stepIndex(query.get('start') || '') : -1;
-      if (startedAt === null) { startedAt = phaseStartedAt = Date.now(); timeline = []; }
+      if (phaseStartedAt === null) { phaseStartedAt = Date.now(); timeline = []; }
       s().index = jump > 0 ? jump : s().index + 1;
       prepare(); render();
     }, 900);
@@ -174,7 +176,7 @@ export function sessionStore(state, emitter) {
   });
   emitter.on('session:select', word => {
     if (!active()) return;
-    if (step().type === 'sequence') {
+    if (step().type === 'sequence' || (step().type === 'hold' && !s().counted)) {
       const next = String(step().from - s().selected.length);
       if (word !== next) {
         s().rejected = word; s().feedback = `Out of sequence. Continue from ${next}.`; sound('retry');
@@ -182,7 +184,9 @@ export function sessionStore(state, emitter) {
         render(); return;
       }
       s().selected = [...s().selected, word]; s().rejected = null; s().feedback = '';
-      if (word === String(step().to)) finish(acceptanceFor(step())); else { sound('select'); render(); }
+      if (word !== String(step().to)) { sound('select'); render(); }
+      else if (step().type === 'hold') { s().counted = true; sound('confirm'); render(); }
+      else finish(acceptanceFor(step()));
       return;
     }
     if (step().type !== 'cloud') return;
@@ -195,7 +199,7 @@ export function sessionStore(state, emitter) {
     else { s().feedback = step().symbolic ? 'Check the example and try again. Select every matching symbol.' : 'Check the category and try again. Select every matching word.'; sound('retry'); render(); }
   });
   emitter.on('session:traceComplete', () => { if (active() && step().type === 'trace') finish(acceptanceFor(step())); });
-  emitter.on('session:holdComplete', () => { if (active() && step().type === 'hold') finish(acceptanceFor(step())); });
+  emitter.on('session:holdComplete', () => { if (active() && step().type === 'hold') { snap(); finish(acceptanceFor(step())); } });
   emitter.on('session:next', () => { if (s().screen === 'play' && !blocked() && s().done) advance(); });
   emitter.on('session:skip', () => {
     if (!isLocalDev() || s().screen !== 'play' || blocked()) return;
@@ -209,14 +213,14 @@ export function sessionStore(state, emitter) {
   emitter.on('session:continue', () => { if (!active() || !s().waiting) return; s().waiting = false; finish('', true); });
   emitter.on('session:exit', () => {
     const target = stepIndex('recovery-permission');
-    if (s().screen !== 'play' || s().index >= target) { end(); render(); return; }
+    if (s().screen !== 'play' || s().index >= target || !step().phase.chamber) { end(); render(); return; }
     cancelAdvance(); closePhase(step().phase);
     Object.assign(s(), { exiting: false, settings: false, paused: false });
     s().index = target; prepare(); render();
   });
-  emitter.on('session:restart', () => { const { muted, returnUrl } = s(); disarm(); startedAt = null; timeline = []; state.session = { ...fresh(), muted, returnUrl }; render(); });
+  emitter.on('session:restart', () => { const { muted, returnUrl } = s(); disarm(); phaseStartedAt = null; timeline = []; state.session = { ...fresh(), muted, returnUrl }; render(); });
   emitter.on('session:leave', () => { if (s().returnUrl) window.location.assign(s().returnUrl); });
-  emitter.on('session:mute', () => { s().muted = !s().muted; muteAudio(s().muted); render(); });
+  emitter.on('session:mute', () => { s().muted = !s().muted; render(); });
   function sync() {
     const session = s();
     const current = steps[session.index];
@@ -234,10 +238,12 @@ export function sessionStore(state, emitter) {
     const spiking = playing && !suspended && session.spiking;
     setIntensity(meterAt(session.index));
     setClimax(playing && !suspended && !session.done ? (current.type === 'stream' ? session.climax : current.type === 'hold' ? session.holdFill : 0) : 0);
+    setBeat(playing && !suspended && !session.done ? (current.type === 'hold' ? session.holdFill : current.type === 'trace' ? traceWind : 0) : 0);
     setSurge(spiking && current.type !== 'burst');
     setBurst(playing && !suspended && current.type === 'burst' && !session.done, current.ms);
     const spiral = document.getElementById('session-spiral');
-    if (spiral) mountSpiral(spiral, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : current.type === 'trace' ? 0.55 : 1 });
+    const idleHold = current.type === 'hold' && session.counted && !session.done && !session.holdFill;
+    if (spiral) mountSpiral(spiral, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : idleHold ? 0.35 : current.type === 'trace' ? 0.55 : 1 });
     else unmountSpiral();
     const stage = playing && !suspended && current.phase.glitch ? document.getElementById(`stage-${current.id}`) : null;
     if (stage) mountGlitch(stage, { intensity: current.phase.glitch }); else unmountGlitch();
@@ -246,13 +252,12 @@ export function sessionStore(state, emitter) {
     if (traceCanvas) {
       const task = session.traceTask;
       task.chamber = current.phase.chamber;
-      mountTrace(traceCanvas, task, () => { if (s().traceTask === task) emitter.emit('session:traceComplete'); });
-    } else unmountTrace();
-    const holdCanvas = running && current.type === 'hold' ? document.getElementById('session-hold') : null;
-    if (holdCanvas) {
+      mountTrace(traceCanvas, task, () => { if (s().traceTask === task) emitter.emit('session:traceComplete'); }, { onGrab: () => sound('select'), onWind: (progress, engage) => { traceWind = Math.round(progress * engage * 0.5 * 100) / 100; setBeat(traceWind); setSpiral({ spin: engage * (2 + 9 * progress) }); } });
+    } else { unmountTrace(); setSpiral({ spin: 0 }); }
+    const holdSurface = running && current.type === 'hold' && session.counted ? document.querySelector('.study-page') : null;
+    if (holdSurface) {
       const task = session.holdTask;
-      task.chamber = current.phase.chamber;
-      mountHold(holdCanvas, task, { onComplete: () => { if (s().holdTask === task) emitter.emit('session:holdComplete'); }, onFill: fill => { setSpiral({ contraction: fill }); if (Math.abs(fill - s().holdFill) > 0.02 || (fill === 0 && s().holdFill)) { s().holdFill = fill; emitter.emit('render'); } }, onPulse: () => sound('confirm') });
+      mountHold(holdSurface, task, { onComplete: () => { if (s().holdTask === task) emitter.emit('session:holdComplete'); }, onFill: fill => { setSpiral({ contraction: fill }); if (fill > 0) stimuliRun?.press(); const level = Math.round(fill * 50) / 50; if (level !== s().holdFill) { s().holdFill = level; emitter.emit('render'); } }, onFull: () => sound('confirm') });
     } else { unmountHold(); setSpiral({ contraction: 0 }); }
   }
   const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(sync); };

@@ -173,7 +173,7 @@ A grid accepts exactly its answer set and nothing else, and a rejected attempt s
 
 ## Labyrinth
 
-A generated unicursal labyrinth of three to five rings, traced from the outer start to the center with a follower that stays near the pointer. Routes recur: the first route returns in a second skin, and the chamber uses its own dark skin. Instruction level drops from a full sentence to the command word to the bare symbol.
+A generated unicursal labyrinth of three to five rings, traced from the outer start to the center with a follower that stays near the pointer. Routes recur: the first route returns in a second skin, and the chamber uses its own dark skin. Instruction level drops from a full sentence to the command word to the bare symbol. Grabbing the marker latches it visibly (it grows, gains a white core and a ring, and its halo brightens) with the selection click. A press away from the marker sends a ripple out from the marker to show where to grab. In the chamber, a held marker winds the carrier with the tracing itself: the beat speeds up continuously with progress, from 6 Hz to about 15 Hz at the centre (half the install hold's range). The spiral spins faster too: three times as fast the moment the marker is held (about one turn every 9 seconds against 26 at rest) and up to twelve times at the centre (about one every 2 seconds), and letting go eases both back within about a third of a second. Light-mode mazes stay silent apart from the grab click, as a CAPTCHA would.
 
 ## Countdown
 
@@ -181,11 +181,11 @@ Nine numbers shuffled in the grid, clicked from 9 to 1. A wrong number shakes, i
 
 ## Commands
 
-Three commands are taught as a full instruction with the symbol beside it, then as the command word, then as the symbol alone: `FOLLOW` (labyrinth), `COUNT` (countdown), `SELECT` (grid). Every chamber protocol runs its full-word-symbol trio. `HOLD` exists only as the two installation gestures, "Press and hold to complete installation."
+Three commands are taught as a full instruction with the symbol beside it, then as the command word, then as the symbol alone: `FOLLOW` (labyrinth), `COUNT` (countdown), `SELECT` (grid). Every chamber protocol runs its full-word-symbol trio. `HOLD` exists only at the three installations, "Press and hold to complete installation."
 
 ## Interludes
 
-Text steps between tasks: console lines that arrive one at a time in the card and are simply read. They carry every claim the fiction makes. Nothing that has to be read is ever placed beside a task in progress.
+Text steps between tasks: console lines that arrive one at a time and are simply read. They carry every claim the fiction makes. Nothing that has to be read is ever placed beside a task in progress.
 
 ---
 
@@ -204,6 +204,8 @@ Text steps between tasks: console lines that arrive one at a time in the card an
 | Reveal | The install screen states the association outright | end of each protocol |
 
 Flashes are theatrical. They last several frames, sit where the eyes already are, and are easy to overlook under distraction. Nothing is one frame long and nothing is claimed to work on the player outside the fiction.
+
+Colour flashes carry the rest of the strobing. Wherever the shutter runs (a burst after its freeze, the last stretch of an install hold, the late climax), a full-screen layer with `mix-blend-mode: color` steps the whole screen through fuchsia, violet, indigo and blue on every eighth of a beat, so the four hues cycle twice per beat. That blend changes only hue and keeps every pixel's brightness: against the chamber's real colours the worst change in relative luminance is 0.015, where the WCAG flash threshold is 0.10. The palette has no red or orange, so the red-flash rule never applies. At about 8.8 changes a second the steps are past WCAG's three-per-second safe harbour, so safety rests on those two properties. The rate is also held under about 10 a second, so that the small remaining brightness change, and differences between displays, never land in the 15 to 20 per second band where photosensitivity peaks. Teal was dropped from the palette because the blend's brightness model underweights green, which lifted the pink accents by 0.07.
 
 ## 5.2 The acquired-word rule
 
@@ -230,7 +232,7 @@ The rule is why the conversion screen can say RESPONSE VOCABULARY ACQUIRED and P
 | 4 | Verification result | — | AUTOMATIC, PROGRAMMABLE, WARM, OPEN, ROBOT, FOLLOW |
 | 5 | Programming interface | programmed, obedient, open, aroused, willing | OPEN, WARM, SOFT, ROBOT, PROGRAMMED |
 | 6 | Protocol 01 · Open | horny, needy, warm, aching, flushed, aroused, excited, heated, eager, want, crave, need, long, yearn, open, soft, receptive, willing | WARM, OPEN, ROBOT, PROGRAMMED, HORNY, NEEDY, WANT, LET IT IN, SOFT |
-| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, prompt, willing, think | OBEY, OPEN, HORNY, COMPLY, ROBOT, PROGRAMMED, SUBMIT, NO DELAY, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
+| 7 | Protocol 02 · Obey | obey, comply, submit, follow, yield, obedient, compliant, submissive, mindless, willing, horny, needy, accept | OBEY, OPEN, HORNY, COMPLY, ROBOT, PROGRAMMED, SUBMIT, NO DELAY, AGAIN, FOLLOW, GOOD, COMPLIANT, MORE |
 | 8 | Protocol 03 · Please | please, serve, satisfy, gratify, delight, pleasure, warmth, relief, bliss, satisfaction, praise, approval, reward, adoration, applause, obey, respond, follow | PLEASE, OBEY, HORNY, OPEN, PLEASURE, WARM, APPROVAL, ROBOT, PROGRAMMED, PRAISE, MORE |
 | 9 | Protocol execution | — | OBEY, PLEASE, OPEN, ROBOT, PLEASURE, PROGRAMMED, WANT, HORNY, WARM, SUBMIT, NEEDY, ACHING, PRAISE, YIELD, AROUSED, CRAVE, COMPLY, APPROVAL, NEED, SERVE |
 | 10 | Standby | — | — |
@@ -254,7 +256,7 @@ A 66 BPM low pulse and a 200 Hz / 206 Hz sine pair start when the chamber opens 
 
 ## Spikes and bursts
 
-A reward spike leans the crossfeed a further quarter and opens the filter for 1.3 seconds. A burst runs an envelope: duck for a quarter second, near-silence, a low impact with crossfeed jumping to 85 percent, filter opening through the build, full mono and the brightest filter at the crest, then release to the phase baseline with the confirmation tone.
+A reward spike leans the crossfeed a further quarter and opens the filter for 1.3 seconds. A burst is the carrier itself, modulated, and nothing else. It ducks for a quarter second and goes silent for about 30 ms. It then slams back about 4 dB louder and crossfeeds to full mono. From there to the crest the two tones spread symmetrically around 203 Hz, so the beat between them accelerates from 6 Hz, a countable throb, to 40 Hz, a rough buzz, while the pitch never rises. The carrier ends about 8 dB above its resting level at the crest. At the end the beat snaps back to 6 Hz and the carrier drops to rest under the confirmation tone. Earlier versions added layers over the carrier: a noise riser and climbing saw ("a bad engine revving sound effect"), then static beds and ticks. Both were cut, because the burst should only modulate the base.
 
 ## Deferred
 
@@ -273,12 +275,12 @@ Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting
 | 3 | Response verification | 10 | 6 grids, 2 labyrinths, 1 countdowns, 1 symbol picks | 1.5 | 5.0 |  |
 | 4 | Verification result | 4 | 1 symbol picks, 1 countdowns, 1 labyrinths, 1 interludes | 0.8 | 5.9 |  |
 | 5 | Programming interface | 5 | 2 interludes, 1 labyrinths, 1 grids, 1 bursts | 0.7 | 6.5 |  |
-| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 2.5 | 9.0 | installs OPEN |
-| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 2.8 | 11.8 | installs OBEY |
-| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.4 | 14.2 | installs PLEASE |
-| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.6 | 16.8 |  |
-| 10 | Standby | 2 | 2 interludes | 0.6 | 17.3 |  |
-| 11 | Recovery | 3 | 3 interludes | 1.6 | 18.9 |  |
+| 6 | Protocol 01 · Open | 17 | 6 interludes, 3 labyrinths, 4 grids, 2 bursts, 1 countdowns, 1 holds | 2.6 | 9.2 | installs OPEN |
+| 7 | Protocol 02 · Obey | 20 | 4 interludes, 3 grids, 3 bursts, 3 labyrinths, 3 countdowns, 3 symbol picks, 1 holds | 2.9 | 12.1 | installs OBEY |
+| 8 | Protocol 03 · Please | 16 | 5 interludes, 4 grids, 2 symbol picks, 1 countdowns, 2 labyrinths, 1 bursts, 1 holds | 2.5 | 14.6 | installs PLEASE |
+| 9 | Protocol execution | 10 | 3 interludes, 1 checkbox, 1 symbol picks, 1 countdowns, 1 labyrinths, 1 climax stream, 2 bursts | 2.6 | 17.2 |  |
+| 10 | Standby | 2 | 2 interludes | 0.6 | 17.8 |  |
+| 11 | Recovery | 3 | 3 interludes | 1.6 | 19.4 |  |
 
 **Human verification.** Ordinary grids, two labyrinths, the first countdown. Every flash is a word from the task just finished or one two tasks back. ROBOT appears once, masked, after the player sorts it as a machine.
 
@@ -288,7 +290,7 @@ Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting
 
 **Verification result.** A symbol-only trio, then the checkbox again and HUMAN VERIFICATION FAILED. The screen lists the acquired vocabulary and claims that every programming term was accepted before its purpose was revealed.
 
-**Programming interface.** The chamber boots in six lines, a first dark labyrinth with an interlude on the carrier, and the first burst.
+**Programming interface.** The chamber boots in six lines, a first dark labyrinth with an interlude on the carrier, and the first burst. The CAPTCHA card is gone from here on: the interface is fullscreen, with the section label and progress bar along the top edge, the task floating unframed over the spiral in a halo that pulses with the carrier, and the interference bands across the whole screen. The spiral speeds up and tightens with the programming meter. At the chamber's start it has about 5.7 turns and moves about 1.5 times its original speed; by the end it has 9 turns and moves about 5 times that speed, its lines thinning as it tightens. It gets denser by adding turns rather than arms, because the rate at which an arm sweeps past any point is what matters for photosensitivity: arm count times rotations per second. However bursts, holds and mazes combine, that sweep is capped at three a second.
 
 **Protocol 01 · Open, 02 · Obey, 03 · Please.** See 8.
 
@@ -300,7 +302,7 @@ Eleven sections, 114 steps, about 19 minutes at the pace measured in playtesting
 
 # 8. Protocols
 
-Each protocol has the same skeleton: a declaring interlude, tasks whose grids acquire the protocol's cluster before anything flashes it, a burst, the install hold, and an install screen that states the association outright. The interludes say the tasks themselves do the installing; the hold is the protocol's crest. "Press and hold to complete installation." runs eight seconds: as the ring fills, the protocol's words stream over the target, the spiral tightens and surges, the crossfeed and filter climb with the fill, and the shutter accents arrive past the halfway mark. Letting go early lets it all sink back; holding to the ring's end and releasing completes the installation.
+Each protocol has the same skeleton: a declaring interlude, tasks whose grids acquire the protocol's cluster before anything flashes it, a burst, the install hold, and an install screen that states the association outright. The interludes say the tasks themselves do the installing; the hold is the protocol's crest. It opens as an ordinary countdown grid, because at that point the player is clicking, not reading, with 1 always in the centre. When 1 is clicked, the eight outer tiles and the grid lines fade away and the centre tile, right under the pointer, becomes a solid pink COMPLETE INSTALLATION button. It glows on the beat while the spiral waits, dim and slow; held, it fills with light from left to right. A press anywhere on the screen starts it, and the protocol's words start streaming only then. Over eight seconds the button fills, the spiral tightens and surges, the crossfeed and filter climb, the two carrier tones spread so the beat winds from 6 Hz to 40 Hz, and the shutter accents arrive past the halfway mark. Letting go early lets it all sink back. How a hold ends is taught across the three installs. OPEN finishes by itself at full, whether or not the press is still held. OBEY and PLEASE hold at the peak and command RELEASE, full-screen on the beat, and letting go is what completes them. The interface lets go by itself six seconds after the command. Every completion cuts the carrier to silence for 0.4 seconds under the acceptance chord.
 
 ## Protocol 01 · OPEN
 
@@ -375,7 +377,7 @@ Then the shutdown: SUBLIMINAL CHANNEL CLOSED, AUDIO CARRIER DISCONNECTED, ACTIVE
 
 ## Recovery
 
-The session never ends deep, and every early exit from the settings panel routes here too. First a permission screen in the interface's voice: ACTIVE EXECUTION PAUSED, THE UNIT MAY MOVE, THE UNIT MAY TOUCH ITSELF AND ENJOY THE FEELING, IN ANY WAY IT LIKES, FOR AS LONG AS IT LIKES, NOTHING IS BEING MEASURED. It waits, for as long as the player wants, behind one button that carries the game's second and last first person: "I am ready to come back." Then the count-up, one calm sentence at a time in plain type with the spiral gone, the carrier off and no glitch: breathe in, breathe out, one through ten, eyes open, fully awake, fully yourself, recovery complete. Only then CONNECTION TERMINATED. The end card stays in the dark chamber styling and shows the session length with one row per section; the run is stored locally for later reading. The host page still provides the real boundary and any further aftercare.
+The session never ends deep, and every exit from the settings panel after the chamber opens routes here too; an exit during the verification sections ends the session at once. First a permission screen in the interface's voice: ACTIVE EXECUTION PAUSED, THE UNIT MAY MOVE, THE UNIT MAY TOUCH ITSELF AND ENJOY THE FEELING, IN ANY WAY IT LIKES, FOR AS LONG AS IT LIKES, NOTHING IS BEING MEASURED. It waits, for as long as the player wants, behind one button that carries the game's second and last first person: "I am ready to come back." Then the count-up, one calm sentence at a time in plain type with the spiral gone, the carrier off and no glitch: breathe in, breathe out, one through ten, eyes open, fully awake, fully yourself, recovery complete. Only then CONNECTION TERMINATED. The end card stays in the dark chamber styling and shows the session length with one row per section, timed up to the start of recovery; the run is stored locally for later reading. The host page still provides the real boundary and any further aftercare.
 
 ---
 

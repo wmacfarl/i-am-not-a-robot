@@ -48,13 +48,14 @@ export function sessionView(state, emit) {
     const long = entry.text.length > 18;
     return html`<div id=${`stim-${entry.key}`} class="stim-flash" style=${`--ms:${entry.ms}ms; --dy:${long ? dy / 2 : dy}em; --scale:${scale}; --fit:${long ? 0.72 : 1}`} aria-hidden="true"><b>${entry.text}</b></div>`;
   });
-  const cue = () => {
-    if (!step.command) return step.example ? html`<span class="center-cue-label cue-example"><span>Example</span>${glyph(step.example, 26)}</span>` : '';
-    if (level === 'full') return html`<span class="center-cue-label">${glyph(step.command, 16)}${symbols[step.command].word}${step.example ? glyph(step.example, 22) : ''}</span>`;
-    if (level === 'word') return html`<span class="command-label">${glyph(step.command, 30)}${step.label || symbols[step.command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
-    return html`<span class="command-label is-symbol">${glyph(step.command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
+  const cue = command => {
+    if (!command) return step.example ? html`<span class="center-cue-label cue-example"><span>Example</span>${glyph(step.example, 26)}</span>` : '';
+    if (level === 'full') return html`<span class="center-cue-label">${glyph(command, 16)}${symbols[command].word}${step.example ? glyph(step.example, 22) : ''}</span>`;
+    if (level === 'word') return html`<span class="command-label">${glyph(command, 30)}${step.label || symbols[command].word}${step.example ? glyph(step.example, 30) : ''}</span>`;
+    return html`<span class="command-label is-symbol">${glyph(command, 48)}${step.example ? glyph(step.example, 48) : ''}</span>`;
   };
-  const instructionRow = () => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${level === 'full' ? html`<p class="captcha-instruction">${step.prompt}</p>` : ''}${cue()}</div>`;
+  const instructionRow = (prompt = step.prompt, command = step.command) => html`<div class="captcha-instruction-row ${level === 'symbol' ? 'is-symbol' : ''}">${level === 'full' ? html`<p class="captcha-instruction">${prompt}</p>` : ''}${cue(command)}</div>`;
+  const numberTile = n => { const accepted = s.selected.includes(n); return html`<button class="captcha-tile is-text is-number ${accepted ? 'is-accepted' : ''} ${s.rejected === n ? 'is-rejected' : ''}" type="button" disabled=${s.done || accepted} aria-label=${n} onclick=${() => emit('session:select', n)}><span class="tile-text">${n}</span><span class="selection-frame" aria-hidden="true"></span></button>`; };
   const statusText = () => (s.done ? (interrupted ? interrupted.text : s.feedback) : s.feedback);
   const statusTone = () => (s.done ? 'accepted' : s.feedback ? 'retry' : '');
   const cycleStatus = () => { const text = statusText(); return html`<div class="cycle-status tone-${statusTone()} ${text ? '' : 'is-empty'}" role="status" aria-live="polite">${text ? html`<span class="status-indicator ${s.done ? 'is-complete' : ''}"></span><span id=${`status-${s.done ? 'done' : 'retry'}`}>${text}</span>` : ''}</div>`; };
@@ -108,7 +109,7 @@ export function sessionView(state, emit) {
         ${instructionRow()}
         <div class="captcha-grid-stage ${s.done ? 'is-verified' : ''}" id=${`stage-${step.id}`} style="--scan-ms: 2200ms">
           <div class="grid-scan" aria-hidden="true"></div>
-          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${numbers.map(n => { const accepted = s.selected.includes(n); return html`<button class="captcha-tile is-text is-number ${accepted ? 'is-accepted' : ''} ${s.rejected === n ? 'is-rejected' : ''}" type="button" disabled=${s.done || accepted} aria-label=${n} onclick=${() => emit('session:select', n)}><span class="tile-text">${n}</span><span class="selection-frame" aria-hidden="true"></span></button>`; })}</div>
+          <div class="captcha-grid" role="group" aria-label=${step.prompt}>${numbers.map(numberTile)}</div>
           ${flashLayer()}
         </div>
         <div class="verification-cycle">${cycleStatus()}</div>
@@ -135,11 +136,19 @@ export function sessionView(state, emit) {
       <div class="captcha-grid-stage trace-grid-stage" id=${`stage-${step.id}`}>${canvas('session-trace', { 'aria-label': 'Hold near the marker and lead it along the route.' })}${flashLayer()}</div>
       <div class="verification-cycle">${cycleStatus()}</div>
     </div>`;
-    if (step.type === 'hold') return html`<div class="captcha-experience action-experience">
-      ${instructionRow()}
-      <div class="captcha-grid-stage action-grid-stage" id=${`stage-${step.id}`}>${canvas('session-hold', { 'aria-label': 'Press and hold the center target' })}${flashLayer()}</div>
-      <div class="verification-cycle">${cycleStatus()}</div>
-    </div>`;
+    if (step.type === 'hold') {
+      const rest = arrangeWords(Array.from({ length: step.from - step.to }, (_, i) => String(step.from - i)), s.index);
+      const numbers = [...rest.slice(0, 4), String(step.to), ...rest.slice(4)];
+      const button = html`<button class="captcha-tile hold-button ${s.holdFill > 0 && !s.done ? 'is-holding' : ''} ${s.holdFill === 1 ? 'is-full' : ''}" type="button" disabled=${s.done} style=${`--fill:${s.holdFill}`}>${step.button}</button>`;
+      return html`<div class="captcha-experience">
+        ${s.counted ? instructionRow() : instructionRow(step.countPrompt, 'count')}
+        <div class="captcha-grid-stage install-stage ${s.counted ? 'is-counted' : ''}" id=${`stage-${step.id}`}>
+          <div class="captcha-grid" role="group" aria-label=${s.counted ? step.prompt : step.countPrompt}>${numbers.map((n, index) => (index === 4 && s.counted ? button : numberTile(n)))}</div>
+          ${flashLayer()}${step.releaseOnCommand && s.holdFill === 1 && !s.done ? html`<div class="stim-flash release-command" aria-live="assertive"><b>RELEASE</b></div>` : ''}
+        </div>
+        <div class="verification-cycle">${cycleStatus()}</div>
+      </div>`;
+    }
     return '';
   };
   const card = () => html`<section class="study-card test-card experience-card ${chamber ? 'pulse-card mode-center' : ''} task-${step.type} ${s.done ? 'is-complete' : ''}" aria-label="Verification session">
@@ -181,7 +190,7 @@ export function sessionView(state, emit) {
       </section>
     </div>`;
   };
-  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking || (step.type === 'hold' && !s.done && s.holdFill > 0.3)) ? 'is-burst' : ''} ${playing && ((step.type === 'burst' && !s.prelude && !s.done) || (step.type === 'stream' && !s.done && s.climax > 0.75) || (step.type === 'hold' && !s.done && s.holdFill > 0.6)) ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''} ${playing && step.type === 'stream' && !s.done ? 'is-climax' : ''} ${recovery ? 'is-recovery' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div>
+  return html`<body class="${chamber ? 'is-chamber' : ''} ${playing && (step.type === 'burst' || s.spiking || (step.type === 'hold' && !s.done && s.holdFill > 0.3)) ? 'is-burst' : ''} ${playing && ((step.type === 'burst' && !s.prelude && !s.done) || (step.type === 'stream' && !s.done && s.climax > 0.75) || (step.type === 'hold' && !s.done && s.holdFill > 0.6)) ? 'is-shutter' : ''} ${s.prelude ? 'is-prelude' : ''} ${playing && step.type === 'stream' && !s.done ? 'is-climax' : ''} ${recovery ? 'is-recovery' : ''}" style=${`--glitch:${playing ? step.phase.glitch || 0 : 0}`}><main class="study-page screen-${s.screen}"><div class="shutter" aria-hidden="true"></div><div class="hue-flash" aria-hidden="true"></div>
     ${playing && chamber && !recovery ? canvas('session-spiral', { class: 'pulse-backdrop', 'aria-hidden': 'true' }) : ''}
     <div class="study-shell">${playing ? card() : endCard()}</div>
     ${playing && isLocalDev() ? html`<button class="dev-skip debug-jump-btn" type="button" disabled=${busy} onclick=${() => emit('session:skip')}>Skip · dev</button>` : ''}

@@ -7,11 +7,11 @@ const skins = {
   chamber: { field: "rgba(0,0,0,0)", corridor: "#5e3a50", path: "#c98fb0", traced: "#f0a6c8", core: "#ffffff", guide: "#f0a6c8", guideFill: "#2a1530", marker: "240,166,200", start: "#e07aa8", end: "#c4b5fd", endpointFill: "#2a1530" },
 };
 
-export function mountTrace(canvas, task, onComplete) {
+export function mountTrace(canvas, task, onComplete, cues = {}) {
   if (!canvas || !task) return;
   if (active?.canvas === canvas && active?.taskId === task.id) return;
   unmountTrace();
-  const controller = createController(canvas, task, onComplete);
+  const controller = createController(canvas, task, onComplete, cues);
   active = { canvas, taskId: task.id, destroy: controller.destroy };
 }
 
@@ -20,7 +20,7 @@ export function unmountTrace() {
   active = null;
 }
 
-function createController(canvas, task, onComplete) {
+function createController(canvas, task, onComplete, { onGrab, onWind }) {
   const context = canvas.getContext("2d");
   const skin = skins[task.skin || (task.chamber ? "chamber" : "paper")];
   let points = [];
@@ -33,6 +33,8 @@ function createController(canvas, task, onComplete) {
   let resizeObserver = null;
   let guideProgress = 0;
   let lastGuideAt = performance.now();
+  let missedAt = -Infinity;
+  let engage = 0;
 
   resize();
   resizeObserver = new ResizeObserver(resize);
@@ -58,10 +60,11 @@ function createController(canvas, task, onComplete) {
     if (completed || !points.length) return;
     if (event.button != null && event.button !== 0) return;
     const nextPointer = localPoint(event);
-    if (distance(nextPointer, pointAt(points, progress)) > 90) return;
+    if (distance(nextPointer, pointAt(points, progress)) > 90) { missedAt = performance.now(); return; }
     pointer = nextPointer;
     canvas.setPointerCapture(event.pointerId);
     drawing = true;
+    onGrab?.();
     event.preventDefault();
   }
 
@@ -124,6 +127,8 @@ function createController(canvas, task, onComplete) {
     const delta = Math.min(40, now - lastGuideAt);
     lastGuideAt = now;
     advanceMovement(Math.max(0, delta));
+    engage += ((drawing ? 1 : 0) - engage) * (1 - Math.exp(-delta / 300));
+    onWind?.(progress, engage);
     const lead = 70 / pathLength;
     const guideTarget = Math.min(1, progress + lead);
     guideProgress += Math.min(guideTarget - guideProgress, delta / 9000);
@@ -145,14 +150,35 @@ function createController(canvas, task, onComplete) {
     const marker = pointAt(points, progress);
     const beckon = drawing ? 0 : 0.5 + 0.5 * Math.sin(now / 260);
     context.beginPath();
-    context.fillStyle = `rgba(${skin.marker},${drawing ? 0.07 : 0.05 + beckon * 0.12})`;
-    context.arc(marker.x, marker.y, 30 + beckon * 14, 0, Math.PI * 2);
+    context.fillStyle = `rgba(${skin.marker},${drawing ? 0.22 : 0.05 + beckon * 0.12})`;
+    context.arc(marker.x, marker.y, drawing ? 26 : 30 + beckon * 14, 0, Math.PI * 2);
     context.fill();
-    drawGoal(context, points[points.length - 1], progress >= 0.92, skin);
+    const missed = now - missedAt;
+    if (missed < 600) {
+      context.beginPath();
+      context.strokeStyle = `rgba(${skin.marker},${1 - missed / 600})`;
+      context.lineWidth = 3;
+      context.arc(marker.x, marker.y, 14 + missed / 600 * 44, 0, Math.PI * 2);
+      context.stroke();
+    }
+    drawGoal(context, points[points.length - 1], progress, skin);
+    if (drawing) {
+      context.beginPath();
+      context.strokeStyle = `rgba(${skin.marker},0.9)`;
+      context.lineWidth = 2;
+      context.arc(marker.x, marker.y, 20, 0, Math.PI * 2);
+      context.stroke();
+    }
     context.beginPath();
     context.fillStyle = skin.start;
-    context.arc(marker.x, marker.y, 12, 0, Math.PI * 2);
+    context.arc(marker.x, marker.y, drawing ? 14 : 12, 0, Math.PI * 2);
     context.fill();
+    if (drawing) {
+      context.beginPath();
+      context.fillStyle = skin.core;
+      context.arc(marker.x, marker.y, 5, 0, Math.PI * 2);
+      context.fill();
+    }
   }
 
   function localPoint(event) {
@@ -232,9 +258,9 @@ function drawGuide(context, point, now, alpha, skin) {
   context.restore();
 }
 
-function drawGoal(context, point, reached, skin) {
+function drawGoal(context, point, progress, skin) {
   context.save();
-  context.fillStyle = reached ? skin.end : skin.endpointFill;
+  context.fillStyle = progress >= 0.92 ? skin.end : skin.endpointFill;
   context.strokeStyle = skin.end;
   context.lineWidth = 2.5;
   context.beginPath();
