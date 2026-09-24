@@ -103,7 +103,7 @@ test('complete authored session runs from the checkbox to the terminated connect
   assert.ok(sawStimulus); assert.ok(sawCarrier);
   assert.equal(state.session.screen, 'end');
   assert.ok(state.session.duration >= 0);
-  assert.deepEqual(state.session.timeline.map(entry => entry.title), phases.map(phase => phase.title));
+  assert.deepEqual(state.session.timeline.map(entry => entry.title), phases.filter(phase => !phase.recovery).map(phase => phase.title));
   assert.ok(state.session.timeline.every(entry => entry.ms >= 0));
   assert.equal(state.session.carrier, false);
   assert.deepEqual(state.session.stimuli, []);
@@ -126,7 +126,7 @@ test('wrong selections stay editable; pause and settings block input and clear t
   t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
   emit('session:pause'); assert.deepEqual(state.session.stimuli, []);
   emit('session:pause'); t.mock.timers.tick(3500); assert.ok(state.session.stimuli.length);
-  emit('session:exit'); assert.equal(steps[state.session.index].id, 'recovery-permission'); assert.deepEqual(state.session.stimuli, []);
+  emit('session:exit'); assert.equal(state.session.screen, 'end'); assert.deepEqual(state.session.stimuli, []);
 });
 test('text sequences advance line by line, toggle the carrier, and pause holds the current line', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -148,7 +148,20 @@ test('accepted tasks celebrate then advance automatically; settings suspend the 
   emit('session:settings', false); t.mock.timers.tick(850); assert.equal(state.session.index, 2);
   assert.equal(state.session.done, false);
   emit('session:traceComplete'); emit('session:exit');
-  t.mock.timers.tick(2000); assert.equal(steps[state.session.index].id, 'recovery-permission'); assert.equal(state.session.screen, 'play');
+  t.mock.timers.tick(2000); assert.equal(state.session.screen, 'end');
+});
+test('leaving from the chamber runs recovery with the carrier off', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state, emit } = await begin(t, '?start=obey-sort', 'localhost');
+  assert.equal(state.session.carrier, true);
+  emit('session:exitPrompt', true); emit('session:exit');
+  assert.equal(steps[state.session.index].id, 'recovery-permission'); assert.equal(state.session.screen, 'play');
+  assert.equal(state.session.carrier, false);
+});
+test('a deep link into the first chamber section starts with the carrier a real run would have', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const { state } = await begin(t, '?start=robot-grid', 'localhost');
+  assert.equal(steps[state.session.index].id, 'robot-grid'); assert.equal(state.session.carrier, true);
 });
 test('dev skip and ?start deep links are localhost-only', async t => {
   t.mock.timers.enable({ apis: ['setTimeout'] });
@@ -284,6 +297,20 @@ test('the climax stream spawns words, rewards every click, and ends on its own c
   advance(t, 3000);
   assert.ok(state.session.stream.spawned >= 2); assert.equal(state.session.done, false);
   advance(t, step.ms); assert.ok(state.session.done || state.session.index > stepIndex('climax'), 'the stream ends on its own clock');
+});
+
+test('pausing the climax keeps its progress, and nothing spawns once it ends', async t => {
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  const { state, emit } = await begin(t, '?start=climax', 'localhost');
+  const step = steps[state.session.index];
+  advance(t, 42000);
+  const before = state.session.climax;
+  emit('session:pause'); advance(t, 60000); emit('session:pause');
+  assert.ok(state.session.climax >= before && state.session.climax < 0.55, `resumed at ${state.session.climax}`);
+  advance(t, step.ms - 42000 - 40); assert.equal(state.session.done, false);
+  advance(t, 40); assert.equal(state.session.done, true);
+  const spawned = state.session.stream.spawned;
+  advance(t, 800); assert.equal(state.session.stream.spawned, spawned);
 });
 
 test('recovery waits for the player before counting up', async t => {

@@ -19,6 +19,7 @@ export async function startAudio() {
   } catch { return false; }
 }
 export function muteAudio(value) {
+  if (value === muted) return;
   muted = value;
   if (muted) synth?.releaseAll();
   carrier?.gain.gain.rampTo(muted || !chamber ? 0 : 1, 0.2);

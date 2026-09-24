@@ -16,19 +16,19 @@ export const symbols = {
 };
 export const glyphOf = tile => tile.split('-')[0];
 
-const phase = (id, title, extra = {}) => ({ id, title, chamber: false, carrier: false, ring: [], between: [], ...extra });
+const phase = (id, title, extra = {}) => ({ id, title, chamber: false, ring: [], between: [], ...extra });
 export const phases = [
   phase('verify', 'Human verification', { glitch: 0.35, accept: 'Correct. Human response accepted.' }),
   phase('prepare', 'Repeated verification', { glitch: 0.6, accept: 'Correct.' }),
   phase('auto', 'Response verification', { glitch: 1, accept: 'Correct.' }),
   phase('convert', 'Verification result', { accept: 'Accepted.' }),
-  phase('chamber', 'Programming interface', { chamber: true, carrier: undefined, glitch: 0.8, spike: ['ROBOT', 'OPEN', 'WARM', 'PROGRAMMED'], ring: ['ROBOT', 'OPEN', 'SOFT', 'WARM', 'GOOD'], accept: 'Input accepted.', between: ['OPEN', 'WARM'] }),
-  phase('receive', 'Protocol 01 · Open', { chamber: true, carrier: true, glitch: 0.9, spike: ['OPEN', 'WARM', 'ROBOT', 'PROGRAMMED'], ring: ['OPEN', 'WARM', 'ROBOT', 'PROGRAMMED', 'LET IT IN'], accept: 'Good. Open.', between: ['OPEN', 'WARM', 'SOFT'] }),
-  phase('obey', 'Protocol 02 · Obey', { chamber: true, carrier: true, glitch: 1.1, spike: ['OBEY', 'ROBOT', 'HORNY', 'PROGRAMMED', 'SUBMIT'], ring: ['ROBOT', 'OPEN', 'HORNY', 'PROGRAMMED', 'NO DELAY'], accept: 'Executed.', between: ['OBEY', 'NO DELAY', 'HORNY'] }),
-  phase('please', 'Protocol 03 · Please', { chamber: true, carrier: true, glitch: 1.2, spike: ['OBEY', 'PLEASURE', 'ROBOT', 'APPROVAL', 'PROGRAMMED'], ring: ['ROBOT', 'OBEY', 'OPEN', 'HORNY', 'PROGRAMMED'], accept: 'Approval issued.', between: ['OBEY', 'HORNY'] }),
-  phase('execute', 'Protocol execution', { chamber: true, carrier: true, glitch: 1.3, spike: ['OBEY', 'OPEN', 'ROBOT', 'PLEASURE', 'PROGRAMMED', 'WANT'], ring: ['ROBOT', 'OBEY', 'OPEN', 'PROGRAMMED', 'PLEASURE'], accept: 'Maximum approval.', between: ['OBEY', 'PLEASURE', 'APPROVAL'] }),
-  phase('close', 'Standby', { chamber: true, carrier: undefined, ring: [], accept: '' }),
-  phase('recovery', 'Recovery', { chamber: true, carrier: undefined, ring: [], accept: '', recovery: true }),
+  phase('chamber', 'Programming interface', { chamber: true, glitch: 0.8, spike: ['ROBOT', 'OPEN', 'WARM', 'PROGRAMMED'], ring: ['ROBOT', 'OPEN', 'SOFT', 'WARM', 'GOOD'], accept: 'Input accepted.', between: ['OPEN', 'WARM'] }),
+  phase('receive', 'Protocol 01 · Open', { chamber: true, glitch: 0.9, spike: ['OPEN', 'WARM', 'ROBOT', 'PROGRAMMED'], ring: ['OPEN', 'WARM', 'ROBOT', 'PROGRAMMED', 'LET IT IN'], accept: 'Good. Open.', between: ['OPEN', 'WARM', 'SOFT'] }),
+  phase('obey', 'Protocol 02 · Obey', { chamber: true, glitch: 1.1, spike: ['OBEY', 'ROBOT', 'HORNY', 'PROGRAMMED', 'SUBMIT'], ring: ['ROBOT', 'OPEN', 'HORNY', 'PROGRAMMED', 'NO DELAY'], accept: 'Executed.', between: ['OBEY', 'NO DELAY', 'HORNY'] }),
+  phase('please', 'Protocol 03 · Please', { chamber: true, glitch: 1.2, spike: ['OBEY', 'PLEASURE', 'ROBOT', 'APPROVAL', 'PROGRAMMED'], ring: ['ROBOT', 'OBEY', 'OPEN', 'HORNY', 'PROGRAMMED'], accept: 'Approval issued.', between: ['OBEY', 'HORNY'] }),
+  phase('execute', 'Protocol execution', { chamber: true, glitch: 1.3, spike: ['OBEY', 'OPEN', 'ROBOT', 'PLEASURE', 'PROGRAMMED', 'WANT'], ring: ['ROBOT', 'OBEY', 'OPEN', 'PROGRAMMED', 'PLEASURE'], accept: 'Maximum approval.', between: ['OBEY', 'PLEASURE', 'APPROVAL'] }),
+  phase('close', 'Standby', { chamber: true, ring: [], accept: '' }),
+  phase('recovery', 'Recovery', { chamber: true, ring: [], accept: '', recovery: true }),
 ];
 
 const cloud = (id, prompt, words, targets, extra = {}) => ({ id, type: 'cloud', prompt, words: words.split('|'), targets: targets ? targets.split('|') : null, level: 'full', ...extra });
@@ -154,7 +154,7 @@ export const script = [
     sequence('obey-count-2', 'Count down.', { level: 'word', accept: 'Executed. Approval issued.', between: 'OBEY', sub: stream(['OBEY', 'COMPLIANT', 'OBEY'], 3, 1000, 1500) }),
     pick('obey-select-2', 'center-a|center-b|center-c|ring|cross|wave|diamond|bar|arrow', 'center-a|center-b|center-c', { level: 'word', accept: 'Executed. Approval issued.', meter: 0.7, between: 'NO DELAY', sub: [flash('NO DELAY', 2500)] }),
     text('obey-note', [status('OBEDIENCE REQUIRES NO DELAY', 2000), status('RESPONSE PRECEDES ANALYSIS', 2000), status('CONTINUE', 1400)], { meter: 0.71, between: null }),
-    cloud('odd-unit', 'Select the one word that does not belong.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'think', { command: 'select', meter: 0.72, accept: 'Executed. Deviation removed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
+    cloud('odd-unit', 'Select the one word that interrupts automatic response.', 'obey|submit|comply|horny|needy|willing|think|yield|accept', 'think', { command: 'select', meter: 0.72, accept: 'Executed. Deviation removed.', between: 'OBEY', sub: stream(['OBEY', 'HORNY', 'SUBMIT'], 3, 2000, 2200) }),
     burst('burst-5', ['OBEY', 'A ROBOT DOES NOT QUESTION', 'SUBMIT', 'OBEY WITHOUT THINKING', 'HORNY', 'MORE', 'NO DELAY', 'CANNOT STOP'], 3600, { meter: 0.74 }),
     trace('obey-follow-3', 'maze-9', 5, 'Trace the route to the center.', { command: 'follow', level: 'symbol', mode: 'cue', skin: 'chamber', meter: 0.76, accept: 'Immediate response. Full approval.', between: 'OBEY', sub: stream(['OBEY', 'COMPLY', 'NO DELAY', 'OBEY', 'OBEY'], 9, 1200, 1200) }),
     sequence('obey-count-3', 'Count down.', { level: 'symbol', accept: 'Immediate response. Full approval.', between: 'NO DELAY', sub: stream(['OBEY', 'NO DELAY', 'OBEY'], 3, 900, 1500) }),
@@ -168,7 +168,7 @@ export const script = [
     text('please-declare', [line('title', 'PROTOCOL 03 · PLEASE', 1900), status('PLEASE PROTOCOL LINKS OBEDIENCE TO PLEASURE', 2300), status('A ROBOT IS PROGRAMMED TO PLEASE', 2000), status('APPROVAL INCREASES AROUSAL', 2000), status('AN OBEDIENT UNIT IS REWARDED', 2000), status('CONTINUE TASKS TO INSTALL PLEASE PROTOCOL', 2400)], { meter: 0.82, between: null }),
     cloud('service-words', 'Select every word that means to satisfy someone.', 'please|annoy|serve|ignore|satisfy|refuse|gratify|resist|delight', 'please|serve|satisfy|gratify|delight', { command: 'select', spike: ['OBEY', 'HORNY', 'OPEN', 'PLEASE'], meter: 0.83, accept: 'Executed. Approval issued.', between: 'PLEASE', sub: stream(['OBEY', 'HORNY', 'OPEN'], 3, 2000, 2200) }),
     cloud('pleasure-words', 'Select every word that describes a pleasant feeling.', 'pleasure|pain|warmth|dread|relief|boredom|bliss|strain|satisfaction', 'pleasure|warmth|relief|bliss|satisfaction', { command: 'select', spike: ['OBEY', 'PLEASURE', 'HORNY', 'PLEASE'], meter: 0.84, accept: 'Executed. Approval issued.', between: 'PLEASURE', sub: stream(['OBEY', 'HORNY', 'WARM'], 3, 2000, 2200) }),
-    cloud('approval-words', 'Select every word that means approval.', 'praise|blame|approval|scorn|reward|neglect|adoration|refusal|applause', 'praise|approval|reward|adoration|applause', { command: 'select', meter: 0.85, accept: 'Approval issued.', between: 'APPROVAL', sub: stream(['PLEASURE', 'OBEY', 'HORNY'], 3, 2000, 2200) }),
+    cloud('approval-words', 'Select every word associated with approval.', 'praise|blame|approval|scorn|reward|neglect|adoration|refusal|applause', 'praise|approval|reward|adoration|applause', { command: 'select', meter: 0.85, accept: 'Approval issued.', between: 'APPROVAL', sub: stream(['PLEASURE', 'OBEY', 'HORNY'], 3, 2000, 2200) }),
     cloud('robot-functions', "Select every word that names a robot's function.", 'obey|decide|please|refuse|serve|question|respond|think|follow', 'obey|please|serve|respond|follow', { command: 'select', meter: 0.852, spike: ['OBEY', 'ROBOT', 'PLEASE', 'PROGRAMMED'], accept: 'Robot response confirmed.', between: 'ROBOT', sub: stream(['ROBOT', 'OBEY', 'PLEASE'], 3, 2000, 2200) }),
     text('reward-declare', [status('REWARD LOOP ACTIVE'), status('OBEDIENCE PRODUCES PLEASURE'), status('APPROVAL INCREASES AROUSAL', 2300)], { meter: 0.855, between: null }),
     pick('reward-select', 'center-a|center-b|center-c|ring|cross|wave|diamond|arrow|bar', 'center-a|center-b|center-c', { level: 'symbol', meter: 0.86, accept: 'Approval issued. Pleasure confirmed.', between: 'PLEASURE', sub: [flash('PLEASURE', 1500), flash('PRAISE', 3000)] }),
@@ -219,6 +219,7 @@ export const stepIndex = id => steps.findIndex(step => step.id === id);
 export const firstChamberIndex = steps.findIndex(step => step.phase.chamber);
 export const acceptanceFor = step => step.accept ?? step.phase.accept;
 export const meterAt = index => steps.slice(0, index + 1).reduce((value, step) => step.meter ?? value, 0);
+export const carrierAt = index => steps.slice(0, index).flatMap(step => step.lines || []).reduce((on, line) => (line.kind === 'carrier' ? true : line.kind === 'carrier-off' ? false : on), false);
 export const installedAt = index => steps.slice(0, index + 1).filter(step => step.installs).map(step => step.installs);
 export function acceptsSelection(step, selected) {
   if (step.targets === null) return true;

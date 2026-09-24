@@ -16,7 +16,7 @@ Run `npm run dev`, then open `http://127.0.0.1:4173/`.
 The session is the full arc described in
 [docs/covert-priming-design.md](./docs/covert-priming-design.md): eleven sections
 and 114 steps, about 19 minutes at the pace measured in
-playtesting and 26 for a slower first-timer. The end card shows the session length and one row per section,
+playtesting and 26 for a slower first-timer. The end card shows the session length and one row per section up to recovery,
 and every finished run is appended to `localStorage["iamnotarobot.runs"]`.
 
 Everything after the opening checkbox is diegetic: disclosure, consent, and

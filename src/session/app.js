@@ -1,4 +1,4 @@
-import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt } from './content.js';
+import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt, carrierAt } from './content.js';
 import { planStimuli, runStimuli, spikeOf } from './stimuli.js';
 import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge, setClimax } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
@@ -16,7 +16,6 @@ export function sessionStore(state, emitter) {
   let advanceTimer = null;
   let lineTimer = null;
   let stimuliRun = null;
-  let startedAt = null;
   let phaseStartedAt = null;
   let timeline = [];
   let carry = null;
@@ -50,8 +49,8 @@ export function sessionStore(state, emitter) {
     if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 1300); }
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
     if (step().type === 'stream' && !s().done) {
-      s().stream.startedAt = Date.now();
-      lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms);
+      s().stream.startedAt = Date.now() - s().stream.elapsed;
+      lineTimer = setTimeout(() => { lineTimer = null; finish('', true); }, step().ms - s().stream.elapsed);
       spawn();
     }
     if (step().type === 'burst' && !s().done) {
@@ -61,6 +60,7 @@ export function sessionStore(state, emitter) {
     }
   }
   function disarm() {
+    if (armed && s().stream && !s().done) s().stream.elapsed = Date.now() - s().stream.startedAt;
     armed = false;
     stimuliRun?.stop(); stimuliRun = null;
     clearTimeout(lineTimer); lineTimer = null;
@@ -89,10 +89,10 @@ export function sessionStore(state, emitter) {
     const current = step();
     Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [], prelude: false });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
-    s().stream = current.type === 'stream' ? { slots: [], spawned: 0, hits: 0, startedAt: null } : null;
+    s().stream = current.type === 'stream' ? { slots: [], spawned: 0, hits: 0, startedAt: null, elapsed: 0 } : null;
     s().climax = 0; s().holdFill = 0; s().waiting = false;
     s().holdTask = current.type === 'hold' ? { ...current, progress: 0 } : null;
-    if (current.phase.carrier !== undefined) s().carrier = current.phase.carrier;
+    s().carrier = carrierAt(s().index);
   }
   function spawn() {
     const current = step(); const state = s().stream; const now = Date.now();
@@ -113,6 +113,7 @@ export function sessionStore(state, emitter) {
   function finish(message, silent = false) {
     s().done = true; s().feedback = message; s().spiking = Boolean(spikeOf(step()));
     clearTimeout(lineTimer); lineTimer = null;
+    clearTimeout(streamTimer); streamTimer = null;
     if (!silent) sound('accept');
     stimuliRun?.done();
     render();
@@ -124,7 +125,7 @@ export function sessionStore(state, emitter) {
     render();
   }
   function closePhase(phase) {
-    if (startedAt === null) return;
+    if (phaseStartedAt === null || phase.recovery) return;
     const now = Date.now();
     timeline.push({ title: phase.title, ms: now - phaseStartedAt });
     phaseStartedAt = now;
@@ -137,7 +138,7 @@ export function sessionStore(state, emitter) {
   function end() {
     disarm();
     closePhase(step().phase);
-    Object.assign(s(), { duration: startedAt === null ? 0 : Date.now() - startedAt, timeline: [...timeline] });
+    Object.assign(s(), { duration: timeline.reduce((total, entry) => total + entry.ms, 0), timeline: [...timeline] });
     recordRun();
     Object.assign(s(), { screen: 'end', carrier: false, exiting: false, paused: false, settings: false, done: false });
   }
@@ -145,7 +146,6 @@ export function sessionStore(state, emitter) {
     if (s().starting || s().triggered || !active() || (step().type !== 'checkbox' && step().trigger !== 'checkbox')) return;
     s().starting = true; emitter.emit('render');
     await Promise.race([startAudio(), new Promise(resolve => setTimeout(resolve, 1800))]);
-    muteAudio(s().muted);
     setTimeout(() => {
       if (!s().starting) return;
       s().starting = false;
@@ -157,7 +157,7 @@ export function sessionStore(state, emitter) {
         return;
       }
       const jump = s().index === 0 && isLocalDev() ? stepIndex(query.get('start') || '') : -1;
-      if (startedAt === null) { startedAt = phaseStartedAt = Date.now(); timeline = []; }
+      if (phaseStartedAt === null) { phaseStartedAt = Date.now(); timeline = []; }
       s().index = jump > 0 ? jump : s().index + 1;
       prepare(); render();
     }, 900);
@@ -209,14 +209,14 @@ export function sessionStore(state, emitter) {
   emitter.on('session:continue', () => { if (!active() || !s().waiting) return; s().waiting = false; finish('', true); });
   emitter.on('session:exit', () => {
     const target = stepIndex('recovery-permission');
-    if (s().screen !== 'play' || s().index >= target) { end(); render(); return; }
+    if (s().screen !== 'play' || s().index >= target || !step().phase.chamber) { end(); render(); return; }
     cancelAdvance(); closePhase(step().phase);
     Object.assign(s(), { exiting: false, settings: false, paused: false });
     s().index = target; prepare(); render();
   });
-  emitter.on('session:restart', () => { const { muted, returnUrl } = s(); disarm(); startedAt = null; timeline = []; state.session = { ...fresh(), muted, returnUrl }; render(); });
+  emitter.on('session:restart', () => { const { muted, returnUrl } = s(); disarm(); phaseStartedAt = null; timeline = []; state.session = { ...fresh(), muted, returnUrl }; render(); });
   emitter.on('session:leave', () => { if (s().returnUrl) window.location.assign(s().returnUrl); });
-  emitter.on('session:mute', () => { s().muted = !s().muted; muteAudio(s().muted); render(); });
+  emitter.on('session:mute', () => { s().muted = !s().muted; render(); });
   function sync() {
     const session = s();
     const current = steps[session.index];
