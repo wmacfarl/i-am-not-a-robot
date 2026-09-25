@@ -4,8 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "deploy": "node scripts/deploy-itch.js --target signal-response/i-am-not-a-robot",
+    "deploy:dry": "node scripts/deploy-itch.js --target signal-response/i-am-not-a-robot --dry-run",
     "dev": "node server.js",
+    "itch:login": "node scripts/deploy-itch.js --login",
+    "itch:version": "node scripts/deploy-itch.js --version",
     "serve": "node server.js",
     "test": "node --test"
+  },
+  "itch": {
+    "target": "signal-response/i-am-not-a-robot",
+    "channel": "html5",
+    "url": "https://signal-response.itch.io/i-am-not-a-robot"
   }
 }
