@@ -28,13 +28,13 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
   let drawing = false;
   let completed = false;
   let progress = task.progress || 0;
-  let pointer = null;
+  let bearing = null;
+  let reach = 0;
   let pathLength = 1;
   let animationFrame = null;
   let resizeObserver = null;
   let guideProgress = 0;
   let lastGuideAt = performance.now();
-  let missedAt = -Infinity;
   let engage = 0;
 
   resize();
@@ -60,9 +60,8 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
   function pointerDown(event) {
     if (completed || !points.length) return;
     if (event.button != null && event.button !== 0) return;
-    const nextPointer = localPoint(event);
-    if (distance(nextPointer, pointAt(points, progress)) > 90) { missedAt = performance.now(); return; }
-    pointer = nextPointer;
+    bearing = bearingFrom(points, localPoint(event));
+    reach = angleAt(points, progress);
     canvas.setPointerCapture(event.pointerId);
     drawing = true;
     onGrab?.();
@@ -71,39 +70,25 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
 
   function pointerMove(event) {
     if (!drawing || completed) return;
-    pointer = localPoint(event);
+    const next = bearingFrom(points, localPoint(event));
+    const turn = next === null || bearing === null ? 0 : wrap(next - bearing) * points.direction;
+    bearing = next;
+    // A quarter turn between two pointer events is a jump, not circling.
+    if (turn > 0 && turn < Math.PI / 2) reach = Math.min(reach + turn, angleAt(points, progress) + Math.PI / 2);
     event.preventDefault();
   }
 
   function advanceMovement(delta) {
-    if (!drawing || !pointer || completed) return;
-    const currentIndex = Math.floor(progress * (points.length - 1));
-    const from = Math.max(0, currentIndex - 10);
-    // Search only the next short stretch: tolerance must not skip across neighbouring corridors.
-    const to = Math.min(points.length - 1, currentIndex + Math.ceil(110 / pathLength * (points.length - 1)));
-    let nearestIndex = currentIndex;
-    let nearestDistance = Infinity;
-    for (let index = from; index <= to; index += 1) {
-      const candidateDistance = distance(pointer, points[index]);
-      if (candidateDistance < nearestDistance) {
-        nearestDistance = candidateDistance;
-        nearestIndex = index;
-      }
-    }
-    if (nearestDistance <= 56 && nearestIndex >= currentIndex) {
-      const target = nearestIndex / (points.length - 1);
-      const remaining = Math.max(0, target - progress);
-      const eased = remaining * (1 - Math.exp(-delta / 90));
-      progress += Math.min(eased, 520 * delta / 1000 / pathLength);
-      task.progress = progress;
-    }
+    if (!drawing || completed) return;
+    const remaining = Math.max(0, progressAt(points, reach) - progress);
+    progress += Math.min(remaining * (1 - Math.exp(-delta / 90)), 520 * delta / 1000 / pathLength);
+    task.progress = progress;
     if (progress >= 0.995) completeTrace();
   }
 
   function pointerUp(event) {
     if (!drawing) return;
     drawing = false;
-    pointer = null;
     if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
   }
 
@@ -154,14 +139,6 @@ function createController(canvas, task, onComplete, { onGrab, onWind }) {
     context.fillStyle = `rgba(${skin.marker},${drawing ? 0.22 : 0.05 + beckon * 0.12})`;
     context.arc(marker.x, marker.y, drawing ? 26 : glowReach - 14 * (1 - beckon), 0, Math.PI * 2);
     context.fill();
-    const missed = now - missedAt;
-    if (missed < 600) {
-      context.beginPath();
-      context.strokeStyle = `rgba(${skin.marker},${1 - missed / 600})`;
-      context.lineWidth = 3;
-      context.arc(marker.x, marker.y, 14 + missed / 600 * 44, 0, Math.PI * 2);
-      context.stroke();
-    }
     drawGoal(context, points[points.length - 1], progress, skin);
     if (drawing) {
       context.beginPath();
@@ -220,7 +197,29 @@ export function buildPath(path, width, height, rings) {
     return { x: raw[segment - 1].x + (raw[segment].x - raw[segment - 1].x) * fraction, y: raw[segment - 1].y + (raw[segment].y - raw[segment - 1].y) * fraction };
   });
   points.corridor = Math.max(12, maze.geometry.pitch * size * 0.62);
+  points.center = { x: width / 2, y: height / 2 };
+  let turned = 0;
+  const turns = points.map((point, i) => (i && distance(point, points.center) > 1 ? (turned += wrap(bearingOf(point, points.center) - bearingOf(points[i - 1], points.center))) : turned));
+  points.direction = Math.sign(turned);
+  points.angles = turns.map((turn) => turn * points.direction);
   return points;
+}
+
+const wrap = (angle) => Math.atan2(Math.sin(angle), Math.cos(angle));
+const bearingOf = (point, center) => Math.atan2(point.y - center.y, point.x - center.x);
+const bearingFrom = (points, point) => (distance(point, points.center) < 24 ? null : bearingOf(point, points.center));
+const angleAt = (points, progress) => points.angles[Math.min(points.length - 1, Math.floor(progress * (points.length - 1)))];
+
+function progressAt(points, angle) {
+  if (points.angles.at(-1) < angle) return 1;
+  let low = 0;
+  let high = points.length - 1;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (points.angles[middle] < angle) low = middle + 1;
+    else high = middle;
+  }
+  return low / (points.length - 1);
 }
 
 function pointAt(points, progress) {
