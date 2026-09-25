@@ -1,5 +1,5 @@
 import { steps, stepIndex, acceptsSelection, acceptanceFor, meterAt, carrierAt } from './content.js';
-import { planStimuli, runStimuli, spikeOf, effectsOf } from './stimuli.js';
+import { planStimuli, runStimuli, spikeOf, surgeOf, effectsOf } from './stimuli.js';
 import { startAudio, muteAudio, sound, setChamber, setBurst, setIntensity, setSurge, setClimax, setBeat, snap } from './audio.js';
 import { mountTrace, unmountTrace } from '../trace/tracing.js';
 import { mountHold, unmountHold } from './hold.js';
@@ -9,7 +9,7 @@ import { mountGlitch, unmountGlitch, tear } from './glitch.js';
 export const isLocalDev = () => ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
 export function sessionStore(state, emitter) {
   const query = new URLSearchParams(window.location?.search || '');
-  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false, prelude: false, stream: null, climax: 0, holdFill: 0, counted: false, waiting: false });
+  const fresh = () => ({ screen: 'play', index: 0, selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, paused: false, settings: false, exiting: false, muted: query.get('audio') === '0', returnUrl: query.get('return') || '', line: 0, stimuli: [], carrier: false, traceTask: null, holdTask: null, duration: 0, timeline: [], spiking: false, surge: 0, prelude: false, stream: null, climax: 0, holdFill: 0, counted: false, waiting: false });
   state.session = fresh();
   let frame;
   let dialogOpen = false;
@@ -26,6 +26,8 @@ export function sessionStore(state, emitter) {
   let rejectTimer = null;
   let armed = false;
   let traceWind = 0;
+  let taskClock = null;
+  let taskActive = 0;
   const s = () => state.session;
   const step = () => steps[s().index];
   const blocked = () => s().paused || s().settings || s().exiting;
@@ -45,11 +47,12 @@ export function sessionStore(state, emitter) {
   }
   function arm() {
     armed = true;
+    if (!s().done) taskClock = Date.now();
     stimuliRun = runStimuli(planStimuli(step(), carry), {
       show: entry => { s().stimuli = [...s().stimuli, { ...entry, shownAt: performance.now() }]; if (entry.mode === 'flash') tear(); else emitter.emit('render'); },
       hide: key => { const hidden = s().stimuli.find(item => item.key === key); s().stimuli = s().stimuli.filter(item => item.key !== key); if (hidden && hidden.mode !== 'flash') emitter.emit('render'); },
     });
-    if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 1300); }
+    if (carry) { carry = null; spikeTimer = setTimeout(() => { spikeTimer = null; s().spiking = false; emitter.emit('render'); }, 700 + 800 * s().surge); }
     if (step().lines && !s().done && (!step().trigger || s().triggered)) runLine();
     if (step().type === 'stream' && !s().done) {
       s().stream.startedAt = Date.now() - s().stream.elapsed;
@@ -65,6 +68,7 @@ export function sessionStore(state, emitter) {
   function disarm() {
     if (armed && s().stream && !s().done) s().stream.elapsed = Date.now() - s().stream.startedAt;
     armed = false;
+    if (taskClock !== null) { taskActive += Date.now() - taskClock; taskClock = null; }
     stimuliRun?.stop(); stimuliRun = null;
     clearTimeout(lineTimer); lineTimer = null;
     clearTimeout(spikeTimer); spikeTimer = null;
@@ -89,6 +93,7 @@ export function sessionStore(state, emitter) {
   function prepare() {
     cancelAdvance();
     disarm();
+    taskActive = 0;
     const current = step();
     Object.assign(s(), { selected: [], feedback: '', rejected: null, done: false, starting: false, triggered: false, line: 0, stimuli: [], prelude: false });
     s().traceTask = current.type === 'trace' ? { ...current, progress: 0 } : null;
@@ -116,6 +121,7 @@ export function sessionStore(state, emitter) {
   }
   function finish(message, silent = false) {
     s().done = true; s().feedback = message; s().spiking = Boolean(spikeOf(step()));
+    if (s().spiking) s().surge = surgeOf(step(), taskActive + (taskClock === null ? 0 : Date.now() - taskClock));
     clearTimeout(lineTimer); lineTimer = null;
     clearTimeout(streamTimer); streamTimer = null;
     if (!silent) sound('accept');
@@ -241,14 +247,14 @@ export function sessionStore(state, emitter) {
     setIntensity(meterAt(session.index));
     setClimax(playing && !suspended && !session.done ? (current.type === 'stream' ? session.climax : current.type === 'hold' ? session.holdFill : 0) : 0);
     setBeat(playing && !suspended && !session.done ? (current.type === 'hold' ? session.holdFill : current.type === 'trace' ? traceWind : 0) : 0);
-    setSurge(spiking && current.type !== 'burst');
+    setSurge(spiking && current.type !== 'burst' ? session.surge : 0);
     setBurst(playing && !suspended && current.type === 'burst' && !session.done, current.ms);
     const stageElement = document.getElementById(`stage-${current.id}`);
     const { burst, shutter } = effectsOf(session, current);
     const shuttering = shutter && !suspended;
     const backdrop = document.getElementById('backdrop-root');
     const idleHold = current.type === 'hold' && session.counted && !session.done && !session.holdFill;
-    if (backdrop) mountBackdrop(backdrop, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.7 : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : idleHold ? 0.35 : current.type === 'trace' ? 0.55 : 1, stage: current.type === 'burst' ? null : stageElement, climax: current.type === 'stream' && !session.done, hue: shuttering && current.phase.chamber });
+    if (backdrop) mountBackdrop(backdrop, { paused: suspended || session.prelude, intensity: meterAt(session.index), ring: current.phase.ring, burst: current.type === 'burst' && !session.done ? 1 : spiking ? 0.3 + 0.6 * session.surge : current.type === 'stream' && !session.done ? 0.25 + 0.75 * session.climax : current.type === 'hold' && !session.done ? session.holdFill : 0, fade: current.phase.recovery ? 0.1 : current.phase.id === 'close' ? 0.45 : idleHold ? 0.35 : current.type === 'trace' ? 0.55 : 1, stage: current.type === 'burst' ? null : stageElement, climax: current.type === 'stream' && !session.done, hue: shuttering && current.phase.chamber });
     else unmountBackdrop();
     const foreground = document.getElementById('foreground-root');
     if (foreground) mountForeground(foreground, { stimuli: () => s().stimuli, anchor: stageElement || document.querySelector('.readout'), chamber: current.phase.chamber, burstStage: current.type === 'burst', glitch: current.phase.glitch || 0, bandStage: stageElement, scanlines: current.phase.chamber && !current.phase.recovery ? (burst ? 0.5 : 1) : 0, shutter: shuttering, hue: shuttering && current.phase.chamber, frozen: suspended || session.prelude, release: Boolean(current.releaseOnCommand) && session.holdFill === 1 && !session.done, install: current.type === 'hold' });

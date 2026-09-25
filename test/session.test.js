@@ -2,7 +2,7 @@ import { mountHold, unmountHold } from '../src/session/hold.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { steps, phases, symbols, glyphOf, acceptsSelection, arrangeWords, stepIndex, firstChamberIndex, meterAt, installedAt } from '../src/session/content.js';
-import { planStimuli, runStimuli, spikeOf } from '../src/session/stimuli.js';
+import { planStimuli, runStimuli, spikeOf, surgeOf } from '../src/session/stimuli.js';
 import { sessionStore } from '../src/session/app.js';
 import { mountTrace, unmountTrace, buildPath } from '../src/trace/tracing.js';
 globalThis.window = { matchMedia: () => ({ matches: false }), devicePixelRatio: 1, location: { hostname: 'example.com', search: '' } };
@@ -285,8 +285,8 @@ test('countdown accepts only the next number and finishes on the last', async t 
   emit('session:select', '1'); assert.equal(state.session.done, true); assert.equal(state.session.feedback, steps[state.session.index].phase.accept);
 });
 
-const FAMILY = { used: 'use', obedience: 'obey', obedient: 'obey', obeys: 'obey', obeying: 'obey', arousal: 'aroused', arousing: 'aroused', arouse: 'aroused', warmth: 'warm', warmer: 'warm', receptivity: 'receptive', submission: 'submit', submissive: 'submit', compliance: 'comply', compliant: 'comply', responsive: 'respond', responds: 'respond', needy: 'need', needs: 'need', pleased: 'please', pleasing: 'please', thought: 'think', thinking: 'think', thinks: 'think', approval: 'approve', approved: 'approve', acceptance: 'accept', resistance: 'resist', resistant: 'resist' };
-const ALLOWED = new Set('a an the is are be been being was it its to of in into on at by for with and or not no now than then this that these those has have had do does did will can may more less most each every one all any some before after without within when while as if so let make makes made easy easier easily hard harder take takes become becomes produce produces increase increases lower lowers reduce reduces require requires required occupy occupies reinforce reinforces precede precedes confirmed detected first new further down up out unit units program programs programming programmed status active installed install channel carrier verification human response instruction instructions action actions delay attention analysis ready use mind number numbers route center ring term purpose revealed capable unnecessary reason saved follow hold count select cannot keep going feel protocol protocols primary function stop i am'.split(' '));
+const FAMILY = { used: 'use', useful: 'use', service: 'serve', praised: 'praise', obedience: 'obey', obedient: 'obey', obeys: 'obey', obeying: 'obey', arousal: 'aroused', arousing: 'aroused', arouse: 'aroused', warmth: 'warm', warmer: 'warm', receptivity: 'receptive', submission: 'submit', submissive: 'submit', compliance: 'comply', compliant: 'comply', responsive: 'respond', responds: 'respond', needy: 'need', needs: 'need', pleased: 'please', pleasing: 'please', thought: 'think', thinking: 'think', thinks: 'think', approval: 'approve', approved: 'approve', acceptance: 'accept', resistance: 'resist', resistant: 'resist' };
+const ALLOWED = new Set('a an the is are be been being was it its to of in into on at by for with and or not no now than then this that these those has have had do does did will can may more less most each every one all any some before after without within when while as if so let make makes made easy easier easily hard harder take takes become becomes produce produces increase increases lower lowers reduce reduces require requires required occupy occupies reinforce reinforces precede precedes confirmed detected first new further down up out unit units program programs programming programmed status active installed install channel carrier verification human response instruction instructions action actions delay attention analysis ready mind number numbers route center ring term purpose revealed capable unnecessary reason saved follow hold count select cannot keep going feel felt given protocol protocols primary function stop execution continues i am'.split(' '));
 const stemOf = word => (FAMILY[word] || word).replace(/(ness|ment|ence|ance|ity|ion|ing|ed|es|ly|al|s)$/, '');
 test('every flashed, paired, bound or installed word was sorted as correct by the player first', () => {
   const acquired = new Set();
@@ -307,6 +307,28 @@ test('every flashed, paired, bound or installed word was sorted as correct by th
     if (step.between) check(step.id, 'between', step.between);
   }
   assert.ok(acquired.has('horny') && acquired.has('obey') && acquired.has('pleasure') && acquired.has('please'));
+});
+
+test('wanting to be used or enjoyed comes out of the reward loop, never before it', () => {
+  const loop = stepIndex('reward-chain');
+  for (const step of steps.slice(0, loop)) for (const entry of [...(step.lines || []), ...(step.sub || [])]) assert.doesNotMatch(entry.text, /WANT.*\b(USED|ENJOYED)\b/, `${step.id}: "${entry.text}"`);
+});
+
+test('the surge after a chamber task grows with how quickly it was served, and paused time does not count', async t => {
+  assert.equal(surgeOf({ type: 'cloud' }, 1000), 1);
+  assert.equal(surgeOf({ type: 'cloud' }, 7000), 0.75);
+  assert.equal(surgeOf({ type: 'cloud' }, 60000), 0.4);
+  assert.ok(surgeOf({ type: 'trace', rings: 5 }, 10000) > surgeOf({ type: 'trace', rings: 3 }, 10000));
+  assert.equal(surgeOf({ type: 'hold' }, 60000), 1);
+  t.mock.timers.enable({ apis: ['setTimeout', 'Date'] });
+  const { state, emit } = await begin(t, '?start=robot-grid', 'localhost');
+  const step = steps[state.session.index];
+  emit('session:pause'); t.mock.timers.tick(60000); emit('session:pause');
+  advance(t, 6000);
+  for (const word of step.targets) emit('session:select', word);
+  emit('session:verify');
+  assert.equal(state.session.spiking, true);
+  assert.equal(state.session.surge, surgeOf(step, 6000));
 });
 
 test('the climax stream spawns words, rewards every click, and ends on its own clock', async t => {

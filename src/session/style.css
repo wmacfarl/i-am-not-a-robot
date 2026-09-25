@@ -312,14 +312,15 @@ body.is-chamber { background: var(--chamber-page); color: #efe4ec; }
 .stream-tile.is-hit .tile-text { animation: tile-word-out 400ms ease forwards; }
 @keyframes tile-word-in { from { opacity: 0; scale: 0.9; } }
 @keyframes tile-word-out { to { opacity: 0; scale: 1.15; } }
-.study-page:has(.task-hold:not(.is-complete)) { cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none; }
+.study-page { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.study-page:has(.task-hold:not(.is-complete)) { cursor: pointer; touch-action: none; }
 @property --fill { syntax: '<number>'; inherits: false; initial-value: 0; }
 .install-stage .captcha-grid { container-type: inline-size; }
 .install-stage .captcha-grid, .install-stage .captcha-tile { transition: opacity 600ms ease, background 600ms ease, box-shadow 100ms linear; }
 .install-stage.is-counted .captcha-grid { background: transparent; }
 .install-stage.is-counted .captcha-tile:not(.hold-button) { opacity: 0; pointer-events: none; }
-.is-chamber .captcha-tile.hold-button { padding: 10px; background: linear-gradient(90deg, #fff4fa calc(var(--fill) * 100%), #f0a6c8 calc(var(--fill) * 100%)); color: #261b29; font: 800 min(14px, 3.2cqi)/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 0 0 calc(22px + 60px * var(--fill)) rgba(240, 166, 200, calc(0.45 + 0.45 * var(--fill))); transition: --fill 160ms linear, opacity 600ms ease; animation: hold-beckon 909ms ease-in-out infinite; }
-.is-chamber .captcha-tile.hold-button:hover:not(:disabled) { background: linear-gradient(90deg, #fff4fa calc(var(--fill) * 100%), #f6bdd7 calc(var(--fill) * 100%)); }
+.is-chamber .captcha-tile.hold-button { padding: 10px; background: linear-gradient(90deg, rgba(255, 244, 250, 0.75) calc(var(--fill) * 100%), rgba(240, 166, 200, 0.55) calc(var(--fill) * 100%)); color: #261b29; font: 800 min(14px, 3.2cqi)/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: 0 0 calc(22px + 60px * var(--fill)) rgba(240, 166, 200, calc(0.45 + 0.45 * var(--fill))); transition: --fill 160ms linear, opacity 600ms ease; animation: hold-beckon 909ms ease-in-out infinite; }
+.is-chamber .captcha-tile.hold-button:hover:not(:disabled) { background: linear-gradient(90deg, rgba(255, 244, 250, 0.75) calc(var(--fill) * 100%), rgba(246, 189, 215, 0.62) calc(var(--fill) * 100%)); }
 .captcha-tile.hold-button.is-holding { animation: none; }
 .captcha-tile.hold-button.is-full { opacity: 0.4; }
 .captcha-tile.hold-button:disabled { cursor: default; }

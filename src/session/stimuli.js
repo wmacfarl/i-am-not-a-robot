@@ -4,6 +4,8 @@ const defaults = {
 };
 const tasks = ['cloud', 'trace', 'sequence', 'hold'];
 export const spikeOf = step => (tasks.includes(step.type) ? step.spike ?? step.phase?.spike ?? null : null);
+const pace = step => (step.type === 'trace' ? 2500 * step.rings : step.type === 'sequence' ? 8000 : step.symbolic ? 5000 : 7000);
+export const surgeOf = (step, ms) => (step.type === 'hold' ? 1 : Math.min(1, Math.max(0.4, 1.25 - 0.5 * ms / pace(step))));
 const timing = (at, start) => (at === 'done' ? { at: 'done', delay: 0 } : { at: start, delay: at });
 export function planStimuli(step, carry = null) {
   const start = step.type === 'hold' ? 'press' : 'start';

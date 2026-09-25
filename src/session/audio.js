@@ -8,7 +8,7 @@ let chamber = false;
 let epoch = 0;
 let base = { cross: 0.25, cutoff: 900 };
 let intensity = null;
-let surge = false;
+let surge = 0;
 let climax = 0;
 let windup = 0;
 let bursting = false;
@@ -70,8 +70,8 @@ function applyCross(amount, seconds) {
   carrier.cross.forEach(node => node.gain.rampTo(Math.sin(angle), seconds));
 }
 function applyBase(seconds) {
-  applyCross(climax > 0 ? Math.max(base.cross, climax) : base.cross + (surge ? 0.25 : 0), seconds);
-  carrier.filter.frequency.rampTo(climax > 0 ? base.cutoff + climax * 5200 : base.cutoff * (surge ? 1.6 : 1), seconds);
+  applyCross(climax > 0 ? Math.max(base.cross, climax) : base.cross + 0.35 * surge, seconds);
+  carrier.filter.frequency.rampTo(climax > 0 ? base.cutoff + climax * 5200 : base.cutoff * (1 + 0.8 * surge), seconds);
   carrier.pulse.volume.rampTo(-16 + 8 * climax, seconds);
 }
 function tune(amount, seconds) {
@@ -111,10 +111,10 @@ export function setIntensity(meter) {
   base = { cross: 0.25 + 0.45 * meter, cutoff: 900 + 2600 * meter };
   if (carrier && !bursting) applyBase(0.6);
 }
-export function setSurge(on) {
-  if (on === surge) return;
-  surge = on;
-  if (carrier && !bursting) applyBase(on ? 0.15 : 0.5);
+export function setSurge(amount) {
+  if (amount === surge) return;
+  surge = amount;
+  if (carrier && !bursting) applyBase(amount ? 0.15 : 0.5);
 }
 export function setClimax(progress) {
   const next = Math.min(1, Math.max(0, progress));
