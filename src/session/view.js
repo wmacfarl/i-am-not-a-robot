@@ -119,7 +119,7 @@ export function sessionView(state, emit) {
     </div>`;
     if (step.type === 'trace') return html`<div class="captcha-experience trace-experience">
       ${instructionRow()}
-      <div class="captcha-grid-stage trace-grid-stage" id=${`stage-${step.id}`}>${canvas('session-trace', { 'aria-label': 'Hold near the marker and lead it along the route.' })}</div>
+      <div class="captcha-grid-stage trace-grid-stage" id=${`stage-${step.id}`}>${canvas('session-trace', { 'aria-label': 'Press and circle the maze to lead the marker along the route.' })}</div>
       <div class="verification-cycle">${cycleStatus()}</div>
     </div>`;
     if (step.type === 'hold') {
