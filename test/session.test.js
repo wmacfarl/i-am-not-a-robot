@@ -196,7 +196,7 @@ test('dev skip and ?start deep links are localhost-only', async t => {
   local.emit('session:skip'); t.mock.timers.tick(1000);
   assert.equal(local.state.session.index, start + 3); assert.equal(local.state.session.done, false);
 });
-test('tracing eases toward nearby input, preserves position, winds with a held marker, and completes labyrinths of every size', () => {
+test('tracing follows a hand circling the maze the way the route winds, at any distance from the track, and completes labyrinths of every size', () => {
   const originalRAF = globalThis.requestAnimationFrame;
   let frame;
   let now = performance.now();
@@ -205,40 +205,39 @@ test('tracing eases toward nearby input, preserves position, winds with a held m
   const handlers = {};
   const context = new Proxy({}, { get: () => () => {} });
   const canvas = { clientWidth: 500, clientHeight: 400, getContext: () => context, getBoundingClientRect: () => ({ left: 0, top: 0, width: 500, height: 400 }), addEventListener: (type, fn) => handlers[type] = fn, removeEventListener: type => delete handlers[type], setPointerCapture() {}, hasPointerCapture: () => false };
-  const event = (point, offset = 0) => ({ clientX: point.x, clientY: point.y + offset, pointerId: 1, preventDefault() {} });
+  const event = point => ({ clientX: point.x, clientY: point.y, pointerId: 1, preventDefault() {} });
   try {
     for (const path of ['maze-0', 'maze-5', 'maze-11']) {
       const points = buildPath(path, 500, 400);
-      const n = points.length;
       const spacing = Math.hypot(points[1].x - points[0].x, points[1].y - points[0].y);
       assert.ok(spacing > 2 && spacing < 6, 'corridor points are a few pixels apart');
       assert.ok(points.corridor >= 10);
-      const near = Math.round(40 / spacing);
-      const mid = Math.round(n * 0.33);
+      assert.ok(points.angles.every((angle, i) => !i || angle >= points.angles[i - 1]), 'the route only ever winds one way');
+      let angle = Math.atan2(points[0].y - points.center.y, points[0].x - points.center.x) + Math.PI;
+      const hand = radius => ({ x: points.center.x + Math.cos(angle) * radius, y: points.center.y + Math.sin(angle) * radius });
+      const circle = (radius, turns, sense = points.direction) => { for (let i = 0; i < turns * 120; i++) { angle += sense * Math.PI / 60; handlers.pointermove(event(hand(radius))); tick(2); } };
       const task = { id: path, path, mode: 'guided', progress: 0 };
       let completed = 0; let grabs = 0; let wind = 0;
       const cues = { onGrab: () => grabs++, onWind: (progress, engage) => { wind = progress * engage; } };
       mountTrace(canvas, task, () => completed++, cues);
-      handlers.pointerdown(event(points[0], 200)); assert.equal(grabs, 0, 'a press far from the marker is not a grab');
-      handlers.pointerdown(event(points[0], 65)); // generous pickup
-      assert.equal(grabs, 1);
-      handlers.pointermove(event(points.at(-1)));
-      tick(); assert.ok(task.progress < .01, 'cannot teleport to the goal');
-      handlers.pointermove(event(points[near], 30));
-      const before = task.progress;
-      assert.equal(task.progress, before, 'pointer events do not move the marker directly');
-      tick(); assert.ok(task.progress < near / (n - 1), 'marker eases rather than snapping');
-      tick(20); assert.ok(task.progress > before, 'near-path input is accepted');
-      for (let i = near; i < mid; i++) { handlers.pointermove(event(points[i])); tick(2); }
+      handlers.pointerdown(event(hand(100))); assert.equal(grabs, 1, 'a press on the far side of the maze takes the marker');
+      circle(190, 0.5, -points.direction); assert.equal(task.progress, 0, 'circling against the route leaves the marker where it is');
+      handlers.pointermove(event(points.center)); handlers.pointermove(event(hand(190))); tick(20);
+      assert.equal(task.progress, 0, 'passing through the centre is not a turn');
+      angle += points.direction * 0.3; handlers.pointermove(event(hand(190)));
+      assert.equal(task.progress, 0, 'pointer events do not move the marker directly');
+      tick(); const first = task.progress; tick();
+      assert.ok(first > 0 && task.progress > first, 'the marker eases after the hand rather than snapping');
+      circle(60, 2);
       assert.ok(wind > task.progress * 0.8, 'a held marker winds with progress');
-      handlers.pointerup(event(points[mid - 1]));
+      handlers.pointerup(event(hand(60)));
       const saved = task.progress; tick(20); assert.equal(task.progress, saved, 'lifting stops motion');
       assert.ok(wind < saved * 0.5, 'letting go relaxes the wind');
-      assert.ok(saved > 0.2, 'the marker keeps up with a moving hand');
+      assert.ok(saved > 0.2, 'circling well inside the track still leads the marker');
       unmountTrace();
       mountTrace(canvas, task, () => completed++, cues);
-      handlers.pointerdown(event(points[Math.floor(saved * (n - 1))]));
-      for (let i = Math.floor(saved * (n - 1)); i < n; i++) { handlers.pointermove(event(points[i])); tick(2); }
+      handlers.pointerdown(event(hand(240)));
+      circle(240, 8);
       tick(120);
       assert.equal(completed, 1, path); assert.equal(task.progress, 1);
       assert.equal(grabs, 2);
